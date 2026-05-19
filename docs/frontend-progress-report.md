@@ -59,6 +59,47 @@ placeholder stubs awaiting the UI design file.
 
 ---
 
-## Phase 2 — UI Implementation
+## Phase 2 — Authentication Screens (2026-05-19)
+
+### Summary
+
+Implemented the first two game screens from the UI design: the **Agent Login**
+and **New Agent (registration)** pages, including the reusable retro-themed
+component set they are built on.
+
+### Work completed
+
+- Extended the Tailwind theme with the Scam Squad colour palette (neon pink /
+  cyan, deep-purple background, panel and field colours).
+- Built reusable UI components:
+  - `PixelButton` — neon action button and bordered "outline" button.
+  - `TextField` — labelled, retro-styled text input.
+  - `AuthScreen` — shared layout (gradient background, neon title, form card,
+    "Back to Title" button) for the authentication pages.
+- Built the **Login** page: username + password form, client-side validation,
+  error messaging, and a link to registration.
+- Built the **Register** page: username + password form with an 8-character
+  minimum password rule, error messaging, and a link to login.
+- Wired both forms to the backend through `services/api.js`
+  (`POST /auth/login` and `POST /auth/register`); a successful response stores
+  the auth token and routes the player to the case-select screen.
+- Disabled the `react/prop-types` ESLint rule, as component props are
+  documented with comments instead of PropTypes.
+
+### Decisions
+
+- Authentication uses **username + password** (matching the UI design) rather
+  than the email-based flow mentioned earlier in the README.
+- Login and registration share an `AuthScreen` layout to keep the retro look
+  consistent and avoid duplicated markup.
+
+### Next steps
+
+- Set up the backend (`/server`) with the matching `/auth` endpoints.
+- Build the title screen and the case-select screen.
+
+---
+
+## Phase 3 — Further Screens
 
 _To be completed._
