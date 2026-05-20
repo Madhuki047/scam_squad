@@ -1,0 +1,94 @@
+import User from '../models/User.js'
+
+// Public subset - shown when viewing another player's profile.
+const PUBLIC_PROJECTION = 'username createdAt'
+
+// Return a user document without the password hash.
+function safeUser(user) {
+  const obj = user.toObject()
+  delete obj.password
+  return obj
+}
+
+// GET /api/user/me - the signed-in player's full record.
+export async function getMe(req, res, next) {
+  try {
+    const user = await User.findById(req.userId)
+    if (!user) return res.status(404).json({ message: 'Account not found.' })
+    res.json({ user: safeUser(user) })
+  } catch (error) {
+    next(error)
+  }
+}
+
+// PATCH /api/user/me - update the signed-in player's own account. Any of
+// the following may be present, independently:
+//   - email              (add or change; enables/keeps 2FA)
+//   - currentPassword + newPassword  (password change)
+export async function updateMe(req, res, next) {
+  try {
+    const user = await User.findById(req.userId)
+    if (!user) return res.status(404).json({ message: 'Account not found.' })
+
+    const { email, currentPassword, newPassword } = req.body
+
+    // Email add/change.
+    if (typeof email === 'string') {
+      const nextEmail = email.trim().toLowerCase()
+      if (nextEmail && !/^\S+@\S+\.\S+$/.test(nextEmail)) {
+        return res
+          .status(400)
+          .json({ message: 'That email address looks invalid.' })
+      }
+      if (nextEmail && nextEmail !== user.email) {
+        if (await User.findOne({ email: nextEmail })) {
+          return res
+            .status(409)
+            .json({ message: 'That email is already registered.' })
+        }
+      }
+      user.email = nextEmail || undefined
+    }
+
+    // Password change - requires the current password.
+    if (newPassword) {
+      if (!currentPassword || !(await user.comparePassword(currentPassword))) {
+        return res
+          .status(401)
+          .json({ message: 'Current password is incorrect.' })
+      }
+      if (newPassword.length < 8) {
+        return res
+          .status(400)
+          .json({ message: 'New password must be at least 8 characters.' })
+      }
+      user.password = newPassword // hashed by the model's pre-save hook
+    }
+
+    await user.save()
+    res.json({ user: safeUser(user) })
+  } catch (error) {
+    next(error)
+  }
+}
+
+// DELETE /api/user/me - permanently remove the signed-in player.
+export async function deleteMe(req, res, next) {
+  try {
+    await User.findByIdAndDelete(req.userId)
+    res.json({ ok: true })
+  } catch (error) {
+    next(error)
+  }
+}
+
+// GET /api/user/:id - another player's public profile.
+export async function getUserById(req, res, next) {
+  try {
+    const user = await User.findById(req.params.id).select(PUBLIC_PROJECTION)
+    if (!user) return res.status(404).json({ message: 'Player not found.' })
+    res.json({ user })
+  } catch (error) {
+    next(error)
+  }
+}
