@@ -1,7 +1,9 @@
 import User from '../models/User.js'
+import { applyRegen } from '../services/livesService.js'
 
 // Public subset - shown when viewing another player's profile.
-const PUBLIC_PROJECTION = 'username createdAt'
+const PUBLIC_PROJECTION =
+  'username totalScore casesSolved accuracy rank level badges createdAt'
 
 // Return a user document without the password hash.
 function safeUser(user) {
@@ -10,11 +12,15 @@ function safeUser(user) {
   return obj
 }
 
-// GET /api/user/me - the signed-in player's full record.
+// GET /api/user/me - the signed-in player's full record. Also settles
+// any pending lives regeneration so every screen that reads the user
+// sees up-to-date lives without polling /api/lives separately.
 export async function getMe(req, res, next) {
   try {
     const user = await User.findById(req.userId)
     if (!user) return res.status(404).json({ message: 'Account not found.' })
+
+    if (applyRegen(user)) await user.save()
     res.json({ user: safeUser(user) })
   } catch (error) {
     next(error)
@@ -23,6 +29,7 @@ export async function getMe(req, res, next) {
 
 // PATCH /api/user/me - update the signed-in player's own account. Any of
 // the following may be present, independently:
+//   - notifications      (settings.notifications.*)
 //   - email              (add or change; enables/keeps 2FA)
 //   - currentPassword + newPassword  (password change)
 export async function updateMe(req, res, next) {
@@ -30,7 +37,19 @@ export async function updateMe(req, res, next) {
     const user = await User.findById(req.userId)
     if (!user) return res.status(404).json({ message: 'Account not found.' })
 
-    const { email, currentPassword, newPassword } = req.body
+    const { notifications, email, currentPassword, newPassword } = req.body
+
+    // Notification preferences.
+    if (notifications && typeof notifications === 'object') {
+      // Guard accounts created before this phase added `settings`.
+      if (!user.settings) user.settings = {}
+      if (!user.settings.notifications) user.settings.notifications = {}
+      for (const k of ['lifeRegen', 'squadInvites', 'dailyQuiz']) {
+        if (typeof notifications[k] === 'boolean') {
+          user.settings.notifications[k] = notifications[k]
+        }
+      }
+    }
 
     // Email add/change.
     if (typeof email === 'string') {

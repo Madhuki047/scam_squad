@@ -6,6 +6,9 @@ import connectDB from "./config/db.js";
 import { connectRedis } from "./services/redisService.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import livesRoutes from "./routes/livesRoutes.js";
+import quizRoutes from "./routes/quizRoutes.js";
+import activityRoutes from "./routes/activityRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
@@ -27,6 +30,9 @@ app.get("/api/health", (req, res) => {
 // Feature routes.
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/lives", livesRoutes);
+app.use("/api/quiz", quizRoutes);
+app.use("/api/activity", activityRoutes);
 
 // Central error handler (must be registered last).
 app.use(errorHandler);
