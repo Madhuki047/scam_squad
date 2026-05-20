@@ -1,4 +1,6 @@
-# 🕵️ Scam Squad
+# Scam Squad
+
+![Scam Squad banner](docs/images/banner.png)
 
 > A story-driven co-op web game that teaches cyber security to ages 10–18 through interactive cases.
 
@@ -8,7 +10,7 @@
 
 ---
 
-## 🎮 Game Overview
+## Game Overview
 
 Players role-play as new interns at **Unit Zero** — a fictional cybercrime investigation unit. They work through 5 cases covering real-world cyber threats:
 
@@ -24,7 +26,7 @@ Teaching philosophy: **failure is the best teacher** — players make mistakes s
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 /scam-squad
@@ -39,13 +41,13 @@ Teaching philosophy: **failure is the best teacher** — players make mistakes s
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js 18+
 - MongoDB Atlas account (free tier)
-- Upstash Redis account (free tier)
-- Gmail account (for 2FA SMTP)
+- Upstash Redis account (free tier, optional)
+- Gmail account (for 2FA SMTP, optional)
 
 ### 1. Clone the repo
 ```bash
@@ -53,13 +55,13 @@ git clone https://github.com/Madhuki047/scam_squad.git
 cd scam_squad
 ```
 
-📘 **For full setup, see [`SETUP.md`](./SETUP.md).**
-🤝 **For team workflow & git rules, see [`CONTRIBUTING.md`](./CONTRIBUTING.md).**
+For full setup, see [`SETUP.md`](./SETUP.md).
+For team workflow & git rules, see [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ### 2. Set up environment variables
 ```bash
-cp .env.example .env
-# Fill in your values (see .env.example)
+cp .env.example server/.env
+# Fill in MONGODB_URI and JWT_SECRET
 ```
 
 ### 3. Install & run backend
@@ -73,6 +75,7 @@ npm run dev
 ```bash
 cd client
 npm install
+cp .env.example .env     # defaults are fine for local dev
 npm run dev
 ```
 
@@ -81,7 +84,21 @@ Backend runs on `http://localhost:3001`
 
 ---
 
-## 🌿 Branch Strategy
+## Project Phases
+
+The build is delivered in three phases. Each one has a short report under `/docs`:
+
+| Phase | Focus | Report |
+|-------|-------|--------|
+| Phase 1 | Monorepo, frontend scaffold, in-app shell | [`docs/phase-1-foundation.md`](./docs/phase-1-foundation.md) |
+| Phase 2 | Email-based 2FA sign-in, account management | [`docs/phase-2-auth.md`](./docs/phase-2-auth.md) |
+| Phase 3 | Lives system, adaptive quiz, activity feed | [`docs/phase-3-gameplay.md`](./docs/phase-3-gameplay.md) |
+
+Remaining work: social (leaderboard, friends, chat), shop, polish + deploy.
+
+---
+
+## Branch Strategy
 
 | Branch | Purpose |
 |--------|---------|
@@ -95,7 +112,7 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full workflow.
 
 ---
 
-## 👥 Team Roles
+## Team Roles
 
 | Role | Responsibility |
 |------|---------------|
@@ -104,7 +121,7 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full workflow.
 
 ---
 
-## 📡 API Overview
+## API Overview
 
 Base URL (dev): `http://localhost:3001/api`
 
@@ -112,7 +129,7 @@ See `/server/routes/` for full route documentation.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - React 18 + Vite
@@ -138,12 +155,12 @@ See `/server/routes/` for full route documentation.
 
 ---
 
-## 📝 Changelog
+## Changelog
 
-See commit history and [`/docs`](./docs) for detailed changes per feature.
+See commit history and [`/docs`](./docs) for detailed changes per phase.
 
 ---
 
-## 📄 License
+## License
 
 Academic project — 503IT, Coventry University.
