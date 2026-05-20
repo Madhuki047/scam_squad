@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
+import ChatPanel from '../components/ChatPanel.jsx'
 
 // Squad screen: the signed-in player's friends, incoming requests, and a
-// search box for sending new requests. Real-time chat plugs in below.
+// search box for sending new requests. Clicking Chat on a friend opens a
+// real-time chat panel anchored to the bottom-right.
 export default function Squad() {
   const { token } = useAuth()
 
   const [friends, setFriends] = useState(null)
   const [requests, setRequests] = useState(null)
   const [error, setError] = useState('')
+  const [activeChat, setActiveChat] = useState(null)
 
   // Pulls both lists. Re-used after every mutating action so the UI stays
   // in sync without hand-rolling optimistic updates.
@@ -103,18 +106,31 @@ export default function Squad() {
                 style={{ borderBottom: '1px solid var(--line)', paddingBottom: 8 }}
               >
                 <PlayerLine player={p} />
-                <button
-                  type="button"
-                  className="ss-btn ss-btn-red"
-                  onClick={() => handleRemove(p._id)}
-                >
-                  Remove
-                </button>
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-cyan"
+                    onClick={() => setActiveChat(p)}
+                  >
+                    Chat
+                  </button>
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-red"
+                    onClick={() => handleRemove(p._id)}
+                  >
+                    Remove
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </Section>
+
+      {activeChat && (
+        <ChatPanel peer={activeChat} onClose={() => setActiveChat(null)} />
+      )}
     </div>
   )
 }

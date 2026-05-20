@@ -84,6 +84,9 @@ export const api = {
     request(`/friends/decline/${userId}`, { method: 'POST', token }),
   removeFriend: (token, userId) =>
     request(`/friends/${userId}`, { method: 'DELETE', token }),
+
+  // --- chat (history only; live delivery goes through the socket) ---
+  getChatHistory: (token, peerId) => request(`/chat/${peerId}`, { token }),
 }
 
 export { request, API_URL }
