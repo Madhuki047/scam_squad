@@ -93,8 +93,9 @@ The build is delivered in three phases. Each one has a short report under `/docs
 | Phase 1 | Monorepo, frontend scaffold, in-app shell | [`docs/phase-1-foundation.md`](./docs/phase-1-foundation.md) |
 | Phase 2 | Email-based 2FA sign-in, account management | [`docs/phase-2-auth.md`](./docs/phase-2-auth.md) |
 | Phase 3 | Lives system, adaptive quiz, activity feed | [`docs/phase-3-gameplay.md`](./docs/phase-3-gameplay.md) |
+| Phase 5 | Power-up shop (consumables + cosmetics) | [`docs/phase-5-shop.md`](./docs/phase-5-shop.md) |
 
-Remaining work: social (leaderboard, friends, chat), shop, polish + deploy.
+Remaining work: social (leaderboard, friends, chat), polish + deploy.
 
 ---
 

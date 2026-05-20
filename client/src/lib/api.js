@@ -65,6 +65,11 @@ export const api = {
   // --- activity ---
   getActivity: (token, limit) =>
     request(`/activity${limit ? `?limit=${limit}` : ''}`, { token }),
+
+  // --- shop ---
+  getShop: (token) => request('/shop', { token }),
+  buyItem: (token, itemId) =>
+    request(`/shop/buy/${itemId}`, { method: 'POST', token }),
 }
 
 export { request, API_URL }
