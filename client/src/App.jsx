@@ -12,6 +12,7 @@ import Settings from './pages/Settings.jsx'
 import Play from './pages/Play.jsx'
 import Quiz from './pages/Quiz.jsx'
 import Leaderboard from './pages/Leaderboard.jsx'
+import Squad from './pages/Squad.jsx'
 import ComingSoon from './pages/ComingSoon.jsx'
 
 // Route table for the whole app.
@@ -43,12 +44,9 @@ export default function App() {
           <Route path="/quiz" element={<Quiz />} />
 
           <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/friends" element={<Squad />} />
 
           {/* Built in later phases. */}
-          <Route
-            path="/friends"
-            element={<ComingSoon title="Squad" phase="Phase 4" />}
-          />
           <Route
             path="/shop"
             element={<ComingSoon title="Power-up Shop" phase="Phase 5" />}
