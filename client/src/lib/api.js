@@ -65,6 +65,11 @@ export const api = {
   // --- activity ---
   getActivity: (token, limit) =>
     request(`/activity${limit ? `?limit=${limit}` : ''}`, { token }),
+
+  // --- leaderboard ---
+  getLeaderboard: (token, { limit = 20, offset = 0 } = {}) =>
+    request(`/leaderboard?limit=${limit}&offset=${offset}`, { token }),
+  getMyRank: (token) => request('/leaderboard/me', { token }),
 }
 
 export { request, API_URL }

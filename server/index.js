@@ -9,6 +9,7 @@ import userRoutes from "./routes/userRoutes.js";
 import livesRoutes from "./routes/livesRoutes.js";
 import quizRoutes from "./routes/quizRoutes.js";
 import activityRoutes from "./routes/activityRoutes.js";
+import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/lives", livesRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/activity", activityRoutes);
+app.use("/api/leaderboard", leaderboardRoutes);
 
 // Central error handler (must be registered last).
 app.use(errorHandler);
