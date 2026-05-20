@@ -107,9 +107,7 @@ export async function nextQuestion(req, res, next) {
 // POST /api/quiz/answer  body: { answerIndex }
 // Validates the answer, updates streak + level for the NEXT question,
 // returns the truth (correct/incorrect + correctIndex) so the UI can
-// teach.
-//
-// PHASE 6: rate-limit to max 1 / 2 seconds / user.
+// teach. Rate-limited to 1 call / 2 seconds / user in quizRoutes.js.
 export async function answerQuestion(req, res, next) {
   try {
     const { answerIndex } = req.body

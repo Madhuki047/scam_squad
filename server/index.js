@@ -4,6 +4,7 @@ import cors from "cors";
 
 import connectDB from "./config/db.js";
 import { connectRedis } from "./services/redisService.js";
+import securityHeaders from "./middleware/securityHeaders.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import livesRoutes from "./routes/livesRoutes.js";
@@ -12,6 +13,9 @@ import activityRoutes from "./routes/activityRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
+
+// Sensible security headers on every response (registered first).
+app.use(securityHeaders);
 
 // Allow the frontend (Vite dev server) to call the API.
 app.use(

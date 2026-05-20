@@ -36,9 +36,8 @@ export async function getLives(req, res, next) {
 }
 
 // POST /api/lives/use - called by the case team when a player fails a
-// case. Returns 409 if the player is already out of lives.
-//
-// PHASE 6: rate-limit this to max 3 calls / minute / user.
+// case. Returns 409 if the player is already out of lives. Rate-limited
+// to 3 calls / minute / user in livesRoutes.js.
 export async function spendLife(req, res, next) {
   try {
     const user = await User.findById(req.userId)
