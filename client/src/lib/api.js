@@ -65,6 +65,28 @@ export const api = {
   // --- activity ---
   getActivity: (token, limit) =>
     request(`/activity${limit ? `?limit=${limit}` : ''}`, { token }),
+
+  // --- leaderboard ---
+  getLeaderboard: (token, { limit = 20, offset = 0 } = {}) =>
+    request(`/leaderboard?limit=${limit}&offset=${offset}`, { token }),
+  getMyRank: (token) => request('/leaderboard/me', { token }),
+
+  // --- friends ---
+  getFriends: (token) => request('/friends', { token }),
+  getFriendRequests: (token) => request('/friends/requests', { token }),
+  searchPlayers: (token, q) =>
+    request(`/friends/search?q=${encodeURIComponent(q)}`, { token }),
+  sendFriendRequest: (token, userId) =>
+    request(`/friends/request/${userId}`, { method: 'POST', token }),
+  acceptFriendRequest: (token, userId) =>
+    request(`/friends/accept/${userId}`, { method: 'POST', token }),
+  declineFriendRequest: (token, userId) =>
+    request(`/friends/decline/${userId}`, { method: 'POST', token }),
+  removeFriend: (token, userId) =>
+    request(`/friends/${userId}`, { method: 'DELETE', token }),
+
+  // --- chat (history only; live delivery goes through the socket) ---
+  getChatHistory: (token, peerId) => request(`/chat/${peerId}`, { token }),
 }
 
 export { request, API_URL }
