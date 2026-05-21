@@ -11,7 +11,10 @@ import Profile from './pages/Profile.jsx'
 import Settings from './pages/Settings.jsx'
 import Play from './pages/Play.jsx'
 import Quiz from './pages/Quiz.jsx'
-import ComingSoon from './pages/ComingSoon.jsx'
+import Case from './pages/Case.jsx'
+import Leaderboard from './pages/Leaderboard.jsx'
+import Shop from './pages/Shop.jsx'
+import Squad from './pages/Squad.jsx'
 
 // Route table for the whole app.
 //
@@ -40,20 +43,10 @@ export default function App() {
 
           <Route path="/play" element={<Play />} />
           <Route path="/quiz" element={<Quiz />} />
-
-          {/* Built in later phases. */}
-          <Route
-            path="/leaderboard"
-            element={<ComingSoon title="Leaderboard" phase="Phase 4" />}
-          />
-          <Route
-            path="/friends"
-            element={<ComingSoon title="Squad" phase="Phase 4" />}
-          />
-          <Route
-            path="/shop"
-            element={<ComingSoon title="Power-up Shop" phase="Phase 5" />}
-          />
+          <Route path="/case/:id" element={<Case />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/friends" element={<Squad />} />
+          <Route path="/shop" element={<Shop />} />
         </Route>
       </Route>
 

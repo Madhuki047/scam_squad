@@ -52,3 +52,48 @@ authentication API, so the Login and Register screens have endpoints to call.
 - Game models: scores, badges, case progress, quiz questions.
 - Socket.io setup for real-time co-op gameplay.
 - Redis for sessions, rate limiting and life cooldowns.
+
+---
+
+## Leaderboard, Shop and Squad APIs (2026-05-21)
+
+### Summary
+
+Wired up the three remaining game screens (Rankings, Power-up Shop, Squad)
+to real endpoints, and made the adaptive quiz recoverable when a session is
+abandoned mid-question. All build on the existing `User` model fields
+(`xp`, `points`, `inventory`, `friends`, `pendingRequests`) — no schema
+changes were needed.
+
+### Endpoints added
+
+- **Leaderboard** (`controllers/leaderboardController.js`,
+  `routes/leaderboardRoutes.js`, mounted at `/api/leaderboard`):
+  - `GET /api/leaderboard` — top 20 players ranked by **lifetime `xp`**, plus
+    the caller's own rank. `xp` (not `points`) is the ranking key because
+    `points` is spendable currency in the shop and would make a player's rank
+    drop when they buy something.
+- **Shop** (`controllers/shopController.js`, `routes/shopRoutes.js`, mounted
+  at `/api/shop`):
+  - `GET /api/shop` — server-owned catalog (`SHOP_CATALOG`, mirroring
+    `CASE_CATALOG`) plus the player's balance and inventory.
+  - `POST /api/shop/buy/:itemId` — validates funds and prior ownership
+    server-side, deducts `points`, grants the item (consumable counter or
+    cosmetic boolean), logs a `shop` activity entry.
+- **Squad** (`controllers/friendsController.js`, `routes/friendsRoutes.js`,
+  mounted at `/api/friends`):
+  - `GET /api/friends`, `GET /api/friends/search?q=`,
+    `POST /api/friends/request|accept|decline|remove/:id`.
+  - `pendingRequests` holds **incoming** requests. Sending a request to
+    someone who already requested you confirms the friendship instead.
+- **Quiz** (`controllers/quizController.js`):
+  - `POST /api/quiz/reset` — clears the per-user quiz session so the client
+    can recover from a question left in progress (the previous behaviour
+    dead-ended `GET /api/quiz/next` with "a question is already in progress").
+
+### Decisions
+
+- Item prices live only on the server and are returned by `GET /api/shop`,
+  so the client can't tamper with them and tuning is a one-file edit.
+- The squad surface is intentionally minimal: search, request, accept/decline,
+  list, remove. No DMs, presence, or notifications.

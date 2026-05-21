@@ -49,6 +49,9 @@ const userSchema = new mongoose.Schema(
     // --- Progression stats -------------------------------------------
     totalScore: { type: Number, default: 0, min: 0 },
     casesSolved: { type: Number, default: 0, min: 0 },
+    // String ids of the cases the player has finished (e.g. "1", "2"),
+    // tracked so the /complete endpoint can stay idempotent.
+    completedCases: [{ type: String }],
     accuracy: { type: Number, default: 0, min: 0, max: 100 },
     dayStreak: { type: Number, default: 0, min: 0 },
     rank: { type: Number, default: 0 },

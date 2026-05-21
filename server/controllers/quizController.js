@@ -172,6 +172,19 @@ export async function answerQuestion(req, res, next) {
   }
 }
 
+// POST /api/quiz/reset - abandon any in-progress session so the player
+// can start a fresh quiz. Safe to call when no session exists; this is
+// how the client recovers from a question left mid-flight (e.g. the
+// player navigated away before answering).
+export async function resetSession(req, res, next) {
+  try {
+    await clearSession(req.userId)
+    res.json({ ok: true })
+  } catch (error) {
+    next(error)
+  }
+}
+
 // POST /api/quiz/complete - tally the session, award a life if the
 // player got >= 4/5, log it, and clear the session.
 export async function completeQuiz(req, res, next) {

@@ -61,10 +61,37 @@ export const api = {
   quizAnswer: (token, answerIndex) =>
     request('/quiz/answer', { method: 'POST', token, body: { answerIndex } }),
   quizComplete: (token) => request('/quiz/complete', { method: 'POST', token }),
+  quizReset: (token) => request('/quiz/reset', { method: 'POST', token }),
 
   // --- activity ---
   getActivity: (token, limit) =>
     request(`/activity${limit ? `?limit=${limit}` : ''}`, { token }),
+
+  // --- cases ---
+  getCaseProgress: (token) => request('/cases/progress', { token }),
+  completeCase: (token, caseId) =>
+    request(`/cases/${caseId}/complete`, { method: 'POST', token }),
+
+  // --- leaderboard ---
+  getLeaderboard: (token) => request('/leaderboard', { token }),
+
+  // --- shop ---
+  getShop: (token) => request('/shop', { token }),
+  buyItem: (token, itemId) =>
+    request(`/shop/buy/${itemId}`, { method: 'POST', token }),
+
+  // --- friends / squad ---
+  getFriends: (token) => request('/friends', { token }),
+  searchFriends: (token, q) =>
+    request(`/friends/search?q=${encodeURIComponent(q)}`, { token }),
+  sendFriendRequest: (token, id) =>
+    request(`/friends/request/${id}`, { method: 'POST', token }),
+  acceptFriend: (token, id) =>
+    request(`/friends/accept/${id}`, { method: 'POST', token }),
+  declineFriend: (token, id) =>
+    request(`/friends/decline/${id}`, { method: 'POST', token }),
+  removeFriend: (token, id) =>
+    request(`/friends/remove/${id}`, { method: 'POST', token }),
 }
 
 export { request, API_URL }

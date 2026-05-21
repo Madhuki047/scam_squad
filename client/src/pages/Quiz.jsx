@@ -87,7 +87,15 @@ export default function Quiz() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finishedSession])
 
-  function restart() {
+  // Wipe any server-side session (in-progress or finished), then start a
+  // clean run. Used both by "Play again" and by the error-screen recovery
+  // when a stale session is blocking /next.
+  async function startOver() {
+    try {
+      await api.quizReset(token)
+    } catch {
+      // Best effort - a fresh session is created either way.
+    }
     setSummary(null)
     setFinishedSession(false)
     setProgress({ answered: 0, correct: 0, total: 5 })
@@ -98,11 +106,16 @@ export default function Quiz() {
 
   if (error) {
     return (
-      <div className="max-w-xl mx-auto ss-card p-8 text-center flex flex-col gap-3">
+      <div className="max-w-xl mx-auto ss-card p-8 text-center flex flex-col gap-4">
         <p className="text-sw-red">{error}</p>
-        <Link to="/home" className="ss-btn ss-btn-cyan self-center">
-          Back to Home
-        </Link>
+        <div className="flex gap-3 justify-center">
+          <button onClick={startOver} className="ss-btn ss-btn-pink">
+            Start over
+          </button>
+          <Link to="/home" className="ss-btn ss-btn-cyan">
+            Back to Home
+          </Link>
+        </div>
       </div>
     )
   }
@@ -129,7 +142,7 @@ export default function Quiz() {
           <Link to="/home" className="ss-btn ss-btn-cyan">
             Home
           </Link>
-          <button onClick={restart} className="ss-btn ss-btn-pink">
+          <button onClick={startOver} className="ss-btn ss-btn-pink">
             Play again
           </button>
         </div>
