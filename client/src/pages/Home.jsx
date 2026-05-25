@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
 import { MAX_LIVES } from '../lib/gameRules.js'
+import { playSfx, startSfxLoop, stopSfxLoop } from '../lib/sound.js'
 
 const INTRO_LINES = [
   {
@@ -106,8 +107,20 @@ function PhoneIntro({ onComplete, busy, error }) {
   const navigate = useNavigate()
   const currentLine = INTRO_LINES[lineIndex]
 
+  useEffect(() => {
+    if (answered || finished) {
+      stopSfxLoop('phoneRing')
+      return undefined
+    }
+
+    startSfxLoop('phoneRing')
+    return () => stopSfxLoop('phoneRing')
+  }, [answered, finished])
+
   async function advance() {
     if (!answered) {
+      stopSfxLoop('phoneRing')
+      playSfx('pickup')
       setAnswered(true)
       return
     }

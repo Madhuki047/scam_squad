@@ -163,6 +163,28 @@ html.ss-high-contrast {
   --line2: rgba(93, 213, 232, 0.7);
 }
 
+.top-sfx-toggle {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--line2);
+  border-radius: 0.35rem;
+  color: var(--cyan);
+  background: rgba(13, 0, 30, 0.45);
+  transition:
+    border-color 150ms ease,
+    color 150ms ease,
+    background 150ms ease;
+}
+
+.top-sfx-toggle:hover {
+  border-color: var(--pink);
+  color: var(--pink);
+  background: rgba(255, 78, 201, 0.1);
+}
+
 /* ---------------------------------------------------------------------
    Home intro transmission.
 --------------------------------------------------------------------- */
