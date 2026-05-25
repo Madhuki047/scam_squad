@@ -142,34 +142,84 @@ function noise(duration = 0.05, volume = 0.04) {
   source.start()
 }
 
+function filteredNoise(
+  duration = 0.04,
+  volume = 0.05,
+  frequency = 2600,
+  delay = 0,
+  group = null,
+) {
+  const ctx = getContext()
+  if (!ctx || !unlocked) return
+
+  const start = ctx.currentTime + delay
+  const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1
+
+  const source = ctx.createBufferSource()
+  const filter = ctx.createBiquadFilter()
+  const gain = gainNode(ctx, volume)
+
+  filter.type = 'bandpass'
+  filter.frequency.setValueAtTime(frequency, start)
+  filter.Q.setValueAtTime(8, start)
+  gain.gain.setValueAtTime(0.0001, start)
+  gain.gain.exponentialRampToValueAtTime(volume, start + 0.006)
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration)
+
+  source.buffer = buffer
+  source.connect(filter)
+  filter.connect(gain)
+  rememberSource(group, source)
+  source.start(start)
+  source.stop(start + duration + 0.01)
+}
+
 function vintagePhoneRing() {
-  const strikes = [0, 0.085, 0.17, 0.255, 0.34, 0.425, 0.51]
-  const makeStrike = (delay, offset = 0) => {
-    const bellA = 540 + offset
-    const bellB = 690 + offset
-    tone(bellA, 0.12, VOLUME.phoneRing, 'square', delay, 'phoneRing')
-    tone(
-      bellB,
-      0.12,
-      VOLUME.phoneRing * 0.88,
-      'square',
-      delay + 0.012,
-      'phoneRing',
-    )
-    tone(180, 0.16, VOLUME.phoneRing * 0.58, 'sine', delay, 'phoneRing')
-    sweepTone(
-      760 + offset,
-      520 + offset,
-      0.12,
-      VOLUME.phoneRing * 0.24,
-      'sine',
-      delay,
-      'phoneRing',
-    )
+  const makeBellRing = (startDelay, offset = 0) => {
+    const strikes = [0, 0.14, 0.28, 0.42]
+    strikes.forEach((strikeDelay, index) => {
+      const delay = startDelay + strikeDelay
+      const wobble = index % 2 === 0 ? 0 : -16
+
+      filteredNoise(
+        0.032,
+        VOLUME.phoneRing * 0.95,
+        3200 + offset,
+        delay,
+        'phoneRing',
+      )
+      tone(
+        438 + offset + wobble,
+        0.34,
+        VOLUME.phoneRing,
+        'sine',
+        delay,
+        'phoneRing',
+      )
+      tone(
+        552 + offset - wobble,
+        0.32,
+        VOLUME.phoneRing * 0.88,
+        'sine',
+        delay + 0.006,
+        'phoneRing',
+      )
+      tone(
+        704 + offset + wobble,
+        0.22,
+        VOLUME.phoneRing * 0.52,
+        'triangle',
+        delay + 0.012,
+        'phoneRing',
+      )
+      tone(176, 0.28, VOLUME.phoneRing * 0.42, 'sine', delay, 'phoneRing')
+    })
   }
 
-  strikes.forEach((delay) => makeStrike(delay))
-  strikes.forEach((delay) => makeStrike(0.72 + delay, -18))
+  makeBellRing(0)
+  makeBellRing(0.78, -22)
 }
 
 function missionBriefingCue() {
@@ -267,7 +317,7 @@ export function playSfx(name) {
 export function startSfxLoop(name) {
   if (muted || loops.has(name)) return
   playSfx(name)
-  const interval = name === 'phoneRing' ? 2100 : 1550
+  const interval = name === 'phoneRing' ? 2600 : 1550
   const id = window.setInterval(() => playSfx(name), interval)
   loops.set(name, id)
 }
