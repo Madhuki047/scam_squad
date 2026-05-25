@@ -120,6 +120,14 @@ userSchema.pre('save', async function hashPassword(next) {
   next()
 })
 
+// Accounts created before the lives cap was reduced may still have
+// livesRemaining > 3 in Mongo. Clamp before validation so those legacy
+// records can still be saved during login/profile hydration.
+userSchema.pre('validate', function clampLegacyLives(next) {
+  if (this.livesRemaining > 3) this.livesRemaining = 3
+  next()
+})
+
 // Compare a plain-text password against the stored hash.
 userSchema.methods.comparePassword = function comparePassword(plainText) {
   return bcrypt.compare(plainText, this.password)

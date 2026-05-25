@@ -4,7 +4,7 @@ const VOLUME = {
   hover: 0.025,
   click: 0.04,
   pickup: 0.07,
-  phoneRing: 0.078,
+  phoneRing: 0.088,
   missionBriefing: 0.095,
   correct: 0.07,
   wrong: 0.07,
@@ -143,49 +143,33 @@ function noise(duration = 0.05, volume = 0.04) {
 }
 
 function vintagePhoneRing() {
-  const burst = [0, 0.06, 0.12, 0.18, 0.24, 0.3]
-  burst.forEach((delay, index) => {
-    const freq = index % 2 === 0 ? 720 : 610
-    tone(freq, 0.07, VOLUME.phoneRing, 'square', delay, 'phoneRing')
-    tone(235, 0.09, VOLUME.phoneRing * 0.52, 'sine', delay, 'phoneRing')
+  const strikes = [0, 0.085, 0.17, 0.255, 0.34, 0.425, 0.51]
+  const makeStrike = (delay, offset = 0) => {
+    const bellA = 540 + offset
+    const bellB = 690 + offset
+    tone(bellA, 0.12, VOLUME.phoneRing, 'square', delay, 'phoneRing')
     tone(
-      freq * 1.5,
-      0.055,
-      VOLUME.phoneRing * 0.32,
-      'sine',
-      delay + 0.006,
-      'phoneRing',
-    )
-  })
-
-  const secondBurstOffset = 0.55
-  burst.forEach((delay, index) => {
-    const freq = index % 2 === 0 ? 700 : 590
-    tone(
-      freq,
-      0.07,
-      VOLUME.phoneRing,
+      bellB,
+      0.12,
+      VOLUME.phoneRing * 0.88,
       'square',
-      secondBurstOffset + delay,
+      delay + 0.012,
       'phoneRing',
     )
-    tone(
-      220,
-      0.09,
-      VOLUME.phoneRing * 0.52,
+    tone(180, 0.16, VOLUME.phoneRing * 0.58, 'sine', delay, 'phoneRing')
+    sweepTone(
+      760 + offset,
+      520 + offset,
+      0.12,
+      VOLUME.phoneRing * 0.24,
       'sine',
-      secondBurstOffset + delay,
+      delay,
       'phoneRing',
     )
-    tone(
-      freq * 1.5,
-      0.055,
-      VOLUME.phoneRing * 0.32,
-      'sine',
-      secondBurstOffset + delay + 0.006,
-      'phoneRing',
-    )
-  })
+  }
+
+  strikes.forEach((delay) => makeStrike(delay))
+  strikes.forEach((delay) => makeStrike(0.72 + delay, -18))
 }
 
 function missionBriefingCue() {
