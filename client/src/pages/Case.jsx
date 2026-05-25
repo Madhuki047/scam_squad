@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { IconArrowRight, IconFlag, IconLock } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext.jsx'
-import { completeCaseMode, isCaseUnlocked } from '../lib/caseProgress.js'
+import {
+  completeCaseMode,
+  isCaseModeComplete,
+  isCaseUnlocked,
+} from '../lib/caseProgress.js'
+import { api } from '../lib/api.js'
+import { BADGES } from '../lib/badges.js'
+import { pointsForDifficulty } from '../lib/gameRules.js'
 
 const INTRO_STEPS = [
   {
@@ -90,7 +97,7 @@ function PixelPerson({ role, label, position = '' }) {
   )
 }
 
-function StoryScene({ step, onNext, internName, isLastStep }) {
+function StoryScene({ step, onNext, internName, isLastStep, exiting }) {
   const speakerName = step.speakerKey === 'intern' ? internName : step.speaker
 
   return (
@@ -100,7 +107,7 @@ function StoryScene({ step, onNext, internName, isLastStep }) {
         <span>{step.time}</span>
       </div>
 
-      <div className="case-office">
+      <div className={`case-office ${exiting ? 'case-office-exiting' : ''}`}>
         <div className="case-window case-window-left">
           <span />
           <span />
@@ -389,16 +396,33 @@ function Debrief({ outcome, onReplay, onContinue }) {
   )
 }
 
-function EndScreen({ badge, onReturn, onVeteran }) {
+function PixelBadgeCard({ badge, pointsAwarded }) {
+  if (!badge) return null
+  return (
+    <div className="case-badge-unlock">
+      <div className={`case-badge-icon badge-icon-${badge.icon || 'hook'}`}>
+        <span />
+      </div>
+      <div>
+        <span className="case-badge-kicker">Badge Unlocked</span>
+        <strong>{badge.name}</strong>
+        <p>{badge.message}</p>
+        {pointsAwarded > 0 && (
+          <span className="case-points-award">+{pointsAwarded} points</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function EndScreen({ badge, pointsAwarded, onReturn, onVeteran }) {
   return (
     <section className="ss-card p-6 flex flex-col gap-4">
       <h2 className="font-pixel text-sw-cyan text-sm">
         Case 01 Rookie Complete
       </h2>
-      <p className="text-sw-text2">
-        Case file updated. Badge unlocked:{' '}
-        <span className="text-sw-yellow uppercase">{badge}</span>
-      </p>
+      <p className="text-sw-text2">Case file updated. Rookie reward secured.</p>
+      <PixelBadgeCard badge={badge} pointsAwarded={pointsAwarded} />
       <div className="flex flex-col sm:flex-row gap-3">
         <button type="button" className="ss-btn ss-btn-cyan" onClick={onReturn}>
           Return to Case Files
@@ -412,10 +436,33 @@ function EndScreen({ badge, onReturn, onVeteran }) {
 }
 
 function VeteranPlaceholder() {
+  const { token, setUser } = useAuth()
   const navigate = useNavigate()
 
-  function returnToFiles() {
-    completeCaseMode(1, 'veteran')
+  async function returnToFiles() {
+    const wasComplete = isCaseModeComplete(1, 'veteran')
+    const pointsAwarded = pointsForDifficulty('veteran')
+    completeCaseMode(1, 'veteran', null, pointsAwarded)
+    if (token) {
+      try {
+        const data = await api.completeCase(token, {
+          caseId: 1,
+          difficulty: 'veteran',
+        })
+        setUser(data.user)
+      } catch {
+        setUser((current) =>
+          current
+            ? {
+                ...current,
+                points: (current.points ?? 0) + (wasComplete ? 0 : pointsAwarded),
+                totalScore:
+                  (current.totalScore ?? 0) + (wasComplete ? 0 : pointsAwarded),
+              }
+            : current,
+        )
+      }
+    }
     navigate('/play')
   }
 
@@ -481,13 +528,15 @@ function FutureCase({ caseId }) {
 
 export default function Case() {
   const { caseId, difficulty = 'rookie' } = useParams()
-  const { user } = useAuth()
+  const { user, token, setUser } = useAuth()
   const navigate = useNavigate()
   const numericCaseId = Number(caseId)
   const [phase, setPhase] = useState('intro')
   const [stepIndex, setStepIndex] = useState(0)
   const [outcome, setOutcome] = useState(null)
   const [badge, setBadge] = useState(null)
+  const [pointsAwarded, setPointsAwarded] = useState(0)
+  const [sceneExiting, setSceneExiting] = useState(false)
   const internName = user?.username || 'Nova'
 
   if (!['rookie', 'veteran'].includes(difficulty)) {
@@ -503,7 +552,38 @@ export default function Case() {
       setStepIndex((value) => value + 1)
       return
     }
-    setPhase('inbox')
+    setSceneExiting(true)
+    setTimeout(() => {
+      setSceneExiting(false)
+      setPhase('inbox')
+    }, 520)
+  }
+
+  async function handleClaimVoucher() {
+    if (token) {
+      try {
+        const data = await api.useLife(token)
+        setUser((current) =>
+          current
+            ? {
+                ...current,
+                livesRemaining: data.livesRemaining,
+                lastLifeRegen: data.lastLifeRegen,
+              }
+            : current,
+        )
+      } catch {
+        setUser((current) =>
+          current
+            ? {
+                ...current,
+                livesRemaining: Math.max(0, (current.livesRemaining ?? 0) - 1),
+              }
+            : current,
+        )
+      }
+    }
+    setPhase('glitch')
   }
 
   function restart() {
@@ -511,12 +591,43 @@ export default function Case() {
     setStepIndex(0)
     setOutcome(null)
     setBadge(null)
+    setPointsAwarded(0)
+    setSceneExiting(false)
   }
 
-  function finishRookie() {
-    const unlockedBadge = outcome === 'claim' ? 'Hooked Once' : 'Sharp Eyes'
-    completeCaseMode(1, 'rookie', unlockedBadge)
+  async function finishRookie() {
+    const unlockedBadge =
+      outcome === 'claim' ? BADGES.hookedOnce : BADGES.sharpEyes
+    const wasComplete = isCaseModeComplete(1, 'rookie')
+    const reward = pointsForDifficulty('rookie')
+    completeCaseMode(1, 'rookie', unlockedBadge, reward)
     setBadge(unlockedBadge)
+    setPointsAwarded(wasComplete ? 0 : reward)
+    if (token) {
+      try {
+        const data = await api.completeCase(token, {
+          caseId: 1,
+          difficulty: 'rookie',
+          badge: unlockedBadge,
+        })
+        setUser(data.user)
+        setPointsAwarded(data.pointsAwarded)
+      } catch {
+        setUser((current) =>
+          current
+            ? {
+                ...current,
+                points: (current.points ?? 0) + (wasComplete ? 0 : reward),
+                totalScore: (current.totalScore ?? 0) + (wasComplete ? 0 : reward),
+                badges: [
+                  ...(current.badges || []),
+                  { id: unlockedBadge.id, earnedAt: new Date().toISOString() },
+                ],
+              }
+            : current,
+        )
+      }
+    }
     setPhase('end')
   }
 
@@ -537,6 +648,7 @@ export default function Case() {
           onNext={nextIntro}
           internName={internName}
           isLastStep={stepIndex === INTRO_STEPS.length - 1}
+          exiting={sceneExiting}
         />
       )}
       {phase === 'inbox' && (
@@ -545,7 +657,7 @@ export default function Case() {
       {phase === 'email' && (
         <EmailScene
           internName={internName}
-          onClaim={() => setPhase('glitch')}
+          onClaim={handleClaimVoucher}
           onReport={() => {
             setOutcome('report')
             setPhase('zoey')
@@ -574,6 +686,7 @@ export default function Case() {
       {phase === 'end' && (
         <EndScreen
           badge={badge}
+          pointsAwarded={pointsAwarded}
           onReturn={() => navigate('/play')}
           onVeteran={() => navigate('/case/1/veteran')}
         />

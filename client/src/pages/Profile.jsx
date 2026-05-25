@@ -1,23 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
-
-// The 12-badge catalog. A badge counts as earned when its id appears in
-// user.badges; the earning logic itself comes in later phases.
-const BADGE_CATALOG = [
-  { id: 'first-case', name: 'First Case' },
-  { id: 'phishing-pro', name: 'Phishing Pro' },
-  { id: 'quiz-streak', name: 'Quiz Streak' },
-  { id: 'squad-up', name: 'Squad Up' },
-  { id: 'veteran', name: 'Veteran' },
-  { id: 'sharp-eye', name: 'Sharp Eye' },
-  { id: 'night-owl', name: 'Night Owl' },
-  { id: 'perfect-run', name: 'Perfect Run' },
-  { id: 'mentor', name: 'Mentor' },
-  { id: 'collector', name: 'Collector' },
-  { id: 'unbreakable', name: 'Unbreakable' },
-  { id: 'unit-zero', name: 'Unit Zero' },
-]
+import { BADGE_CATALOG } from '../lib/badges.js'
+import { getCaseProgress } from '../lib/caseProgress.js'
 
 // XP needed to reach the next level. Simple linear curve for now.
 function xpForNextLevel(level) {
@@ -59,7 +44,12 @@ export default function Profile() {
 
   if (!user) return null
 
+  const localBadges = getCaseProgress().badges
   const earned = new Set((user.badges || []).map((b) => b.id))
+  for (const badgeName of localBadges) {
+    const match = BADGE_CATALOG.find((badge) => badge.name === badgeName)
+    if (match) earned.add(match.id)
+  }
   const level = user.level || 1
   const nextLevelXp = xpForNextLevel(level)
   const xpPct = Math.min(100, Math.round(((user.xp || 0) / nextLevelXp) * 100))

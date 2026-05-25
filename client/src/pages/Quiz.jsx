@@ -13,7 +13,7 @@ import { api } from '../lib/api.js'
 //   completing   -> /complete in flight after the 5th answer
 //   summary      -> final score + life-award screen
 export default function Quiz() {
-  const { token, refreshUser } = useAuth()
+  const { token, refreshUser, setUser } = useAuth()
 
   const [question, setQuestion] = useState(null)
   const [level, setLevel] = useState('easy')
@@ -58,6 +58,17 @@ export default function Quiz() {
       setResult({ correct: data.correct, correctIndex: data.correctIndex })
       setLevel(data.nextLevel)
       setProgress(data.progress)
+      if (!data.correct && Number.isInteger(data.livesRemaining)) {
+        setUser((current) =>
+          current
+            ? {
+                ...current,
+                livesRemaining: data.livesRemaining,
+                lastLifeRegen: data.lastLifeRegen,
+              }
+            : current,
+        )
+      }
       if (data.finished) setFinishedSession(true)
     } catch (err) {
       setError(err.message)

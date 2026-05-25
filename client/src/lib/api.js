@@ -69,6 +69,8 @@ export const api = {
   getMe: (token) => request('/user/me', { token }),
   updateMe: (token, body) => request('/user/me', { method: 'PATCH', token, body }),
   deleteMe: (token) => request('/user/me', { method: 'DELETE', token }),
+  completeCase: (token, body) =>
+    request('/user/me/complete-case', { method: 'POST', token, body }),
   getUser: (id) => request(`/user/${id}`),
 
   // --- lives ---

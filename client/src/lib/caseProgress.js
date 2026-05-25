@@ -3,6 +3,7 @@ const STORAGE_KEY = 'ss_case_progress'
 const INITIAL_PROGRESS = {
   completed: {},
   badges: [],
+  points: 0,
 }
 
 function readProgress() {
@@ -43,10 +44,12 @@ export function isCaseUnlocked(caseId) {
   return isCaseComplete(caseId - 1)
 }
 
-export function completeCaseMode(caseId, difficulty, badge) {
+export function completeCaseMode(caseId, difficulty, badge, pointsAwarded = 0) {
   const progress = readProgress()
   const nextBadges = new Set(progress.badges)
-  if (badge) nextBadges.add(badge)
+  const badgeName = typeof badge === 'string' ? badge : badge?.name
+  if (badgeName) nextBadges.add(badgeName)
+  const alreadyComplete = Boolean(progress.completed[caseKey(caseId, difficulty)])
 
   return writeProgress({
     ...progress,
@@ -55,5 +58,6 @@ export function completeCaseMode(caseId, difficulty, badge) {
       [caseKey(caseId, difficulty)]: true,
     },
     badges: Array.from(nextBadges),
+    points: progress.points + (alreadyComplete ? 0 : pointsAwarded),
   })
 }
