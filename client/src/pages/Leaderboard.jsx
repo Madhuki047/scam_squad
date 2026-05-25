@@ -4,7 +4,7 @@ import { api } from '../lib/api.js'
 
 const PAGE_SIZE = 20
 
-// Global ranking by total score. Highlights the signed-in player wherever
+// Global ranking by total coins. Highlights the signed-in player wherever
 // they appear in the page; if they're on a later page, the panel below
 // the table shows their actual rank so they always see how they're doing.
 export default function Leaderboard() {
@@ -61,7 +61,7 @@ export default function Leaderboard() {
           GLOBAL RANKING
         </h2>
         <p className="text-sw-text3">
-          Sorted by total score. Ties broken by earliest sign-up.
+          Sorted by total coins. Ties broken by earliest sign-up.
         </p>
       </div>
 
@@ -80,7 +80,7 @@ export default function Leaderboard() {
               <th className="px-4 py-3">AGENT</th>
               <th className="px-4 py-3 text-right">LVL</th>
               <th className="px-4 py-3 text-right">CASES</th>
-              <th className="px-4 py-3 text-right">SCORE</th>
+              <th className="px-4 py-3 text-right">COINS</th>
             </tr>
           </thead>
           <tbody>
@@ -125,7 +125,7 @@ export default function Leaderboard() {
                       {row.casesSolved}
                     </td>
                     <td className="px-4 py-3 text-right font-pixel text-sw-cyan text-sm">
-                      {row.totalScore}
+                      {row.points ?? row.totalScore ?? 0}
                     </td>
                   </tr>
                 )
@@ -143,7 +143,7 @@ export default function Leaderboard() {
             #{myRank.rank}
           </span>
           <span className="text-sw-text3 ml-2">
-            ({myRank.totalScore} score)
+            ({myRank.points ?? myRank.totalScore ?? 0} coins)
           </span>
         </div>
       )}

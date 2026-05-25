@@ -4,10 +4,6 @@ import { api } from '../lib/api.js'
 import { BADGE_CATALOG } from '../lib/badges.js'
 import { getCaseProgress } from '../lib/caseProgress.js'
 
-function xpForNextLevel(level) {
-  return level * 500
-}
-
 function relativeTime(iso) {
   const diff = Date.now() - new Date(iso).getTime()
   const minutes = Math.floor(diff / 60_000)
@@ -22,16 +18,22 @@ function relativeTime(iso) {
 export default function Profile() {
   const { user, token } = useAuth()
   const [activity, setActivity] = useState(null)
+  const [coinsLastWeek, setCoinsLastWeek] = useState(0)
 
   useEffect(() => {
     let cancelled = false
     api
       .getActivity(token, 15)
       .then((data) => {
-        if (!cancelled) setActivity(data.items)
+        if (cancelled) return
+        setActivity(data.items)
+        setCoinsLastWeek(data.pointsLastWeek || 0)
       })
       .catch(() => {
-        if (!cancelled) setActivity([])
+        if (!cancelled) {
+          setActivity([])
+          setCoinsLastWeek(0)
+        }
       })
     return () => {
       cancelled = true
@@ -48,11 +50,16 @@ export default function Profile() {
   }
 
   const level = user.level || 1
-  const nextLevelXp = xpForNextLevel(level)
-  const xpPct = Math.min(100, Math.round(((user.xp || 0) / nextLevelXp) * 100))
+  const coins = user.points ?? user.totalScore ?? 0
+  const coinScaleMax = Math.max(coins, coinsLastWeek, 1)
+  const coinPct = Math.min(100, Math.round((coins / coinScaleMax) * 100))
+  const lastWeekPct =
+    coinsLastWeek > 0
+      ? Math.min(100, Math.round((coinsLastWeek / coinScaleMax) * 100))
+      : 0
 
   const stats = [
-    { label: 'TOTAL SCORE', value: user.totalScore ?? 0 },
+    { label: 'TOTAL COINS', value: coins },
     { label: 'GLOBAL RANK', value: user.rank > 0 ? `#${user.rank}` : '--' },
     { label: 'ACCURACY', value: `${user.accuracy ?? 0}%` },
     { label: 'DAY STREAK', value: user.dayStreak ?? 0 },
@@ -78,22 +85,39 @@ export default function Profile() {
 
       <div className="ss-card p-5">
         <div className="flex justify-between text-sw-text3 mb-2">
-          <span>XP</span>
-          <span>
-            {user.xp || 0} / {nextLevelXp}
-          </span>
+          <span>Coins</span>
+          <span>{coins} coins</span>
         </div>
         <div
-          className="h-3 rounded overflow-hidden"
+          className="relative h-4 rounded overflow-visible"
           style={{ background: 'rgba(255,255,255,.1)' }}
+          aria-label={`Coins progress. Current ${coins}. Last week ${coinsLastWeek}.`}
         >
           <div
             className="h-full rounded"
             style={{
-              width: `${xpPct}%`,
+              width: `${coinPct}%`,
               background: 'linear-gradient(90deg,var(--cyan),var(--pink))',
+              boxShadow: '0 0 12px rgba(93,213,232,.55)',
             }}
           />
+          <div
+            className="absolute top-1/2 -translate-y-1/2"
+            style={{
+              left: `${lastWeekPct}%`,
+              width: 3,
+              height: 22,
+              background: 'var(--yellow)',
+              boxShadow: '0 0 10px var(--yellow)',
+              transform: 'translate(-50%, -50%)',
+            }}
+          />
+        </div>
+        <div className="flex justify-between text-sw-text3 text-xs mt-3">
+          <span>0 coins</span>
+          <span className="text-sw-yellow">
+            Last week marker: {coinsLastWeek} coins
+          </span>
         </div>
       </div>
 
