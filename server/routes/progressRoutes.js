@@ -11,6 +11,10 @@ import {
 // under an explicit API surface.
 const router = Router()
 
+router.get('/ping', (req, res) => {
+  res.json({ message: 'progress routes mounted' })
+})
+
 router.get('/', protect, getProgress)
 router.post('/complete-case', protect, completeCase)
 router.post('/fail-attempt', protect, failAttempt)

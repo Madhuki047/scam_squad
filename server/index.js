@@ -28,7 +28,13 @@ app.use(express.json());
 
 // Simple health check - useful to confirm the server is running.
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
+  res.json({
+    status: "ok",
+    routes: {
+      progress: "/api/progress",
+      progressPing: "/api/progress/ping",
+    },
+  });
 });
 
 // Feature routes.
