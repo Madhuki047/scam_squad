@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { IconCheck, IconLock } from '@tabler/icons-react'
+import { useAuth } from '../context/AuthContext.jsx'
 import {
   getCaseProgress,
   isCaseComplete,
@@ -43,11 +44,14 @@ const CASES = [
 const DIFFICULTIES = ['rookie', 'veteran']
 
 export default function Play() {
+  const { user } = useAuth()
   const navigate = useNavigate()
   const progress = getCaseProgress()
   const completedCount = CASES.filter((c) => isCaseComplete(c.id)).length
+  const hasLives = (user?.livesRemaining ?? 0) > 0
 
   function openCase(caseId, difficulty) {
+    if (!hasLives) return
     navigate(`/case/${caseId}/${difficulty}`)
   }
 
@@ -58,6 +62,11 @@ export default function Play() {
           CASE FILES
         </h2>
         <p className="text-sw-text3 mt-1">Select a case to investigate.</p>
+        {!hasLives && (
+          <p className="text-sw-red mt-2">
+            You need at least 1 life to start a case.
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -103,7 +112,7 @@ export default function Play() {
                     <button
                       key={difficulty}
                       type="button"
-                      disabled={locked}
+                      disabled={locked || !hasLives}
                       onClick={() => openCase(c.id, difficulty)}
                       className={`case-diff-btn ${
                         done ? 'case-diff-btn-complete' : ''

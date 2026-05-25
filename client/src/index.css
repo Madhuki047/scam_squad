@@ -1164,6 +1164,57 @@ html.ss-high-contrast {
   text-transform: uppercase;
 }
 
+.profile-badge-icon,
+.profile-badge-locked {
+  position: relative;
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border-radius: 0.35rem;
+}
+
+.profile-badge-icon {
+  border: 1.5px solid var(--cyan);
+  background: rgba(93, 213, 232, 0.14);
+  box-shadow: 0 0 0.75rem rgba(93, 213, 232, 0.32);
+}
+
+.profile-badge-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0.48rem;
+  border: 1.5px solid var(--yellow);
+  rotate: 45deg;
+}
+
+.profile-badge-icon span {
+  position: relative;
+  z-index: 1;
+}
+
+.profile-badge-locked {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text3);
+  opacity: 0.45;
+}
+
+.profile-badge-locked span {
+  font-family: var(--mono);
+  font-size: 1.3rem;
+}
+
+.badge-icon-unit span,
+.badge-icon-first span,
+.badge-icon-streak span {
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 3px solid var(--violet);
+  box-shadow:
+    0.28rem 0.28rem 0 rgba(255, 78, 201, 0.55),
+    -0.28rem -0.28rem 0 rgba(93, 213, 232, 0.45);
+}
+
 @media (max-width: 640px) {
   .case-scene {
     min-height: 32rem;

@@ -332,7 +332,7 @@ function ZoeyBrief({ outcome, onNext }) {
   )
 }
 
-function Debrief({ outcome, onReplay, onContinue }) {
+function Debrief({ outcome, onReplay, onContinue, busy }) {
   const isBreach = outcome === 'claim'
   const badge = isBreach ? 'Hooked Once' : 'Sharp Eyes'
 
@@ -380,6 +380,7 @@ function Debrief({ outcome, onReplay, onContinue }) {
             type="button"
             className="ss-btn ss-btn-pink"
             onClick={onReplay}
+            disabled={busy}
           >
             Replay Scene
           </button>
@@ -387,6 +388,7 @@ function Debrief({ outcome, onReplay, onContinue }) {
             type="button"
             className="ss-btn ss-btn-cyan"
             onClick={onContinue}
+            disabled={busy}
           >
             Continue
           </button>
@@ -506,6 +508,26 @@ function LockedCase() {
   )
 }
 
+function NoLivesCase() {
+  const navigate = useNavigate()
+  return (
+    <section className="ss-card p-6 flex flex-col gap-4 max-w-3xl mx-auto opacity-90">
+      <IconLock size={28} className="text-sw-red" />
+      <h2 className="font-pixel text-sw-cyan text-sm">No lives remaining</h2>
+      <p className="text-sw-text2">
+        You need at least 1 life to start a case.
+      </p>
+      <button
+        type="button"
+        className="ss-btn ss-btn-cyan self-start"
+        onClick={() => navigate('/play')}
+      >
+        Return to Case Files
+      </button>
+    </section>
+  )
+}
+
 function FutureCase({ caseId }) {
   const navigate = useNavigate()
   return (
@@ -537,12 +559,15 @@ export default function Case() {
   const [badge, setBadge] = useState(null)
   const [pointsAwarded, setPointsAwarded] = useState(0)
   const [sceneExiting, setSceneExiting] = useState(false)
+  const [resolvingDebrief, setResolvingDebrief] = useState(false)
   const internName = user?.username || 'Nova'
+  const hasLives = (user?.livesRemaining ?? 0) > 0
 
   if (!['rookie', 'veteran'].includes(difficulty)) {
     return <Navigate to={`/case/${caseId}/rookie`} replace />
   }
 
+  if (!hasLives) return <NoLivesCase />
   if (!isCaseUnlocked(numericCaseId)) return <LockedCase />
   if (numericCaseId !== 1) return <FutureCase caseId={numericCaseId} />
   if (difficulty === 'veteran') return <VeteranPlaceholder />
@@ -559,7 +584,7 @@ export default function Case() {
     }, 520)
   }
 
-  async function handleClaimVoucher() {
+  async function spendFailureLife() {
     if (token) {
       try {
         const data = await api.useLife(token)
@@ -583,6 +608,9 @@ export default function Case() {
         )
       }
     }
+  }
+
+  async function handleClaimVoucher() {
     setPhase('glitch')
   }
 
@@ -593,9 +621,21 @@ export default function Case() {
     setBadge(null)
     setPointsAwarded(0)
     setSceneExiting(false)
+    setResolvingDebrief(false)
   }
 
-  async function finishRookie() {
+  async function finishFailedAttempt(nextAction) {
+    if (resolvingDebrief) return
+    setResolvingDebrief(true)
+    await spendFailureLife()
+    if (nextAction === 'replay') {
+      restart()
+      return
+    }
+    navigate('/play')
+  }
+
+  async function awardRookieCompletion() {
     const unlockedBadge =
       outcome === 'claim' ? BADGES.hookedOnce : BADGES.sharpEyes
     const wasComplete = isCaseModeComplete(1, 'rookie')
@@ -615,20 +655,45 @@ export default function Case() {
       } catch {
         setUser((current) =>
           current
-            ? {
-                ...current,
-                points: (current.points ?? 0) + (wasComplete ? 0 : reward),
-                totalScore: (current.totalScore ?? 0) + (wasComplete ? 0 : reward),
-                badges: [
-                  ...(current.badges || []),
-                  { id: unlockedBadge.id, earnedAt: new Date().toISOString() },
-                ],
-              }
+            ? (() => {
+                const badges = current.badges || []
+                const hasBadge = badges.some((entry) => entry.id === unlockedBadge.id)
+                return {
+                  ...current,
+                  points: (current.points ?? 0) + (wasComplete ? 0 : reward),
+                  totalScore:
+                    (current.totalScore ?? 0) + (wasComplete ? 0 : reward),
+                  badges: hasBadge
+                    ? badges
+                    : [
+                        ...badges,
+                        {
+                          id: unlockedBadge.id,
+                          earnedAt: new Date().toISOString(),
+                        },
+                      ],
+                }
+              })()
             : current,
         )
       }
     }
+    return { unlockedBadge, awarded: wasComplete ? 0 : reward }
+  }
+
+  async function replayAfterSuccess() {
+    if (resolvingDebrief) return
+    setResolvingDebrief(true)
+    await awardRookieCompletion()
+    restart()
+  }
+
+  async function finishRookie() {
+    if (resolvingDebrief) return
+    setResolvingDebrief(true)
+    await awardRookieCompletion()
     setPhase('end')
+    setResolvingDebrief(false)
   }
 
   return (
@@ -679,8 +744,17 @@ export default function Case() {
       {phase === 'debrief' && (
         <Debrief
           outcome={outcome}
-          onReplay={restart}
-          onContinue={finishRookie}
+          onReplay={
+            outcome === 'claim'
+              ? () => finishFailedAttempt('replay')
+              : replayAfterSuccess
+          }
+          onContinue={
+            outcome === 'claim'
+              ? () => finishFailedAttempt('continue')
+              : finishRookie
+          }
+          busy={resolvingDebrief}
         />
       )}
       {phase === 'end' && (
