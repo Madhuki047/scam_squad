@@ -73,6 +73,7 @@ function AssignmentCard() {
     <Link
       to="/play"
       className="ss-card home-assignment-card hover:border-sw-cyan transition-colors"
+      onClick={() => playSfx('missionBriefing')}
     >
       <div className="home-assignment-scene" aria-hidden="true">
         <div className="home-agent-shadow">
@@ -149,7 +150,10 @@ function PhoneIntro({ onComplete, busy, error }) {
         <button
           type="button"
           className="ss-btn ss-btn-cyan self-start"
-          onClick={() => navigate('/play')}
+          onClick={() => {
+            playSfx('missionBriefing')
+            navigate('/play')
+          }}
           disabled={busy}
         >
           Proceed to case files
