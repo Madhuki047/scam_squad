@@ -593,6 +593,13 @@ export default function Case() {
       }
       navigate('/play')
     } catch (error) {
+      console.error('[progress] Failed case attempt update failed', {
+        endpoint: '/progress/fail-attempt',
+        action: nextAction,
+        caseId: numericCaseId,
+        difficulty,
+        message: error.message,
+      })
       setProgressError(error.message || 'Could not update lives.')
       resolvingRef.current = false
       setResolvingDebrief(false)
@@ -623,6 +630,12 @@ export default function Case() {
       await awardRookieCompletion()
       restart()
     } catch (error) {
+      console.error('[progress] Successful replay progress update failed', {
+        endpoint: '/progress/complete-case',
+        caseId: numericCaseId,
+        difficulty: 'rookie',
+        message: error.message,
+      })
       setProgressError(error.message || 'Could not update case progress.')
       resolvingRef.current = false
       setResolvingDebrief(false)
@@ -638,6 +651,12 @@ export default function Case() {
       await awardRookieCompletion()
       setPhase('end')
     } catch (error) {
+      console.error('[progress] Case completion update failed', {
+        endpoint: '/progress/complete-case',
+        caseId: numericCaseId,
+        difficulty: 'rookie',
+        message: error.message,
+      })
       setProgressError(error.message || 'Could not update case progress.')
     } finally {
       resolvingRef.current = false

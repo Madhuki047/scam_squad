@@ -41,7 +41,15 @@ async function request(path, { method = 'GET', body, token } = {}) {
   const data = await res.json().catch(() => ({}))
 
   if (!res.ok) {
-    throw new Error(data.message || `Request failed (${res.status})`)
+    console.error('[api] Request failed', {
+      url,
+      method,
+      status: res.status,
+      message: data.message,
+    })
+    throw new Error(
+      data.message || `Request failed (${res.status}) for ${method} ${url}`,
+    )
   }
   return data
 }
@@ -67,13 +75,13 @@ export const api = {
 
   // --- user ---
   getMe: (token) => request('/user/me', { token }),
-  getProgress: (token) => request('/user/me/progress', { token }),
+  getProgress: (token) => request('/progress', { token }),
   updateMe: (token, body) => request('/user/me', { method: 'PATCH', token, body }),
   deleteMe: (token) => request('/user/me', { method: 'DELETE', token }),
   completeCase: (token, body) =>
-    request('/user/me/complete-case', { method: 'POST', token, body }),
+    request('/progress/complete-case', { method: 'POST', token, body }),
   failAttempt: (token, body) =>
-    request('/user/me/fail-attempt', { method: 'POST', token, body }),
+    request('/progress/fail-attempt', { method: 'POST', token, body }),
   getUser: (id) => request(`/user/${id}`),
 
   // --- lives ---

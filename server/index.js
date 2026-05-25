@@ -10,6 +10,7 @@ import { connectRedis } from "./services/redisService.js";
 import { attachChatSocket } from "./services/chatSocket.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import progressRoutes from "./routes/progressRoutes.js";
 import livesRoutes from "./routes/livesRoutes.js";
 import quizRoutes from "./routes/quizRoutes.js";
 import activityRoutes from "./routes/activityRoutes.js";
@@ -33,12 +34,20 @@ app.get("/api/health", (req, res) => {
 // Feature routes.
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/progress", progressRoutes);
 app.use("/api/lives", livesRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/friends", friendsRoutes);
 app.use("/api/chat", chatRoutes);
+
+app.use("/api", (req, res) => {
+  console.warn(`[api] 404 ${req.method} ${req.originalUrl}`);
+  res.status(404).json({
+    message: `API route not found: ${req.method} ${req.originalUrl}`,
+  });
+});
 
 // Central error handler (must be registered last).
 app.use(errorHandler);
