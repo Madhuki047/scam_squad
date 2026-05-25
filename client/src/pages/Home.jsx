@@ -71,13 +71,30 @@ function AssignmentCard() {
   return (
     <Link
       to="/play"
-      className="ss-card p-8 flex flex-col items-center gap-2 text-center hover:border-sw-cyan transition-colors"
+      className="ss-card home-assignment-card hover:border-sw-cyan transition-colors"
     >
-      <span className="text-sw-text3">CURRENT ASSIGNMENT</span>
-      <span className="font-pixel text-sw-pink text-xl md:text-2xl">
-        CONTINUE CASE 01
-      </span>
-      <span className="text-sw-text2">The Bait - phishing investigation</span>
+      <div className="home-assignment-scene" aria-hidden="true">
+        <div className="home-agent-shadow">
+          <span className="home-agent-head" />
+          <span className="home-agent-coat" />
+        </div>
+        <div className="home-mission-desk">
+          <div className="home-monitor">
+            <span>CASE 01</span>
+            <strong>THE BAIT</strong>
+          </div>
+          <div className="home-keyboard" />
+        </div>
+      </div>
+
+      <div className="home-assignment-brief">
+        <span className="text-sw-text3">CURRENT ASSIGNMENT</span>
+        <span className="font-pixel text-sw-pink text-xl md:text-2xl">
+          CONTINUE CASE 01
+        </span>
+        <span className="text-sw-text2">The Bait - phishing investigation</span>
+        <span className="home-mission-chip">Open mission briefing</span>
+      </div>
     </Link>
   )
 }
