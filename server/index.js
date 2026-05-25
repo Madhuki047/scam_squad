@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import { Server as SocketIOServer } from "socket.io";
 
+import { createCorsOptions } from "./config/cors.js";
 import connectDB from "./config/db.js";
 import { connectRedis } from "./services/redisService.js";
 import { attachChatSocket } from "./services/chatSocket.js";
@@ -18,14 +19,10 @@ import chatRoutes from "./routes/chatRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
+const corsOptions = createCorsOptions();
 
 // Allow the frontend (Vite dev server) to call the API.
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    credentials: true,
-  }),
-);
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Simple health check - useful to confirm the server is running.
@@ -54,10 +51,7 @@ const PORT = process.env.PORT || 3001;
 // services/chatSocket.js.
 const httpServer = http.createServer(app);
 const io = new SocketIOServer(httpServer, {
-  cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    credentials: true,
-  },
+  cors: corsOptions,
 });
 attachChatSocket(io);
 
