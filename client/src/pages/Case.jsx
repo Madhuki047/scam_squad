@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { IconArrowRight, IconFlag, IconLock } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -131,8 +131,8 @@ function StoryScene({ step, onNext, internName, isLastStep }) {
         />
 
         <div className="pixel-desk">
-          <PixelPerson role="jane" label="JANE" />
-          <div className="desk-front">JANE - RECEPTIONIST</div>
+          <PixelPerson role="jane" label="" />
+          <div className="desk-front">RECEPTIONIST - JANE</div>
         </div>
 
         <div className={`case-bubble case-bubble-${step.speakerKey}`}>
@@ -153,6 +153,15 @@ function StoryScene({ step, onNext, internName, isLastStep }) {
 }
 
 function InboxScene({ onNext, internName }) {
+  const desktopItems = [
+    { label: 'Files', icon: 'folder' },
+    { label: 'Chat', icon: 'chat' },
+    { label: 'Mail', icon: 'mail' },
+    { label: 'Calendar', icon: 'calendar' },
+    { label: 'Security', icon: 'security' },
+    { label: 'Settings', icon: 'settings' },
+  ]
+
   return (
     <section className="case-terminal ss-card scene-transition">
       <div className="case-terminal-header">
@@ -169,16 +178,17 @@ function InboxScene({ onNext, internName }) {
       <p className="case-os-subtitle">FIRST DAY ON THE JOB - STAY SHARP.</p>
 
       <div className="case-desktop-grid">
-        {['Files', 'Chat', 'Mail', 'Calendar', 'Security', 'Settings'].map(
-          (item) => (
+        {desktopItems.map((item) => (
             <div
-              key={item}
-              className={`case-desktop-tile ${item === 'Mail' ? 'active' : ''}`}
+              key={item.label}
+              className={`case-desktop-tile ${
+                item.label === 'Mail' ? 'active' : ''
+              }`}
             >
-              {item}
+              <span className={`desktop-pixel-icon icon-${item.icon}`} />
+              <span>{item.label}</span>
             </div>
-          ),
-        )}
+          ))}
       </div>
 
       <div className="jane-message">
@@ -198,6 +208,19 @@ function InboxScene({ onNext, internName }) {
 }
 
 function EmailScene({ onClaim, onReport, internName }) {
+  const [secondsLeft, setSecondsLeft] = useState(48 * 60 * 60)
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSecondsLeft((value) => Math.max(0, value - 1))
+    }, 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  const hours = String(Math.floor(secondsLeft / 3600)).padStart(2, '0')
+  const minutes = String(Math.floor((secondsLeft % 3600) / 60)).padStart(2, '0')
+  const seconds = String(secondsLeft % 60).padStart(2, '0')
+
   return (
     <section className="case-email ss-card scene-transition">
       <div className="voucher-header">
@@ -215,7 +238,9 @@ function EmailScene({ onClaim, onReport, internName }) {
         have prepared a GBP 50 welcome voucher for you.
       </p>
       <p>Click below to claim it within 48 hours before it expires.</p>
-      <div className="voucher-countdown">EXPIRES IN: 47:17:26</div>
+      <div className="voucher-countdown">
+        EXPIRES IN: {hours}:{minutes}:{seconds}
+      </div>
       <div className="grid grid-cols-1 gap-3">
         <button type="button" className="voucher-claim-btn" onClick={onClaim}>
           Claim Your Voucher <IconArrowRight size={18} />
