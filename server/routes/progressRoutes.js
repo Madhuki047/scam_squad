@@ -2,6 +2,7 @@ import { Router } from 'express'
 import protect from '../middleware/auth.js'
 import {
   completeCase,
+  completeIntro,
   failAttempt,
   getProgress,
 } from '../controllers/progressController.js'
@@ -16,6 +17,7 @@ router.get('/ping', (req, res) => {
 })
 
 router.get('/', protect, getProgress)
+router.post('/complete-intro', protect, completeIntro)
 router.post('/complete-case', protect, completeCase)
 router.post('/fail-attempt', protect, failAttempt)
 

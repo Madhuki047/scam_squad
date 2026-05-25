@@ -164,6 +164,167 @@ html.ss-high-contrast {
 }
 
 /* ---------------------------------------------------------------------
+   Home intro transmission.
+--------------------------------------------------------------------- */
+.home-phone-card,
+.home-verify-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.home-phone-scene {
+  position: relative;
+  min-height: 18rem;
+  overflow: hidden;
+  border: 1.5px solid var(--line2);
+  border-radius: 0.5rem;
+  background:
+    linear-gradient(rgba(93, 213, 232, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 78, 201, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 65% 20%, rgba(255, 217, 61, 0.14), transparent 28%),
+    linear-gradient(180deg, #17002d, #28004d 55%, #110021);
+  background-size:
+    28px 28px,
+    28px 28px,
+    auto,
+    auto;
+}
+
+.home-phone {
+  position: absolute;
+  left: 50%;
+  bottom: 2rem;
+  width: 11rem;
+  height: 8rem;
+  transform: translateX(-50%);
+  animation: phone-ring 900ms steps(2) infinite;
+}
+
+.home-phone-answered {
+  animation: none;
+}
+
+.home-phone-receiver {
+  position: absolute;
+  left: 0.7rem;
+  top: 0;
+  z-index: 2;
+  width: 9.6rem;
+  height: 2rem;
+  border: 3px solid #12001f;
+  border-radius: 1.4rem 1.4rem 0.55rem 0.55rem;
+  background: var(--pink);
+  box-shadow: 0.3rem 0.3rem 0 rgba(0, 0, 0, 0.35);
+  transition:
+    transform 180ms steps(3),
+    background 180ms ease;
+}
+
+.home-phone-answered .home-phone-receiver {
+  transform: translate(-1.6rem, -2.2rem) rotate(-18deg);
+  background: var(--cyan);
+}
+
+.home-phone-body {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 9rem;
+  height: 6.5rem;
+  transform: translateX(-50%);
+  border: 3px solid #12001f;
+  border-radius: 0.8rem 0.8rem 0.45rem 0.45rem;
+  background: linear-gradient(180deg, var(--pink-soft), var(--pink));
+  box-shadow:
+    0.35rem 0.35rem 0 rgba(0, 0, 0, 0.35),
+    0 0 1rem rgba(255, 78, 201, 0.35);
+}
+
+.home-phone-dial {
+  position: absolute;
+  left: 50%;
+  top: 1.25rem;
+  display: grid;
+  width: 4.6rem;
+  height: 4.1rem;
+  transform: translateX(-50%);
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.32rem;
+}
+
+.home-phone-dial span {
+  border: 2px solid #12001f;
+  border-radius: 50%;
+  background: rgba(255, 217, 61, 0.9);
+}
+
+.home-phone-cord {
+  position: absolute;
+  right: 0.7rem;
+  bottom: -1.35rem;
+  width: 3.5rem;
+  height: 2rem;
+  border-right: 3px solid var(--cyan);
+  border-bottom: 3px solid var(--cyan);
+  border-radius: 0 0 2rem 0;
+}
+
+.home-phone-bubble {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  top: 1rem;
+  max-width: 33rem;
+  border: 1.5px solid var(--line2);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: rgba(13, 0, 30, 0.92);
+  box-shadow: 0.25rem 0.25rem 0 rgba(255, 78, 201, 0.18);
+}
+
+.home-phone-bubble::after {
+  content: '';
+  position: absolute;
+  left: 45%;
+  bottom: -0.55rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  rotate: 45deg;
+  border-right: 1.5px solid var(--line2);
+  border-bottom: 1.5px solid var(--line2);
+  background: rgba(13, 0, 30, 0.92);
+}
+
+.home-phone-bubble p,
+.home-verify-card p {
+  margin: 0.35rem 0 0;
+  color: var(--text2);
+}
+
+.home-verify-card h3 {
+  margin: 0;
+  color: var(--pink);
+  font-family: var(--mono);
+  font-size: 1.75rem;
+  text-transform: uppercase;
+}
+
+@keyframes phone-ring {
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(0);
+  }
+  25% {
+    transform: translateX(-50%) rotate(-3deg);
+  }
+  75% {
+    transform: translateX(-50%) rotate(3deg);
+  }
+}
+
+/* ---------------------------------------------------------------------
    Case files and Case 01 story mission.
 --------------------------------------------------------------------- */
 .case-diff-btn {

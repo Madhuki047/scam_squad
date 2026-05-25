@@ -76,6 +76,8 @@ export const api = {
   // --- user ---
   getMe: (token) => request('/user/me', { token }),
   getProgress: (token) => request('/progress', { token }),
+  completeIntro: (token) =>
+    request('/progress/complete-intro', { method: 'POST', token }),
   updateMe: (token, body) => request('/user/me', { method: 'PATCH', token, body }),
   deleteMe: (token) => request('/user/me', { method: 'DELETE', token }),
   completeCase: (token, body) =>
