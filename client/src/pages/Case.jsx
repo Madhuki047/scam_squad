@@ -1,33 +1,49 @@
 import { useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import {
-  IconAlertTriangle,
-  IconArrowRight,
-  IconFlag,
-  IconLock,
-} from '@tabler/icons-react'
+import { IconArrowRight, IconFlag, IconLock } from '@tabler/icons-react'
+import { useAuth } from '../context/AuthContext.jsx'
 import { completeCaseMode, isCaseUnlocked } from '../lib/caseProgress.js'
 
 const INTRO_STEPS = [
   {
     label: 'UNIT ZERO HQ - RECEPTION',
-    time: 'DAY 01 / 09:02',
+    time: 'DAY 1 - 08:42',
     speaker: 'Jane',
-    bubble: 'Welcome to Unit Zero, intern. Agent Zoey is waiting upstairs.',
+    speakerKey: 'jane',
+    bubble: 'Morning. Visitor ID, please. Unit Zero does not do mystery guests.',
     intern: 'left',
   },
   {
     label: 'UNIT ZERO HQ - RECEPTION',
-    time: 'DAY 01 / 09:04',
+    time: 'DAY 1 - 08:43',
     speaker: 'Intern',
-    bubble: 'First shift. No pressure. Where do I report in?',
+    speakerKey: 'intern',
+    bubble: 'There you go. I was told to report for my first shift today.',
     intern: 'center',
   },
   {
     label: 'UNIT ZERO HQ - RECEPTION',
-    time: 'DAY 01 / 09:05',
+    time: 'DAY 1 - 08:44',
     speaker: 'Jane',
-    bubble: 'Workstation 7. Check your inbox before the morning briefing.',
+    speakerKey: 'jane',
+    bubble:
+      'Oh, you must be the new intern. Congratulations. Room S109 is down the hall.',
+    intern: 'center',
+  },
+  {
+    label: 'UNIT ZERO HQ - RECEPTION',
+    time: 'DAY 1 - 08:45',
+    speaker: 'Jane',
+    speakerKey: 'jane',
+    bubble: 'Log into your workstation and read the welcome notes before briefing.',
+    intern: 'right',
+  },
+  {
+    label: 'UNIT ZERO HQ - RECEPTION',
+    time: 'DAY 1 - 08:46',
+    speaker: 'Intern',
+    speakerKey: 'intern',
+    bubble: 'Thanks, Jane. I will head to S109 now.',
     intern: 'right',
   },
 ]
@@ -51,31 +67,76 @@ const RED_FLAGS = [
   },
 ]
 
-function StoryScene({ step, onNext }) {
+function PixelPerson({ role, label, position = '' }) {
   return (
-    <section className="case-scene">
+    <div className={`pixel-person pixel-${role} ${position}`}>
+      <div className="pixel-hair" />
+      <div className="pixel-head">
+        <span className="pixel-eye pixel-eye-left" />
+        <span className="pixel-eye pixel-eye-right" />
+        <span className="pixel-mouth" />
+      </div>
+      <div className="pixel-torso">
+        <span className="pixel-arm pixel-arm-left" />
+        <span className="pixel-badge" />
+        <span className="pixel-arm pixel-arm-right" />
+      </div>
+      <div className="pixel-feet">
+        <span />
+        <span />
+      </div>
+      <div className="pixel-name">{label}</div>
+    </div>
+  )
+}
+
+function StoryScene({ step, onNext, internName, isLastStep }) {
+  const speakerName = step.speakerKey === 'intern' ? internName : step.speaker
+
+  return (
+    <section className="case-scene scene-transition">
       <div className="case-scene-top">
         <span>{step.label}</span>
         <span>{step.time}</span>
       </div>
 
       <div className="case-office">
-        <div className={`pixel-intern pixel-intern-${step.intern}`}>
-          <div className="pixel-head" />
-          <div className="pixel-body" />
-          <div className="pixel-legs" />
+        <div className="case-window case-window-left">
+          <span />
+          <span />
+          <span />
+          <span />
         </div>
+        <div className="case-window case-window-right">
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="unit-poster unit-poster-left">
+          UNIT ZERO
+          <br />
+          CYBER UNIT
+        </div>
+        <div className="unit-poster unit-poster-right">
+          UNIT ZERO
+          <br />
+          CYBER UNIT
+        </div>
+
+        <PixelPerson
+          role="intern"
+          label={`${internName} - YOU`}
+          position={`pixel-intern-${step.intern}`}
+        />
 
         <div className="pixel-desk">
-          <div className="pixel-receptionist">
-            <div className="pixel-head" />
-            <div className="pixel-body" />
-          </div>
-          <div className="desk-front">JANE</div>
+          <PixelPerson role="jane" label="JANE" />
+          <div className="desk-front">JANE - RECEPTIONIST</div>
         </div>
 
-        <div className="case-bubble">
-          <span className="text-sw-yellow">{step.speaker}</span>
+        <div className={`case-bubble case-bubble-${step.speakerKey}`}>
+          <span className="text-sw-yellow">{speakerName}</span>
           <p>{step.bubble}</p>
         </div>
       </div>
@@ -85,27 +146,49 @@ function StoryScene({ step, onNext }) {
         className="ss-btn ss-btn-cyan self-end"
         onClick={onNext}
       >
-        Next <IconArrowRight size={16} />
+        {isLastStep ? 'Enter Office' : 'Next'} <IconArrowRight size={16} />
       </button>
     </section>
   )
 }
 
-function InboxScene({ onNext }) {
+function InboxScene({ onNext, internName }) {
   return (
-    <section className="case-terminal ss-card">
+    <section className="case-terminal ss-card scene-transition">
       <div className="case-terminal-header">
-        <span>WORKSTATION 7 - INBOX</span>
-        <span>3 NEW</span>
+        <span>ROOM S109 - YOUR WORKSTATION</span>
+        <span>DAY 1 - 08:52</span>
       </div>
-      <div className="case-inbox-row muted">
-        IT Helpdesk - Password rotation reminder
+
+      <div className="case-os-bar">
+        <span>UNIT ZERO OS v4.2</span>
+        <span>{internName.toLowerCase()}@unitzero.gov - DESKTOP</span>
       </div>
+
+      <h2 className="case-os-welcome">WELCOME, {internName.toUpperCase()}</h2>
+      <p className="case-os-subtitle">FIRST DAY ON THE JOB - STAY SHARP.</p>
+
+      <div className="case-desktop-grid">
+        {['Files', 'Chat', 'Mail', 'Calendar', 'Security', 'Settings'].map(
+          (item) => (
+            <div
+              key={item}
+              className={`case-desktop-tile ${item === 'Mail' ? 'active' : ''}`}
+            >
+              {item}
+            </div>
+          ),
+        )}
+      </div>
+
+      <div className="jane-message">
+        <strong>Jane (message):</strong> Welcome to Unit Zero. Stay sharp -
+        nothing here is what it looks like.
+      </div>
+
+      <div className="case-inbox-label">INBOX (1 NEW)</div>
       <div className="case-inbox-row active">
-        HR Rewards - URGENT: Claim your staff voucher
-      </div>
-      <div className="case-inbox-row muted">
-        Agent Zoey - Morning briefing at 10
+        YOUR WELCOME GIFT VOUCHER - CLAIM BEFORE FRIDAY!
       </div>
       <button type="button" className="ss-btn ss-btn-cyan mt-4" onClick={onNext}>
         Open Email
@@ -114,26 +197,35 @@ function InboxScene({ onNext }) {
   )
 }
 
-function EmailScene({ onClaim, onReport }) {
+function EmailScene({ onClaim, onReport, internName }) {
   return (
-    <section className="case-email ss-card">
-      <div className="text-sw-text3">
-        From: HR Rewards &lt;bonus@hr-rewards-unitzero.com&gt;
+    <section className="case-email ss-card scene-transition">
+      <div className="voucher-header">
+        YOUR WELCOME GIFT VOUCHER - CLAIM BEFORE FRIDAY!
       </div>
-      <h2 className="font-pixel text-sw-pink text-sm">
-        URGENT: Claim your Unit Zero voucher
-      </h2>
+      <div className="email-meta">
+        <span>From:</span> hr-welcomedesk@unit-zero-benefits.cm
+      </div>
+      <div className="email-meta">
+        <span>To:</span> {internName.toLowerCase()}@unitzero.gov
+      </div>
+      <div className="fake-hr-stamp">UNIT ZERO HR</div>
       <p>
-        Interns who verify their details in the next 2 hours receive a 200
-        credit welcome voucher. Click below before your reward expires.
+        Congratulations on joining Unit Zero. As a token of appreciation, we
+        have prepared a GBP 50 welcome voucher for you.
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <button type="button" className="ss-btn ss-btn-pink" onClick={onClaim}>
-          Claim voucher
+      <p>Click below to claim it within 48 hours before it expires.</p>
+      <div className="voucher-countdown">EXPIRES IN: 47:17:26</div>
+      <div className="grid grid-cols-1 gap-3">
+        <button type="button" className="voucher-claim-btn" onClick={onClaim}>
+          Claim Your Voucher <IconArrowRight size={18} />
         </button>
-        <button type="button" className="ss-btn ss-btn-cyan" onClick={onReport}>
+        <button type="button" className="voucher-report-btn" onClick={onReport}>
           Report to supervisor
         </button>
+      </div>
+      <div className="case-choice-hint">
+        Choose: click the voucher or report it
       </div>
     </section>
   )
@@ -185,8 +277,10 @@ function GlitchScreen({ onNext }) {
 function ZoeyBrief({ outcome, onNext }) {
   const isBreach = outcome === 'claim'
   return (
-    <section className="case-zoey ss-card">
-      <div className="agent-avatar">Z</div>
+    <section className="case-zoey ss-card scene-transition">
+      <div className="agent-avatar">
+        <PixelPerson role="zoey" label="AGENT ZOEY" />
+      </div>
       <div>
         <h2 className="font-pixel text-sw-cyan text-sm">Agent Zoey</h2>
         <p>
@@ -362,12 +456,14 @@ function FutureCase({ caseId }) {
 
 export default function Case() {
   const { caseId, difficulty = 'rookie' } = useParams()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const numericCaseId = Number(caseId)
   const [phase, setPhase] = useState('intro')
   const [stepIndex, setStepIndex] = useState(0)
   const [outcome, setOutcome] = useState(null)
   const [badge, setBadge] = useState(null)
+  const internName = user?.username || 'Nova'
 
   if (!['rookie', 'veteran'].includes(difficulty)) {
     return <Navigate to={`/case/${caseId}/rookie`} replace />
@@ -408,18 +504,22 @@ export default function Case() {
             The Bait
           </h2>
         </div>
-        <div className="case-threat">
-          <IconAlertTriangle size={18} />
-          Phishing Drill
-        </div>
       </div>
 
       {phase === 'intro' && (
-        <StoryScene step={INTRO_STEPS[stepIndex]} onNext={nextIntro} />
+        <StoryScene
+          step={INTRO_STEPS[stepIndex]}
+          onNext={nextIntro}
+          internName={internName}
+          isLastStep={stepIndex === INTRO_STEPS.length - 1}
+        />
       )}
-      {phase === 'inbox' && <InboxScene onNext={() => setPhase('email')} />}
+      {phase === 'inbox' && (
+        <InboxScene onNext={() => setPhase('email')} internName={internName} />
+      )}
       {phase === 'email' && (
         <EmailScene
+          internName={internName}
           onClaim={() => setPhase('glitch')}
           onReport={() => {
             setOutcome('report')
