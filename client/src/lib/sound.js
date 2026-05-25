@@ -4,8 +4,8 @@ const VOLUME = {
   hover: 0.025,
   click: 0.04,
   pickup: 0.07,
-  phoneRing: 0.032,
-  missionBriefing: 0.055,
+  phoneRing: 0.078,
+  missionBriefing: 0.095,
   correct: 0.07,
   wrong: 0.07,
   lifeLost: 0.065,
@@ -20,6 +20,7 @@ let muted = readMuted()
 let unlocked = false
 const loops = new Map()
 const groupedSources = new Map()
+const lastPlayedAt = new Map()
 
 function readMuted() {
   try {
@@ -96,6 +97,35 @@ function tone(
   osc.stop(start + duration + 0.02)
 }
 
+function sweepTone(
+  fromFreq,
+  toFreq,
+  duration = 0.18,
+  volume = 0.06,
+  type = 'sine',
+  delay = 0,
+  group = null,
+) {
+  const ctx = getContext()
+  if (!ctx || !unlocked) return
+
+  const start = ctx.currentTime + delay
+  const osc = ctx.createOscillator()
+  const gain = gainNode(ctx, volume)
+
+  osc.type = type
+  osc.frequency.setValueAtTime(fromFreq, start)
+  osc.frequency.exponentialRampToValueAtTime(toFreq, start + duration)
+  gain.gain.setValueAtTime(0.0001, start)
+  gain.gain.exponentialRampToValueAtTime(volume, start + 0.018)
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration)
+
+  osc.connect(gain)
+  rememberSource(group, osc)
+  osc.start(start)
+  osc.stop(start + duration + 0.02)
+}
+
 function noise(duration = 0.05, volume = 0.04) {
   const ctx = getContext()
   if (!ctx || !unlocked) return
@@ -113,14 +143,15 @@ function noise(duration = 0.05, volume = 0.04) {
 }
 
 function vintagePhoneRing() {
-  const burst = [0, 0.065, 0.13, 0.195, 0.26, 0.325]
+  const burst = [0, 0.06, 0.12, 0.18, 0.24, 0.3]
   burst.forEach((delay, index) => {
-    const freq = index % 2 === 0 ? 690 : 610
-    tone(freq, 0.052, VOLUME.phoneRing, 'square', delay, 'phoneRing')
+    const freq = index % 2 === 0 ? 720 : 610
+    tone(freq, 0.07, VOLUME.phoneRing, 'square', delay, 'phoneRing')
+    tone(235, 0.09, VOLUME.phoneRing * 0.52, 'sine', delay, 'phoneRing')
     tone(
       freq * 1.5,
-      0.045,
-      VOLUME.phoneRing * 0.45,
+      0.055,
+      VOLUME.phoneRing * 0.32,
       'sine',
       delay + 0.006,
       'phoneRing',
@@ -129,24 +160,50 @@ function vintagePhoneRing() {
 
   const secondBurstOffset = 0.55
   burst.forEach((delay, index) => {
-    const freq = index % 2 === 0 ? 675 : 595
+    const freq = index % 2 === 0 ? 700 : 590
     tone(
       freq,
-      0.052,
+      0.07,
       VOLUME.phoneRing,
       'square',
       secondBurstOffset + delay,
       'phoneRing',
     )
     tone(
+      220,
+      0.09,
+      VOLUME.phoneRing * 0.52,
+      'sine',
+      secondBurstOffset + delay,
+      'phoneRing',
+    )
+    tone(
       freq * 1.5,
-      0.045,
-      VOLUME.phoneRing * 0.45,
+      0.055,
+      VOLUME.phoneRing * 0.32,
       'sine',
       secondBurstOffset + delay + 0.006,
       'phoneRing',
     )
   })
+}
+
+function missionBriefingCue() {
+  noise(0.05, VOLUME.missionBriefing * 0.42)
+  sweepTone(95, 155, 0.34, VOLUME.missionBriefing * 0.82, 'sine')
+  tone(280, 0.13, VOLUME.missionBriefing * 0.78, 'triangle', 0.025)
+  tone(510, 0.11, VOLUME.missionBriefing, 'triangle', 0.11)
+  tone(760, 0.14, VOLUME.missionBriefing * 0.82, 'sine', 0.21)
+  tone(1160, 0.11, VOLUME.missionBriefing * 0.55, 'triangle', 0.32)
+  sweepTone(1480, 620, 0.22, VOLUME.missionBriefing * 0.32, 'sine', 0.08)
+}
+
+function recentlyPlayed(name, cooldownMs) {
+  const now = Date.now()
+  const previous = lastPlayedAt.get(name) || 0
+  if (now - previous < cooldownMs) return true
+  lastPlayedAt.set(name, now)
+  return false
 }
 
 export async function unlockAudio() {
@@ -185,10 +242,7 @@ export function playSfx(name) {
       vintagePhoneRing()
       break
     case 'missionBriefing':
-      tone(420, 0.06, VOLUME.missionBriefing, 'triangle')
-      tone(640, 0.08, VOLUME.missionBriefing * 0.8, 'sine', 0.055)
-      tone(980, 0.1, VOLUME.missionBriefing * 0.65, 'triangle', 0.13)
-      noise(0.035, VOLUME.missionBriefing * 0.35)
+      if (!recentlyPlayed('missionBriefing', 900)) missionBriefingCue()
       break
     case 'correct':
       tone(540, 0.07, VOLUME.correct, 'triangle')
