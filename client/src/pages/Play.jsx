@@ -49,8 +49,6 @@ export default function Play() {
   const progress = getCaseProgress(user)
   const completedCount = CASES.filter((c) => isCaseComplete(user, c.id)).length
   const hasLives = (user?.livesRemaining ?? 0) > 0
-  const earnedBadgeIds = new Set((user?.badges || []).map((badge) => badge.id))
-  const badgeCount = Math.max(earnedBadgeIds.size, progress.badges.length)
 
   function openCase(caseId, difficulty) {
     if (!hasLives) return
@@ -139,7 +137,7 @@ export default function Play() {
         Case progress:{' '}
         <span className="text-sw-cyan">{completedCount} / {CASES.length}</span>
         {' '}files cleared - Badges:{' '}
-        <span className="text-sw-yellow">{badgeCount}</span>
+        <span className="text-sw-yellow">{progress.badges.length}</span>
       </p>
     </div>
   )

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
 import { BADGE_CATALOG } from '../lib/badges.js'
-import { getCaseProgress } from '../lib/caseProgress.js'
 
 function relativeTime(iso) {
   const diff = Date.now() - new Date(iso).getTime()
@@ -42,12 +41,7 @@ export default function Profile() {
 
   if (!user) return null
 
-  const localBadges = getCaseProgress(user).badges
   const earned = new Set((user.badges || []).map((b) => b.id))
-  for (const badgeName of localBadges) {
-    const match = BADGE_CATALOG.find((badge) => badge.name === badgeName)
-    if (match) earned.add(match.id)
-  }
 
   const level = user.level || 1
   const coins = user.points ?? user.totalScore ?? 0

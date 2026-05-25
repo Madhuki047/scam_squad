@@ -67,10 +67,13 @@ export const api = {
 
   // --- user ---
   getMe: (token) => request('/user/me', { token }),
+  getProgress: (token) => request('/user/me/progress', { token }),
   updateMe: (token, body) => request('/user/me', { method: 'PATCH', token, body }),
   deleteMe: (token) => request('/user/me', { method: 'DELETE', token }),
   completeCase: (token, body) =>
     request('/user/me/complete-case', { method: 'POST', token, body }),
+  failAttempt: (token, body) =>
+    request('/user/me/fail-attempt', { method: 'POST', token, body }),
   getUser: (id) => request(`/user/${id}`),
 
   // --- lives ---

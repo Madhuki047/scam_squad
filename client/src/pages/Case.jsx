@@ -1,15 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { IconArrowRight, IconFlag, IconLock } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext.jsx'
-import {
-  completeCaseMode,
-  isCaseModeComplete,
-  isCaseUnlocked,
-} from '../lib/caseProgress.js'
+import { isCaseUnlocked } from '../lib/caseProgress.js'
 import { api } from '../lib/api.js'
 import { BADGES } from '../lib/badges.js'
-import { pointsForDifficulty } from '../lib/gameRules.js'
 
 const INTRO_STEPS = [
   {
@@ -334,7 +329,6 @@ function ZoeyBrief({ outcome, onNext }) {
 
 function Debrief({ outcome, onReplay, onContinue, busy }) {
   const isBreach = outcome === 'claim'
-  const badge = isBreach ? 'Hooked Once' : 'Sharp Eyes'
 
   return (
     <section className="case-debrief">
@@ -370,10 +364,12 @@ function Debrief({ outcome, onReplay, onContinue, busy }) {
           over the keys."
         </blockquote>
 
-        <div className="badge-card">
-          <span>Badge unlocked</span>
-          <strong>{badge.toUpperCase()}</strong>
-        </div>
+        {!isBreach && (
+          <div className="badge-card">
+            <span>Badge unlocked</span>
+            <strong>SHARP EYES</strong>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-3">
           <button
@@ -438,35 +434,7 @@ function EndScreen({ badge, pointsAwarded, onReturn, onVeteran }) {
 }
 
 function VeteranPlaceholder() {
-  const { user, token, setUser } = useAuth()
   const navigate = useNavigate()
-
-  async function returnToFiles() {
-    const wasComplete = isCaseModeComplete(user, 1, 'veteran')
-    const pointsAwarded = pointsForDifficulty('veteran')
-    completeCaseMode(user, 1, 'veteran', null, pointsAwarded)
-    if (token) {
-      try {
-        const data = await api.completeCase(token, {
-          caseId: 1,
-          difficulty: 'veteran',
-        })
-        setUser(data.user)
-      } catch {
-        setUser((current) =>
-          current
-            ? {
-                ...current,
-                points: (current.points ?? 0) + (wasComplete ? 0 : pointsAwarded),
-                totalScore:
-                  (current.totalScore ?? 0) + (wasComplete ? 0 : pointsAwarded),
-              }
-            : current,
-        )
-      }
-    }
-    navigate('/play')
-  }
 
   return (
     <section className="ss-card p-6 flex flex-col gap-4 max-w-3xl mx-auto">
@@ -480,7 +448,7 @@ function VeteranPlaceholder() {
       <button
         type="button"
         className="ss-btn ss-btn-cyan self-start"
-        onClick={returnToFiles}
+        onClick={() => navigate('/play')}
       >
         Return to Case Files
       </button>
@@ -560,6 +528,8 @@ export default function Case() {
   const [pointsAwarded, setPointsAwarded] = useState(0)
   const [sceneExiting, setSceneExiting] = useState(false)
   const [resolvingDebrief, setResolvingDebrief] = useState(false)
+  const [progressError, setProgressError] = useState('')
+  const resolvingRef = useRef(false)
   const internName = user?.username || 'Nova'
   const hasLives = (user?.livesRemaining ?? 0) > 0
 
@@ -585,29 +555,13 @@ export default function Case() {
   }
 
   async function spendFailureLife() {
-    if (token) {
-      try {
-        const data = await api.useLife(token)
-        setUser((current) =>
-          current
-            ? {
-                ...current,
-                livesRemaining: data.livesRemaining,
-                lastLifeRegen: data.lastLifeRegen,
-              }
-            : current,
-        )
-      } catch {
-        setUser((current) =>
-          current
-            ? {
-                ...current,
-                livesRemaining: Math.max(0, (current.livesRemaining ?? 0) - 1),
-              }
-            : current,
-        )
-      }
-    }
+    if (!token) throw new Error('You need to be signed in to update progress.')
+    const data = await api.failAttempt(token, {
+      caseId: numericCaseId,
+      difficulty,
+    })
+    setUser(data.user)
+    return data
   }
 
   async function handleClaimVoucher() {
@@ -622,78 +576,73 @@ export default function Case() {
     setPointsAwarded(0)
     setSceneExiting(false)
     setResolvingDebrief(false)
+    setProgressError('')
+    resolvingRef.current = false
   }
 
   async function finishFailedAttempt(nextAction) {
-    if (resolvingDebrief) return
+    if (resolvingRef.current) return
+    resolvingRef.current = true
     setResolvingDebrief(true)
-    await spendFailureLife()
-    if (nextAction === 'replay') {
-      restart()
-      return
+    setProgressError('')
+    try {
+      await spendFailureLife()
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      navigate('/play')
+    } catch (error) {
+      setProgressError(error.message || 'Could not update lives.')
+      resolvingRef.current = false
+      setResolvingDebrief(false)
     }
-    navigate('/play')
   }
 
   async function awardRookieCompletion() {
-    const unlockedBadge =
-      outcome === 'claim' ? BADGES.hookedOnce : BADGES.sharpEyes
-    const wasComplete = isCaseModeComplete(user, 1, 'rookie')
-    const reward = pointsForDifficulty('rookie')
-    completeCaseMode(user, 1, 'rookie', unlockedBadge, reward)
+    const unlockedBadge = BADGES.sharpEyes
     setBadge(unlockedBadge)
-    setPointsAwarded(wasComplete ? 0 : reward)
-    if (token) {
-      try {
-        const data = await api.completeCase(token, {
-          caseId: 1,
-          difficulty: 'rookie',
-          badge: unlockedBadge,
-        })
-        setUser(data.user)
-        setPointsAwarded(data.pointsAwarded)
-      } catch {
-        setUser((current) =>
-          current
-            ? (() => {
-                const badges = current.badges || []
-                const hasBadge = badges.some((entry) => entry.id === unlockedBadge.id)
-                return {
-                  ...current,
-                  points: (current.points ?? 0) + (wasComplete ? 0 : reward),
-                  totalScore:
-                    (current.totalScore ?? 0) + (wasComplete ? 0 : reward),
-                  badges: hasBadge
-                    ? badges
-                    : [
-                        ...badges,
-                        {
-                          id: unlockedBadge.id,
-                          earnedAt: new Date().toISOString(),
-                        },
-                      ],
-                }
-              })()
-            : current,
-        )
-      }
-    }
-    return { unlockedBadge, awarded: wasComplete ? 0 : reward }
+    if (!token) throw new Error('You need to be signed in to update progress.')
+    const data = await api.completeCase(token, {
+      caseId: 1,
+      difficulty: 'rookie',
+      result: 'success',
+      badge: unlockedBadge,
+    })
+    setUser(data.user)
+    setPointsAwarded(data.pointsAwarded)
+    return { unlockedBadge, awarded: data.pointsAwarded }
   }
 
   async function replayAfterSuccess() {
-    if (resolvingDebrief) return
+    if (resolvingRef.current) return
+    resolvingRef.current = true
     setResolvingDebrief(true)
-    await awardRookieCompletion()
-    restart()
+    setProgressError('')
+    try {
+      await awardRookieCompletion()
+      restart()
+    } catch (error) {
+      setProgressError(error.message || 'Could not update case progress.')
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
   }
 
   async function finishRookie() {
-    if (resolvingDebrief) return
+    if (resolvingRef.current) return
+    resolvingRef.current = true
     setResolvingDebrief(true)
-    await awardRookieCompletion()
-    setPhase('end')
-    setResolvingDebrief(false)
+    setProgressError('')
+    try {
+      await awardRookieCompletion()
+      setPhase('end')
+    } catch (error) {
+      setProgressError(error.message || 'Could not update case progress.')
+    } finally {
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
   }
 
   return (
@@ -706,6 +655,9 @@ export default function Case() {
           </h2>
         </div>
       </div>
+      {progressError && (
+        <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
+      )}
 
       {phase === 'intro' && (
         <StoryScene
