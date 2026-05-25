@@ -40,7 +40,7 @@ export default function Profile() {
 
   if (!user) return null
 
-  const localBadges = getCaseProgress().badges
+  const localBadges = getCaseProgress(user).badges
   const earned = new Set((user.badges || []).map((b) => b.id))
   for (const badgeName of localBadges) {
     const match = BADGE_CATALOG.find((badge) => badge.name === badgeName)

@@ -46,9 +46,11 @@ const DIFFICULTIES = ['rookie', 'veteran']
 export default function Play() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const progress = getCaseProgress()
-  const completedCount = CASES.filter((c) => isCaseComplete(c.id)).length
+  const progress = getCaseProgress(user)
+  const completedCount = CASES.filter((c) => isCaseComplete(user, c.id)).length
   const hasLives = (user?.livesRemaining ?? 0) > 0
+  const earnedBadgeIds = new Set((user?.badges || []).map((badge) => badge.id))
+  const badgeCount = Math.max(earnedBadgeIds.size, progress.badges.length)
 
   function openCase(caseId, difficulty) {
     if (!hasLives) return
@@ -71,8 +73,8 @@ export default function Play() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {CASES.map((c) => {
-          const locked = !isCaseUnlocked(c.id)
-          const complete = isCaseComplete(c.id)
+          const locked = !isCaseUnlocked(user, c.id)
+          const complete = isCaseComplete(user, c.id)
           return (
             <article
               key={c.id}
@@ -107,7 +109,7 @@ export default function Play() {
                 aria-label={`Case 0${c.id} difficulty`}
               >
                 {DIFFICULTIES.map((difficulty) => {
-                  const done = isCaseModeComplete(c.id, difficulty)
+                  const done = isCaseModeComplete(user, c.id, difficulty)
                   return (
                     <button
                       key={difficulty}
@@ -137,7 +139,7 @@ export default function Play() {
         Case progress:{' '}
         <span className="text-sw-cyan">{completedCount} / {CASES.length}</span>
         {' '}files cleared - Badges:{' '}
-        <span className="text-sw-yellow">{progress.badges.length}</span>
+        <span className="text-sw-yellow">{badgeCount}</span>
       </p>
     </div>
   )

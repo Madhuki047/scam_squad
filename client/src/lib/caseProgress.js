@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'ss_case_progress'
+const STORAGE_PREFIX = 'ss_case_progress'
 
 const INITIAL_PROGRESS = {
   completed: {},
@@ -6,17 +6,26 @@ const INITIAL_PROGRESS = {
   points: 0,
 }
 
-function readProgress() {
+function userKey(user) {
+  if (!user) return 'anonymous'
+  return user._id || user.id || user.username || 'anonymous'
+}
+
+function storageKey(user) {
+  return `${STORAGE_PREFIX}:${userKey(user)}`
+}
+
+function readProgress(user) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? { ...INITIAL_PROGRESS, ...JSON.parse(raw) } : INITIAL_PROGRESS
+    const raw = localStorage.getItem(storageKey(user))
+    return raw ? { ...INITIAL_PROGRESS, ...JSON.parse(raw) } : { ...INITIAL_PROGRESS }
   } catch {
-    return INITIAL_PROGRESS
+    return { ...INITIAL_PROGRESS }
   }
 }
 
-function writeProgress(progress) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
+function writeProgress(user, progress) {
+  localStorage.setItem(storageKey(user), JSON.stringify(progress))
   return progress
 }
 
@@ -24,34 +33,47 @@ function caseKey(caseId, difficulty) {
   return `case-${caseId}-${difficulty}`
 }
 
-export function getCaseProgress() {
-  return readProgress()
-}
-
-export function isCaseModeComplete(caseId, difficulty) {
-  return Boolean(readProgress().completed[caseKey(caseId, difficulty)])
-}
-
-export function isCaseComplete(caseId) {
-  return (
-    isCaseModeComplete(caseId, 'rookie') ||
-    isCaseModeComplete(caseId, 'veteran')
+function backendCaseComplete(user, caseId, difficulty) {
+  return Boolean(
+    user?.completedCases?.some(
+      (entry) =>
+        Number(entry.caseId) === Number(caseId) &&
+        entry.difficulty === difficulty,
+    ),
   )
 }
 
-export function isCaseUnlocked(caseId) {
-  if (caseId === 1) return true
-  return isCaseComplete(caseId - 1)
+export function getCaseProgress(user) {
+  return readProgress(user)
 }
 
-export function completeCaseMode(caseId, difficulty, badge, pointsAwarded = 0) {
-  const progress = readProgress()
+export function isCaseModeComplete(user, caseId, difficulty) {
+  return (
+    backendCaseComplete(user, caseId, difficulty) ||
+    Boolean(readProgress(user).completed[caseKey(caseId, difficulty)])
+  )
+}
+
+export function isCaseComplete(user, caseId) {
+  return (
+    isCaseModeComplete(user, caseId, 'rookie') ||
+    isCaseModeComplete(user, caseId, 'veteran')
+  )
+}
+
+export function isCaseUnlocked(user, caseId) {
+  if (caseId === 1) return true
+  return isCaseComplete(user, caseId - 1)
+}
+
+export function completeCaseMode(user, caseId, difficulty, badge, pointsAwarded = 0) {
+  const progress = readProgress(user)
   const nextBadges = new Set(progress.badges)
   const badgeName = typeof badge === 'string' ? badge : badge?.name
   if (badgeName) nextBadges.add(badgeName)
-  const alreadyComplete = Boolean(progress.completed[caseKey(caseId, difficulty)])
+  const alreadyComplete = isCaseModeComplete(user, caseId, difficulty)
 
-  return writeProgress({
+  return writeProgress(user, {
     ...progress,
     completed: {
       ...progress.completed,

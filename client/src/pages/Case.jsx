@@ -438,13 +438,13 @@ function EndScreen({ badge, pointsAwarded, onReturn, onVeteran }) {
 }
 
 function VeteranPlaceholder() {
-  const { token, setUser } = useAuth()
+  const { user, token, setUser } = useAuth()
   const navigate = useNavigate()
 
   async function returnToFiles() {
-    const wasComplete = isCaseModeComplete(1, 'veteran')
+    const wasComplete = isCaseModeComplete(user, 1, 'veteran')
     const pointsAwarded = pointsForDifficulty('veteran')
-    completeCaseMode(1, 'veteran', null, pointsAwarded)
+    completeCaseMode(user, 1, 'veteran', null, pointsAwarded)
     if (token) {
       try {
         const data = await api.completeCase(token, {
@@ -568,7 +568,7 @@ export default function Case() {
   }
 
   if (!hasLives) return <NoLivesCase />
-  if (!isCaseUnlocked(numericCaseId)) return <LockedCase />
+  if (!isCaseUnlocked(user, numericCaseId)) return <LockedCase />
   if (numericCaseId !== 1) return <FutureCase caseId={numericCaseId} />
   if (difficulty === 'veteran') return <VeteranPlaceholder />
 
@@ -638,9 +638,9 @@ export default function Case() {
   async function awardRookieCompletion() {
     const unlockedBadge =
       outcome === 'claim' ? BADGES.hookedOnce : BADGES.sharpEyes
-    const wasComplete = isCaseModeComplete(1, 'rookie')
+    const wasComplete = isCaseModeComplete(user, 1, 'rookie')
     const reward = pointsForDifficulty('rookie')
-    completeCaseMode(1, 'rookie', unlockedBadge, reward)
+    completeCaseMode(user, 1, 'rookie', unlockedBadge, reward)
     setBadge(unlockedBadge)
     setPointsAwarded(wasComplete ? 0 : reward)
     if (token) {
