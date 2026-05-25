@@ -4,25 +4,52 @@
 // The base URL is configurable per environment via VITE_API_URL (see
 // client/.env.example); it defaults to the local backend.
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+function normalizeApiUrl(value) {
+  const trimmed = value.replace(/\/+$/, '')
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`
+}
+
+const API_URL = normalizeApiUrl(
+  import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
+)
 
 // Low-level helper. Throws an Error (with the backend's message, when
 // present) on any non-2xx response, so callers can use try/catch.
 async function request(path, { method = 'GET', body, token } = {}) {
-  const res = await fetch(`${API_URL}${path}`, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  })
+  const url = `${API_URL}${path}`
+  let res
+
+  try {
+    res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    })
+  } catch (error) {
+    console.error('[api] Network request failed', {
+      url,
+      method,
+      message: error.message,
+    })
+    throw error
+  }
 
   // The backend always replies with JSON; guard anyway (e.g. server down).
   const data = await res.json().catch(() => ({}))
 
   if (!res.ok) {
-    throw new Error(data.message || `Request failed (${res.status})`)
+    console.error('[api] Request failed', {
+      url,
+      method,
+      status: res.status,
+      message: data.message,
+    })
+    throw new Error(
+      data.message || `Request failed (${res.status}) for ${method} ${url}`,
+    )
   }
   return data
 }
@@ -48,8 +75,13 @@ export const api = {
 
   // --- user ---
   getMe: (token) => request('/user/me', { token }),
+  getProgress: (token) => request('/progress', { token }),
   updateMe: (token, body) => request('/user/me', { method: 'PATCH', token, body }),
   deleteMe: (token) => request('/user/me', { method: 'DELETE', token }),
+  completeCase: (token, body) =>
+    request('/progress/complete-case', { method: 'POST', token, body }),
+  failAttempt: (token, body) =>
+    request('/progress/fail-attempt', { method: 'POST', token, body }),
   getUser: (id) => request(`/user/${id}`),
 
   // --- lives ---

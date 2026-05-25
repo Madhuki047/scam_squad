@@ -43,12 +43,25 @@ const userSchema = new mongoose.Schema(
 
     // --- Lives system (cooldown timestamp tracked in Redis, mirrored
     //     here so the value survives a Redis flush) ----------------------
-    livesRemaining: { type: Number, default: 5, min: 0, max: 5 },
+    livesRemaining: { type: Number, default: 3, min: 0, max: 3 },
     lastLifeRegen: { type: Date, default: Date.now },
 
     // --- Progression stats -------------------------------------------
     totalScore: { type: Number, default: 0, min: 0 },
     casesSolved: { type: Number, default: 0, min: 0 },
+    completedCases: [
+      {
+        _id: false,
+        caseId: { type: Number, required: true, min: 1 },
+        difficulty: {
+          type: String,
+          required: true,
+          enum: ['rookie', 'veteran'],
+        },
+        completedAt: { type: Date, default: Date.now },
+        pointsAwarded: { type: Number, default: 0, min: 0 },
+      },
+    ],
     accuracy: { type: Number, default: 0, min: 0, max: 100 },
     dayStreak: { type: Number, default: 0, min: 0 },
     rank: { type: Number, default: 0 },

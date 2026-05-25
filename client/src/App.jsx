@@ -14,6 +14,7 @@ import Quiz from './pages/Quiz.jsx'
 import Leaderboard from './pages/Leaderboard.jsx'
 import Squad from './pages/Squad.jsx'
 import ComingSoon from './pages/ComingSoon.jsx'
+import Case from './pages/Case.jsx'
 
 // Route table for the whole app.
 //
@@ -41,6 +42,8 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
 
           <Route path="/play" element={<Play />} />
+          <Route path="/case/:caseId" element={<Case />} />
+          <Route path="/case/:caseId/:difficulty" element={<Case />} />
           <Route path="/quiz" element={<Quiz />} />
 
           <Route path="/leaderboard" element={<Leaderboard />} />

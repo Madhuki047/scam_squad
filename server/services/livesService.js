@@ -7,7 +7,7 @@
 // Redis). Redis becomes interesting once there are multiple instances
 // or when rate-limit windows are added in Phase 6.
 
-export const MAX_LIVES = 5
+export const MAX_LIVES = 3
 export const REGEN_INTERVAL_MS = 30 * 60 * 1000 // 30 minutes
 
 // Apply any owed regenerations to the user. Returns true if anything
@@ -20,6 +20,12 @@ export const REGEN_INTERVAL_MS = 30 * 60 * 1000 // 30 minutes
 // banked toward the next regen.
 export function applyRegen(user) {
   const now = Date.now()
+
+  if (user.livesRemaining > MAX_LIVES) {
+    user.livesRemaining = MAX_LIVES
+    user.lastLifeRegen = new Date(now)
+    return true
+  }
 
   if (user.livesRemaining >= MAX_LIVES) {
     // Full - pin the clock to "now" so a future loss starts a fresh

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { MAX_LIVES } from '../lib/gameRules.js'
 
-const MAX_LIVES = 5
 const REGEN_INTERVAL_MS = 30 * 60 * 1000 // mirrors server livesService
 
 // "M:SS" countdown (e.g. 29:42). Hours rarely needed - if a player has
@@ -21,7 +21,7 @@ export default function TopNav({ title }) {
 
   // Re-render every second to update the countdown - only while not full.
   const [, force] = useState(0)
-  const lives = user?.livesRemaining ?? 0
+  const lives = Math.min(user?.livesRemaining ?? 0, MAX_LIVES)
   useEffect(() => {
     if (lives >= MAX_LIVES) return
     const id = setInterval(() => force((x) => x + 1), 1000)

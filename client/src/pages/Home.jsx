@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import { MAX_LIVES } from '../lib/gameRules.js'
 
 // Home screen: welcome heading, the primary "continue case" call to
 // action, and a quick stats summary. Rendered inside AppLayout.
@@ -7,8 +8,9 @@ export default function Home() {
   const { user } = useAuth()
 
   const rank = user?.rank > 0 ? `#${user.rank}` : 'Unranked'
+  const lives = Math.min(user?.livesRemaining ?? 0, MAX_LIVES)
   const stats = [
-    { label: 'LIVES', value: `${user?.livesRemaining ?? 0} / 5`, color: 'text-sw-red' },
+    { label: 'LIVES', value: `${lives} / ${MAX_LIVES}`, color: 'text-sw-red' },
     { label: 'POINTS', value: user?.points ?? 0, color: 'text-sw-yellow' },
     { label: 'RANK', value: rank, color: 'text-sw-cyan' },
   ]
