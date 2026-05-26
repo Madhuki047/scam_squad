@@ -5,6 +5,7 @@ import {
   getCaseProgress,
   isCaseComplete,
   isCaseModeComplete,
+  isCaseModeUnlocked,
   isCaseUnlocked,
 } from '../lib/caseProgress.js'
 
@@ -108,18 +109,19 @@ export default function Play() {
               >
                 {DIFFICULTIES.map((difficulty) => {
                   const done = isCaseModeComplete(user, c.id, difficulty)
+                  const modeUnlocked = isCaseModeUnlocked(user, c.id, difficulty)
                   return (
                     <button
                       key={difficulty}
                       type="button"
-                      disabled={locked || !hasLives}
+                      disabled={!modeUnlocked || !hasLives}
                       onClick={() => openCase(c.id, difficulty)}
                       className={`case-diff-btn ${
                         done ? 'case-diff-btn-complete' : ''
                       }`}
                     >
                       <span>{difficulty}</span>
-                      {locked ? (
+                      {!modeUnlocked ? (
                         <IconLock size={14} stroke={1.8} />
                       ) : done ? (
                         <IconCheck size={14} stroke={2} />

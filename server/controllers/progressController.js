@@ -15,6 +15,17 @@ const CASE_REWARDS = {
 
 const VALID_BADGES = new Set(['sharp-eyes', 'hooked-once', 'burned-twice'])
 
+function fullCaseCount(completedCases = []) {
+  const byCase = new Map()
+  completedCases.forEach((entry) => {
+    if (!byCase.has(entry.caseId)) byCase.set(entry.caseId, new Set())
+    byCase.get(entry.caseId).add(entry.difficulty)
+  })
+  return [...byCase.values()].filter(
+    (difficulties) => difficulties.has('rookie') && difficulties.has('veteran'),
+  ).length
+}
+
 function safeUser(user) {
   const obj = user.toObject()
   delete obj.password
@@ -37,7 +48,7 @@ function progressPayload(user) {
     totalScore: points,
     completedCases: user.completedCases || [],
     badges: user.badges || [],
-    casesSolved: user.casesSolved || 0,
+    casesSolved: fullCaseCount(user.completedCases),
     introCompleted: Boolean(user.introCompleted),
   }
 }
@@ -82,6 +93,17 @@ export async function completeCase(req, res, next) {
       return res.status(400).json({ message: 'bonusPoints must be an integer from 0 to 100.' })
     }
 
+    const existingUser = await User.findById(req.userId)
+    if (!existingUser) return res.status(404).json({ message: 'Account not found.' })
+    if (
+      difficulty === 'veteran' &&
+      !existingUser.completedCases.some(
+        (entry) => entry.caseId === numericCaseId && entry.difficulty === 'rookie',
+      )
+    ) {
+      return res.status(409).json({ message: 'Complete Rookie before Veteran.' })
+    }
+
     const key = completionKey(numericCaseId, difficulty)
     const reward = CASE_REWARDS[difficulty] + numericBonusPoints
     let alreadyComplete = false
@@ -124,7 +146,7 @@ export async function completeCase(req, res, next) {
     }
 
     applyRegen(user)
-    user.casesSolved = new Set(user.completedCases.map((entry) => entry.caseId)).size
+    user.casesSolved = fullCaseCount(user.completedCases)
 
     if (badge && !user.badges.some((entry) => entry.id === badge.id)) {
       user.badges.push({ id: badge.id })

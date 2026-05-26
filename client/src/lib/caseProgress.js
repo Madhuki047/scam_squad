@@ -25,7 +25,7 @@ export function isCaseModeComplete(user, caseId, difficulty) {
 }
 
 export function isCaseComplete(user, caseId) {
-  return DIFFICULTIES.some((difficulty) =>
+  return DIFFICULTIES.every((difficulty) =>
     isCaseModeComplete(user, caseId, difficulty),
   )
 }
@@ -33,4 +33,11 @@ export function isCaseComplete(user, caseId) {
 export function isCaseUnlocked(user, caseId) {
   if (Number(caseId) === 1) return true
   return isCaseComplete(user, Number(caseId) - 1)
+}
+
+export function isCaseModeUnlocked(user, caseId, difficulty) {
+  if (!isCaseUnlocked(user, caseId)) return false
+  if (difficulty === 'rookie') return true
+  if (difficulty === 'veteran') return isCaseModeComplete(user, caseId, 'rookie')
+  return false
 }

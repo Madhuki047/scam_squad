@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { IconArrowRight, IconFlag, IconLock } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext.jsx'
-import { isCaseUnlocked } from '../lib/caseProgress.js'
+import { isCaseModeUnlocked } from '../lib/caseProgress.js'
 import { api } from '../lib/api.js'
 import { BADGES } from '../lib/badges.js'
 import { playSfx } from '../lib/sound.js'
@@ -126,97 +126,102 @@ const VETERAN_QUIZ = [
   {
     question: 'Why is agentzoey.a@unitzero.gov not automatically trustworthy?',
     options: [
-      'The display name and sender can be spoofed or compromised.',
       'All government-looking emails are unsafe.',
+      'The display name and sender can be spoofed or compromised.',
       'Casual wording always proves an email is fake.',
       'Short emails are always phishing.',
     ],
-    answer: 0,
+    answer: 1,
   },
   {
     question: 'Which domain is the suspicious lookalike in this case?',
-    options: ['unitzero.gov.co', 'unitzero.gov.com', 'mail.unitzero.gov.com', 'casefiles.unitzero.gov.com'],
-    answer: 0,
+    options: [
+      'unitzero.gov.com',
+      'mail.unitzero.gov.com',
+      'unitzero.gov.co',
+      'casefiles.unitzero.gov.com',
+    ],
+    answer: 2,
   },
   {
     question: 'What should you do before using an unexpected login link?',
     options: [
-      'Verify through a separate trusted channel.',
       'Click quickly before the request expires.',
       'Forward the link to another intern.',
+      'Verify through a separate trusted channel.',
       'Trust it if there are no typos.',
     ],
-    answer: 0,
+    answer: 2,
   },
   {
     question: 'Why does "no panic tactic" not make the email safe?',
     options: [
-      'Professional phishing can sound calm and routine.',
       'Only messages with countdowns are dangerous.',
       'Calm emails cannot contain links.',
       'Safe emails always mention rewards.',
+      'Professional phishing can sound calm and routine.',
     ],
-    answer: 0,
+    answer: 3,
   },
   {
     question: 'What is credential harvesting?',
     options: [
-      'Tricking someone into entering login details into a fake portal.',
       'Encrypting files after a backup.',
       'Scanning a computer for old documents.',
+      'Tricking someone into entering login details into a fake portal.',
       'Sending a security reminder to staff.',
     ],
-    answer: 0,
+    answer: 2,
   },
   {
     question: 'Which clue is strongest in the server-log trace?',
     options: [
-      'A link host on a lookalike domain.',
       'The sender uses a friendly tone.',
       'The email mentions a real project.',
+      'A link host on a lookalike domain.',
       'The message is not very long.',
     ],
-    answer: 0,
+    answer: 2,
   },
   {
     question: 'What does hovering over a link help reveal?',
     options: [
-      'The real destination URL before clicking.',
       'The sender password.',
+      'The real destination URL before clicking.',
       'Whether the email has been read.',
       'The exact attacker location.',
     ],
-    answer: 0,
+    answer: 1,
   },
   {
     question: 'Why is messaging Agent Zoey directly safer?',
     options: [
-      'It uses a separate trusted channel to verify the request.',
       'It deletes the phishing email automatically.',
       'It makes the link expire.',
+      'It uses a separate trusted channel to verify the request.',
       'It blocks every future phishing email.',
     ],
-    answer: 0,
+    answer: 2,
   },
   {
     question: 'What should happen after credentials are typed into a fake portal?',
     options: [
-      'Treat it as a breach and report it immediately.',
       'Try the same password again later.',
       'Assume access was confirmed safely.',
       'Ignore it if the page looked official.',
+      'Treat it as a breach and report it immediately.',
     ],
-    answer: 0,
+    answer: 3,
   },
   {
     question: 'What is the best overall lesson from The Double Bluff?',
     options: [
-      'Legitimate-looking requests still need verification.',
       'Only typo-filled emails are phishing.',
+      'Legitimate-looking requests still need verification.',
       'Supervisors never send links.',
       'A familiar sender name proves the email is safe.',
     ],
-    answer: 0,
+    answer: 1,
   },
 ]
 
@@ -998,12 +1003,24 @@ function TracePuzzle({ selected, onToggle, onSubmit, submitted }) {
   )
 }
 
-function VeteranQuiz({ answers, onAnswer, onSubmit, submitted }) {
+function VeteranQuiz({
+  answers,
+  currentQuestionIndex,
+  onAnswer,
+  onNextQuestion,
+  onSubmit,
+  submitted,
+}) {
   const correct = answers.reduce(
     (count, answer, index) => count + (answer === VETERAN_QUIZ[index].answer ? 1 : 0),
     0,
   )
-  const complete = answers.every((answer) => answer !== null)
+  const currentQuestion = VETERAN_QUIZ[currentQuestionIndex]
+  const selectedAnswer = answers[currentQuestionIndex]
+  const answered = selectedAnswer !== null
+  const selectedCorrect = selectedAnswer === currentQuestion.answer
+  const isLastQuestion = currentQuestionIndex === VETERAN_QUIZ.length - 1
+  const passed = correct >= 5
 
   return (
     <section className="case-debrief scene-transition">
@@ -1017,14 +1034,21 @@ function VeteranQuiz({ answers, onAnswer, onSubmit, submitted }) {
           correct answer is worth 10 coins. Passing requires 5 or more correct
           answers and closes the phishing case arc.
         </p>
-        <div className="veteran-quiz-list">
-          {VETERAN_QUIZ.map((item, questionIndex) => (
-            <article key={item.question} className="veteran-quiz-card">
-              <h3>{questionIndex + 1}. {item.question}</h3>
+        {!submitted ? (
+          <>
+            <div className="veteran-quiz-progress">
+              Question {currentQuestionIndex + 1} / {VETERAN_QUIZ.length}
+            </div>
+            <article
+              className={`veteran-quiz-card veteran-quiz-focus ${
+                answered && !selectedCorrect ? 'veteran-quiz-shake' : ''
+              }`}
+            >
+              <h3>{currentQuestion.question}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {item.options.map((option, optionIndex) => {
-                  const selected = answers[questionIndex] === optionIndex
-                  const isCorrect = item.answer === optionIndex
+                {currentQuestion.options.map((option, optionIndex) => {
+                  const selected = selectedAnswer === optionIndex
+                  const isCorrect = currentQuestion.answer === optionIndex
                   return (
                     <button
                       key={option}
@@ -1032,14 +1056,14 @@ function VeteranQuiz({ answers, onAnswer, onSubmit, submitted }) {
                       className={`veteran-answer-btn ${
                         selected ? 'veteran-answer-selected' : ''
                       } ${
-                        submitted && isCorrect ? 'veteran-answer-correct' : ''
+                        answered && isCorrect ? 'veteran-answer-correct' : ''
                       } ${
-                        submitted && selected && !isCorrect
+                        answered && selected && !isCorrect
                           ? 'veteran-answer-wrong'
                           : ''
                       }`}
-                      onClick={() => onAnswer(questionIndex, optionIndex)}
-                      disabled={submitted}
+                      onClick={() => onAnswer(currentQuestionIndex, optionIndex)}
+                      disabled={answered}
                     >
                       {option}
                     </button>
@@ -1047,21 +1071,58 @@ function VeteranQuiz({ answers, onAnswer, onSubmit, submitted }) {
                 })}
               </div>
             </article>
-          ))}
-        </div>
-        {submitted && (
-          <div className={correct >= 5 ? 'success-banner' : 'breach-banner'}>
-            Score: {correct}/10 - {correct * 10} quiz coins
-          </div>
+            {answered && (
+              <div className={selectedCorrect ? 'success-banner' : 'breach-banner'}>
+                {selectedCorrect
+                  ? 'Correct. +10 quiz coins secured.'
+                  : `Not this time. Correct answer: ${
+                      currentQuestion.options[currentQuestion.answer]
+                    }`}
+              </div>
+            )}
+            {answered && (
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan self-start"
+                onClick={isLastQuestion ? onSubmit : onNextQuestion}
+              >
+                {isLastQuestion ? 'View results' : 'Next Question'}
+              </button>
+            )}
+          </>
+        ) : (
+          <>
+            <div className={passed ? 'success-banner' : 'breach-banner'}>
+              {passed ? 'Certification passed' : 'Certification failed'}
+            </div>
+            <div className="veteran-results-grid">
+              <div>
+                <span>Correct</span>
+                <strong>{correct} / 10</strong>
+              </div>
+              <div>
+                <span>Quiz coins</span>
+                <strong>{correct * 10}</strong>
+              </div>
+              <div>
+                <span>Status</span>
+                <strong>{passed ? 'Replay optional' : 'Replay required'}</strong>
+              </div>
+            </div>
+            <p className="text-sw-text2">
+              {passed
+                ? 'You have enough field evidence and quiz score to close the Veteran phishing case.'
+                : 'More than half the answers were missed. Replay the Veteran level before this case can close.'}
+            </p>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start"
+              onClick={onSubmit}
+            >
+              Continue debrief
+            </button>
+          </>
         )}
-        <button
-          type="button"
-          className="ss-btn ss-btn-cyan self-start"
-          onClick={onSubmit}
-          disabled={!complete}
-        >
-          {submitted ? 'Continue' : 'Submit field check'}
-        </button>
       </div>
     </section>
   )
@@ -1181,6 +1242,7 @@ function VeteranCase() {
   const [quizAnswers, setQuizAnswers] = useState(
     () => VETERAN_QUIZ.map(() => null),
   )
+  const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0)
   const [quizSubmitted, setQuizSubmitted] = useState(false)
   const [badge, setBadge] = useState(null)
   const [pointsAwarded, setPointsAwarded] = useState(0)
@@ -1201,6 +1263,7 @@ function VeteranCase() {
     setTraceSelected([])
     setTraceSubmitted(false)
     setQuizAnswers(VETERAN_QUIZ.map(() => null))
+    setCurrentQuizQuestion(0)
     setQuizSubmitted(false)
     setBadge(null)
     setPointsAwarded(0)
@@ -1299,10 +1362,20 @@ function VeteranCase() {
   }
 
   function answerQuiz(questionIndex, optionIndex) {
+    if (quizAnswers[questionIndex] !== null) return
     setQuizAnswers((current) =>
       current.map((answer, index) =>
         index === questionIndex ? optionIndex : answer,
       ),
+    )
+    playSfx(
+      optionIndex === VETERAN_QUIZ[questionIndex].answer ? 'correct' : 'wrong',
+    )
+  }
+
+  function nextQuizQuestion() {
+    setCurrentQuizQuestion((value) =>
+      Math.min(value + 1, VETERAN_QUIZ.length - 1),
     )
   }
 
@@ -1387,7 +1460,9 @@ function VeteranCase() {
       {phase === 'quiz' && (
         <VeteranQuiz
           answers={quizAnswers}
+          currentQuestionIndex={currentQuizQuestion}
           onAnswer={answerQuiz}
+          onNextQuestion={nextQuizQuestion}
           onSubmit={submitQuiz}
           submitted={quizSubmitted}
         />
@@ -1507,7 +1582,7 @@ export default function Case() {
   }
 
   if (!hasLives) return <NoLivesCase />
-  if (!isCaseUnlocked(user, numericCaseId)) return <LockedCase />
+  if (!isCaseModeUnlocked(user, numericCaseId, difficulty)) return <LockedCase />
   if (numericCaseId !== 1) return <FutureCase caseId={numericCaseId} />
   if (difficulty === 'veteran') return <VeteranCase />
 
