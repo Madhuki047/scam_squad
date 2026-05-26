@@ -228,12 +228,14 @@ const VETERAN_QUIZ = [
 const CASE2_THREADS = [
   {
     id: 'direct-insults',
-    title: "Thread 01 - Comment chain on Emma's profile",
+    title: "Comment chain on Emma's profile",
     source: 'GlowLoop social feed',
     reportId: 'GL-2048-A',
+    moment: 'After school, Monday',
+    place: "Emma's profile",
     confidence: 61,
     queueNote: 'Forwarded by two students in Emma\'s year.',
-    evidenceLabel: 'Open replies',
+    evidenceLabel: 'Read the rest',
     correctAction: 'flag',
     profile: { handle: '@maxbyte', posts: 42, reports: 2, relation: 'classmate' },
     messages: [
@@ -246,12 +248,14 @@ const CASE2_THREADS = [
   },
   {
     id: 'appearance-mockery',
-    title: 'Thread 02 - Photo reply pile-on',
+    title: 'Photo reply pile-on',
     source: 'Photo post replies',
     reportId: 'GL-2048-B',
+    moment: 'Evening, Monday',
+    place: 'Photo replies',
     confidence: 58,
     queueNote: 'Pulled from comments under Emma\'s latest photo.',
-    evidenceLabel: 'Open replies',
+    evidenceLabel: 'Read nearby replies',
     correctAction: 'flag',
     profile: { handle: '@mirrorfail', posts: 18, reports: 1, relation: 'unknown' },
     messages: [
@@ -264,12 +268,14 @@ const CASE2_THREADS = [
   },
   {
     id: 'repeated-targeting',
-    title: 'Thread 03 - Replies after Emma joins',
+    title: 'Replies after Emma joins',
     source: 'GlowLoop replies',
     reportId: 'GL-2048-C',
+    moment: 'Tuesday afternoon',
+    place: 'Class feed replies',
     confidence: 54,
     queueNote: 'A short burst of replies after Emma joined the thread.',
-    evidenceLabel: 'Open more replies',
+    evidenceLabel: 'Follow the thread',
     correctAction: 'flag',
     profile: { handle: '@crashpost', posts: 103, reports: 3, relation: 'same year group' },
     timeline: ['15:12', '15:19', '15:27', '15:40'],
@@ -284,12 +290,14 @@ const CASE2_THREADS = [
   },
   {
     id: 'group-exclusion',
-    title: 'Thread 04 - ArtTable group chat',
+    title: 'ArtTable group chat',
     source: 'Private group export',
     reportId: 'GL-2048-D',
+    moment: 'Across the week',
+    place: 'ArtTable chat',
     confidence: 37,
     queueNote: 'Export from a group chat Emma used to be active in.',
-    evidenceLabel: 'Open older messages',
+    evidenceLabel: 'Scroll back',
     correctAction: 'flag',
     profile: { handle: 'Group: ArtTable', posts: 12, reports: 0, relation: 'friend group' },
     timeline: [
@@ -317,12 +325,14 @@ const CASE2_THREADS = [
   },
   {
     id: 'plausible-deniability',
-    title: 'Thread 05 - Short comments from @johnhaha67',
+    title: 'Short comments from @johnhaha67',
     source: 'Cross-post activity log',
     reportId: 'GL-2048-E',
+    moment: 'Mon-Sun',
+    place: "Emma's recent posts",
     confidence: 33,
     queueNote: 'Short comments copied from a few of Emma\'s recent posts.',
-    evidenceLabel: 'Open post history',
+    evidenceLabel: 'Check other posts',
     correctAction: 'flag',
     profile: { handle: '@johnhaha67', posts: 9, reports: 0, relation: 'follows Emma' },
     timeline: [
@@ -344,12 +354,14 @@ const CASE2_THREADS = [
   },
   {
     id: 'one-off-disagreement',
-    title: 'Thread 06 - Debate under a group project post',
+    title: 'Debate under a group project post',
     source: 'GlowLoop class feed',
     reportId: 'GL-2048-F',
+    moment: 'Wednesday morning',
+    place: 'Project post',
     confidence: 46,
     queueNote: 'A classroom thread with a disagreement in the replies.',
-    evidenceLabel: 'Open reply context',
+    evidenceLabel: 'Read context',
     correctAction: 'dismiss',
     profile: { handle: '@rowan7', posts: 27, reports: 0, relation: 'project partner' },
     messages: [
@@ -362,12 +374,14 @@ const CASE2_THREADS = [
   },
   {
     id: 'consensual-banter',
-    title: 'Thread 07 - Friends joking after a game',
+    title: 'Friends joking after a game',
     source: 'GlowLoop game clip replies',
     reportId: 'GL-2048-G',
+    moment: 'Friday night',
+    place: 'Game clip replies',
     confidence: 49,
     queueNote: 'A clip from last night\'s game session.',
-    evidenceLabel: 'Open reaction chain',
+    evidenceLabel: 'Read reactions',
     correctAction: 'dismiss',
     profile: { handle: '@maya-lol', posts: 64, reports: 0, relation: 'friend' },
     messages: [
@@ -380,12 +394,14 @@ const CASE2_THREADS = [
   },
   {
     id: 'constructive-comment',
-    title: 'Thread 08 - Art club feedback',
+    title: 'Art club feedback',
     source: 'GlowLoop creative post',
     reportId: 'GL-2048-H',
+    moment: 'Sunday afternoon',
+    place: 'Art club post',
     confidence: 41,
     queueNote: 'A comment under Emma\'s art club post.',
-    evidenceLabel: 'Open comment context',
+    evidenceLabel: 'Read context',
     correctAction: 'dismiss',
     profile: { handle: '@sketchroom', posts: 88, reports: 0, relation: 'art club' },
     messages: [
@@ -1740,11 +1756,11 @@ function Case2Intro({ internName, onNext }) {
   return (
     <section className="case-terminal ss-card scene-transition">
       <div className="case-terminal-header">
-        <span>UNIT ZERO SOCIAL MONITOR</span>
+        <span>UNIT ZERO FIELD NOTES</span>
         <span>DAY 14 - 09:18</span>
       </div>
       <div className="case-os-bar">
-        <span>MODERATION DESK - ROOKIE REVIEW</span>
+        <span>STUDENT WELLBEING - SOCIAL CONTEXT</span>
         <span>{internName.toLowerCase()}@unitzero.gov - ACTIVE</span>
       </div>
       <div className="case2-intro-grid">
@@ -1767,16 +1783,16 @@ function Case2Intro({ internName, onNext }) {
           <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
           <h2 className="font-pixel text-sw-cyan text-sm">The Network: Just Jokes</h2>
           <p>
-            GlowLoop sent over a quiet report from a student named Emma. It
-            does not look like much at first: comments, group chats, a few
-            deleted replies.
+            Emma sent over a quiet note after a week on GlowLoop. It does not
+            look like much at first: comments, group chats, a few deleted
+            replies.
           </p>
           <p className="text-sw-text3">
-            Open the files. Read them like a person, not a machine. Some of it
-            is nothing. Some of it stays with someone all day.
+            Read it like a person, not a machine. Some of it is nothing. Some
+            of it follows someone from post to post.
           </p>
           <button type="button" className="ss-btn ss-btn-cyan self-start" onClick={onNext}>
-            Open Review Queue <IconArrowRight size={16} />
+            Open Emma's Week <IconArrowRight size={16} />
           </button>
         </div>
       </div>
@@ -1788,8 +1804,8 @@ function Case2QueueList({ activeIndex, decisions, onOpen }) {
   return (
     <aside className="case2-queue-panel">
       <div className="case2-queue-title">
-        <span>GLOWLOOP QUEUE</span>
-        <strong>{CASE2_THREADS.length} FILES</strong>
+        <span>EMMA'S WEEK</span>
+        <strong>{CASE2_THREADS.length} MOMENTS</strong>
       </div>
       {CASE2_THREADS.map((thread, index) => (
         <button
@@ -1800,9 +1816,15 @@ function Case2QueueList({ activeIndex, decisions, onOpen }) {
           }`}
           onClick={() => onOpen(index)}
         >
-          <span>{thread.reportId}</span>
-          <strong>{String(index + 1).padStart(2, '0')}</strong>
-          <em>{decisions[thread.id] ? decisions[thread.id] : 'unopened'}</em>
+          <span>{thread.moment}</span>
+          <strong>{thread.place}</strong>
+          <em>
+            {decisions[thread.id]
+              ? decisions[thread.id] === 'flag'
+                ? 'saved to pattern'
+                : 'left as context'
+              : 'unread'}
+          </em>
         </button>
       ))}
     </aside>
@@ -1828,18 +1850,18 @@ function Case2ThreadFile({
       <div className="case2-file-top">
         <div>
           <span className="font-pixel text-sw-pink text-xs">
-            THREAD {index + 1} OF {total}
+            MOMENT {index + 1} OF {total}
           </span>
           <h3>{thread.title}</h3>
-          <p>{thread.source} - {thread.reportId}</p>
+          <p>{thread.moment} - {thread.source}</p>
         </div>
       </div>
 
       <div className="case2-file-grid">
         <section className="case2-social-window">
           <div className="case2-social-window-bar">
-            <span>GlowLoop thread</span>
-            <span>{thread.reportId}</span>
+            <span>GlowLoop</span>
+            <span>{thread.place}</span>
           </div>
           <div className="case2-message-list case2-message-focus">
             {visibleMessages.map((message, messageIndex) => (
@@ -1861,7 +1883,7 @@ function Case2ThreadFile({
         </section>
 
         <aside className="case2-evidence-panel">
-          <span className="font-pixel text-sw-yellow text-xs">FILE DRAWER</span>
+          <span className="font-pixel text-sw-yellow text-xs">CONTEXT</span>
           <p>{thread.queueNote}</p>
           <div className="case2-profile-card">
             <strong>{thread.profile.handle}</strong>
@@ -1873,11 +1895,11 @@ function Case2ThreadFile({
             onClick={onReveal}
             disabled={evidenceOpen || processing}
           >
-            {evidenceOpen ? 'Opened' : thread.evidenceLabel}
+            {evidenceOpen ? 'Context open' : thread.evidenceLabel}
           </button>
           {evidenceOpen && (
             <div className="case2-timeline" aria-label="Expanded evidence">
-              <strong>Archive</strong>
+              <strong>Earlier nearby</strong>
               {(thread.timeline || ['Original post', 'Reply context', 'Reporter note']).map(
                 (item) => (
                   <span key={item}>{item}</span>
@@ -1898,7 +1920,7 @@ function Case2ThreadFile({
             onClick={() => onDecision(thread.id, 'flag')}
             disabled={processing || Boolean(decision)}
           >
-            FLAG
+            Save to pattern
           </button>
           <button
             type="button"
@@ -1908,7 +1930,7 @@ function Case2ThreadFile({
             onClick={() => onDecision(thread.id, 'dismiss')}
             disabled={processing || Boolean(decision)}
           >
-            DISMISS
+            Leave as context
           </button>
         </div>
         <button
@@ -1917,7 +1939,7 @@ function Case2ThreadFile({
           onClick={onNext}
           disabled={!canAdvance}
         >
-          {index === total - 1 ? 'Submit Report' : 'Next File'} <IconArrowRight size={16} />
+          {index === total - 1 ? 'Finish notes' : 'Keep scrolling'} <IconArrowRight size={16} />
         </button>
       </div>
     </article>
@@ -1941,17 +1963,17 @@ function Case2ReviewBoard({
     <section className="case2-board scene-transition">
       <div className="case2-board-header">
         <div>
-          <span className="font-pixel text-sw-pink text-xs">GLOWLOOP MOD QUEUE</span>
-          <h2 className="font-pixel text-sw-cyan text-sm">Review Emma's Report</h2>
+          <span className="font-pixel text-sw-pink text-xs">GLOWLOOP SOCIAL FEED</span>
+          <h2 className="font-pixel text-sw-cyan text-sm">Read Emma's Week</h2>
         </div>
         <div className="case2-progress-chip">
-          {answeredCount} / {CASE2_THREADS.length} reviewed
+          {answeredCount} / {CASE2_THREADS.length} sorted
         </div>
       </div>
 
       <div className="case2-briefing-strip">
-        <strong>Agent Ricky:</strong> Eight files. Some are ugly. Some are just
-        awkward. Take your time before you decide.
+        <strong>Agent Ricky:</strong> No labels this time. Just read the posts
+        and notice what repeats, who it follows, and what Emma does afterward.
       </div>
 
       <div className="case2-investigation-layout">
@@ -1994,17 +2016,18 @@ function Case2Debrief({
   return (
     <section className="case-debrief scene-transition">
       <div className={passed ? 'success-banner' : 'breach-banner'}>
-        {passed ? 'REPORT ACCEPTED - DEBRIEF MODE' : 'REPORT INCOMPLETE - DEBRIEF MODE'}
+        {passed ? 'PATTERN FOUND - AFTERWARD' : 'PATTERN UNCLEAR - AFTERWARD'}
       </div>
       <div className="ss-card p-5 flex flex-col gap-4">
         <div className="case2-ricky-panel">
           <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
-          <h2 className="font-pixel text-sw-cyan text-sm">Case 02 Rookie Debrief</h2>
+          <h2 className="font-pixel text-sw-cyan text-sm">What changed after you read it all</h2>
           <p>
-            Your report scored {correctCount} / {CASE2_THREADS.length}.{' '}
+            You read {correctCount} / {CASE2_THREADS.length} moments the way
+            Emma experienced them.{' '}
             {passed
-              ? 'You tracked the behaviour pattern and protected Emma from a campaign hiding in plain sight.'
-              : 'This file needs another pass before we can act on it.'}
+              ? 'The harm was not in one dramatic post. It was in the pattern that kept returning to her.'
+              : 'The week needs another read before the pattern is clear.'}
           </p>
           {missedGroupExclusion && (
             <blockquote className="zoey-quote">
@@ -2023,9 +2046,10 @@ function Case2Debrief({
           )}
           {flaggedEverything && (
             <blockquote className="zoey-quote">
-              "Flagging everything feels safe, but it weakens real moderation
-              decisions. Cyberbullying depends on repetition, targeting, power
-              imbalance, and harm. Normal conflict still needs room to exist."
+              "Saving everything into the pattern feels safe, but it blurs the
+              difference between harm and ordinary conflict. Cyberbullying
+              depends on repetition, targeting, power imbalance, and harm.
+              Normal disagreement still needs room to exist."
             </blockquote>
           )}
         </div>
@@ -2042,10 +2066,12 @@ function Case2Debrief({
                 <div>
                   <h3>
                     {correct
-                      ? `Correct ${thread.correctAction}`
+                      ? thread.correctAction === 'flag'
+                        ? 'Belonged in the pattern'
+                        : 'Useful background'
                       : thread.correctAction === 'flag'
-                        ? 'Missed pattern'
-                        : 'Over-flagged'}
+                        ? 'Easy to dismiss at first'
+                        : 'Mistaken for part of the pattern'}
                   </h3>
                   <p>{thread.explanation}</p>
                 </div>
@@ -2056,7 +2082,7 @@ function Case2Debrief({
 
         {wrongThreads.length > 0 && (
           <p className="text-sw-text3 text-sm">
-            Recheck: {wrongThreads.map((thread) => thread.title).join(', ')}.
+            Re-read: {wrongThreads.map((thread) => thread.title).join(', ')}.
           </p>
         )}
 
