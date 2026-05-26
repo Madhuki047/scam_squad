@@ -111,11 +111,14 @@ function PhoneIntro({ onComplete, busy, error }) {
   useEffect(() => {
     if (answered || finished) {
       stopSfxLoop('phoneRing')
+      return undefined
     }
+    startSfxLoop('phoneRing')
     return () => stopSfxLoop('phoneRing')
   }, [answered, finished])
 
-  function startRingFromScene() {
+  function startRingFromScene(event) {
+    if (event.target.closest('button')) return
     if (!answered && !finished) startSfxLoop('phoneRing')
   }
 
