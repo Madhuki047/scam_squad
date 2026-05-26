@@ -11,6 +11,12 @@ export const BADGES = {
     message: 'You caught the bait before it caught you.',
     icon: 'eye',
   },
+  burnedTwice: {
+    id: 'burned-twice',
+    name: 'Burned Twice, Wiser Once',
+    message: 'You spotted the professional double bluff and verified out-of-band.',
+    icon: 'flame',
+  },
 }
 
 export const BADGE_CATALOG = [
@@ -22,6 +28,7 @@ export const BADGE_CATALOG = [
   { id: 'sharp-eye', name: 'Sharp Eye' },
   BADGES.sharpEyes,
   BADGES.hookedOnce,
+  BADGES.burnedTwice,
   { id: 'night-owl', name: 'Night Owl' },
   { id: 'perfect-run', name: 'Perfect Run' },
   { id: 'mentor', name: 'Mentor' },

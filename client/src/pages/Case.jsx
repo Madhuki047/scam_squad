@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { IconArrowRight, IconFlag, IconLock } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext.jsx'
-import { isCaseUnlocked } from '../lib/caseProgress.js'
+import { isCaseModeUnlocked } from '../lib/caseProgress.js'
 import { api } from '../lib/api.js'
 import { BADGES } from '../lib/badges.js'
 import { playSfx } from '../lib/sound.js'
@@ -67,6 +67,161 @@ const RED_FLAGS = [
   {
     title: 'Credential harvesting',
     text: 'The form asked for personal and employee details a voucher never needs.',
+  },
+]
+
+const VETERAN_LESSONS = [
+  {
+    title: 'Display name spoofing',
+    text: 'The name shown in an email is not always the real sender.',
+  },
+  {
+    title: 'Domain deception',
+    text: 'unitzero.gov.co is not the same as unitzero.gov.com.',
+  },
+  {
+    title: 'Calm can still be dangerous',
+    text: 'Sophisticated phishing may avoid panic tactics and obvious errors.',
+  },
+  {
+    title: 'Verify out-of-band',
+    text: 'Confirm unexpected requests through a separate trusted channel.',
+  },
+]
+
+const TRACE_INDICATORS = [
+  {
+    id: 'display',
+    label: 'Display name: Agent Zoey',
+    suspicious: false,
+    detail: 'A familiar display name alone is not proof of identity.',
+  },
+  {
+    id: 'reply',
+    label: 'Reply-To: case-access@unitzero.gov.co',
+    suspicious: true,
+    detail: 'The reply-to uses a lookalike domain controlled outside Unit Zero.',
+  },
+  {
+    id: 'domain',
+    label: 'Link host: secure.unitzero.gov.co',
+    suspicious: true,
+    detail: 'The registered domain is gov.co, not the Unit Zero gov.com domain.',
+  },
+  {
+    id: 'time',
+    label: 'Sent: 16:20, near end of day',
+    suspicious: false,
+    detail: 'Timing can add pressure, but it is not enough by itself.',
+  },
+  {
+    id: 'source',
+    label: 'Source IP reputation: recent credential harvest kit',
+    suspicious: true,
+    detail: 'Infrastructure reputation links this email to active phishing.',
+  },
+]
+
+const VETERAN_QUIZ = [
+  {
+    question: 'Why is agentzoey.a@unitzero.gov not automatically trustworthy?',
+    options: [
+      'All government-looking emails are unsafe.',
+      'The display name and sender can be spoofed or compromised.',
+      'Casual wording always proves an email is fake.',
+      'Short emails are always phishing.',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'Which domain is the suspicious lookalike in this case?',
+    options: [
+      'unitzero.gov.com',
+      'mail.unitzero.gov.com',
+      'unitzero.gov.co',
+      'casefiles.unitzero.gov.com',
+    ],
+    answer: 2,
+  },
+  {
+    question: 'What should you do before using an unexpected login link?',
+    options: [
+      'Click quickly before the request expires.',
+      'Forward the link to another intern.',
+      'Verify through a separate trusted channel.',
+      'Trust it if there are no typos.',
+    ],
+    answer: 2,
+  },
+  {
+    question: 'Why does "no panic tactic" not make the email safe?',
+    options: [
+      'Only messages with countdowns are dangerous.',
+      'Calm emails cannot contain links.',
+      'Safe emails always mention rewards.',
+      'Professional phishing can sound calm and routine.',
+    ],
+    answer: 3,
+  },
+  {
+    question: 'What is credential harvesting?',
+    options: [
+      'Encrypting files after a backup.',
+      'Scanning a computer for old documents.',
+      'Tricking someone into entering login details into a fake portal.',
+      'Sending a security reminder to staff.',
+    ],
+    answer: 2,
+  },
+  {
+    question: 'Which clue is strongest in the server-log trace?',
+    options: [
+      'The sender uses a friendly tone.',
+      'The email mentions a real project.',
+      'A link host on a lookalike domain.',
+      'The message is not very long.',
+    ],
+    answer: 2,
+  },
+  {
+    question: 'What does hovering over a link help reveal?',
+    options: [
+      'The sender password.',
+      'The real destination URL before clicking.',
+      'Whether the email has been read.',
+      'The exact attacker location.',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'Why is messaging Agent Zoey directly safer?',
+    options: [
+      'It deletes the phishing email automatically.',
+      'It makes the link expire.',
+      'It uses a separate trusted channel to verify the request.',
+      'It blocks every future phishing email.',
+    ],
+    answer: 2,
+  },
+  {
+    question: 'What should happen after credentials are typed into a fake portal?',
+    options: [
+      'Try the same password again later.',
+      'Assume access was confirmed safely.',
+      'Ignore it if the page looked official.',
+      'Treat it as a breach and report it immediately.',
+    ],
+    answer: 3,
+  },
+  {
+    question: 'What is the best overall lesson from The Double Bluff?',
+    options: [
+      'Only typo-filled emails are phishing.',
+      'Legitimate-looking requests still need verification.',
+      'Supervisors never send links.',
+      'A familiar sender name proves the email is safe.',
+    ],
+    answer: 1,
   },
 ]
 
@@ -434,26 +589,914 @@ function EndScreen({ badge, pointsAwarded, onReturn, onVeteran }) {
   )
 }
 
-function VeteranPlaceholder() {
-  const navigate = useNavigate()
+function VeteranInbox({ onNext, internName }) {
+  return (
+    <section className="case-terminal ss-card scene-transition">
+      <div className="case-terminal-header">
+        <span>ROOM S109 - YOUR WORKSTATION</span>
+        <span>DAY 8 - 16:20</span>
+      </div>
+      <div className="case-os-bar">
+        <span>UNIT ZERO OS v4.2</span>
+        <span>{internName.toLowerCase()}@unitzero.gov - CASE DIGITISATION</span>
+      </div>
+      <h2 className="case-os-welcome">ONE WEEK LATER</h2>
+      <p className="case-os-subtitle">
+        OLD CASE FILES INDEXED: 73% - ENCRYPTED FOLDER ACCESS PENDING.
+      </p>
+      <div className="case-desktop-grid">
+        {['Archive', 'Scanner', 'Mail', 'Case Logs', 'Chat', 'Security'].map(
+          (item) => (
+            <div
+              key={item}
+              className={`case-desktop-tile ${item === 'Mail' ? 'active' : ''}`}
+            >
+              <span
+                className={`desktop-pixel-icon icon-${
+                  item === 'Mail' ? 'mail' : item === 'Chat' ? 'chat' : 'folder'
+                }`}
+              />
+              <span>{item}</span>
+            </div>
+          ),
+        )}
+      </div>
+      <div className="jane-message">
+        <strong>System note:</strong> Digitisation project moved to encrypted
+        case storage. Supervisor approvals required for new folders.
+      </div>
+      <div className="case-inbox-label">INBOX (1 NEW)</div>
+      <div className="case-inbox-row active">
+        Re: Case File Access - Action Required
+      </div>
+      <button type="button" className="ss-btn ss-btn-cyan mt-4" onClick={onNext}>
+        Open Email
+      </button>
+    </section>
+  )
+}
+
+function VeteranEmail({ onClickLink, onHoverLink, onMessageZoey, internName }) {
+  return (
+    <section className="case-email ss-card scene-transition">
+      <div className="voucher-header veteran-email-header">
+        Re: Case File Access - Action Required
+      </div>
+      <div className="email-meta">
+        <span>From:</span> agentzoey.a@unitzero.gov
+      </div>
+      <div className="email-meta">
+        <span>To:</span> {internName.toLowerCase()}@unitzero.gov
+      </div>
+      <div className="email-meta">
+        <span>Subject:</span> Re: Case File Access - Action Required
+      </div>
+      <div className="fake-hr-stamp veteran-stamp">UNIT ZERO SECURE FILES</div>
+      <p>Hey, I noticed you've been working on the digitisation project.</p>
+      <p>
+        I'm sharing a secure link to the encrypted case folder. You'll need to
+        log in to verify your access level before end of day - the system resets
+        at midnight.
+      </p>
+      <p>Let me know once you're in.</p>
+      <div className="veteran-link-preview">
+        Secure case folder: secure.unitzero.gov.com/case-access
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <button type="button" className="voucher-claim-btn" onClick={onClickLink}>
+          Click the link
+        </button>
+        <button type="button" className="voucher-report-btn" onClick={onHoverLink}>
+          Hover over the link
+        </button>
+        <button type="button" className="voucher-report-btn" onClick={onMessageZoey}>
+          Message Agent Zoey
+        </button>
+      </div>
+      <div className="case-choice-hint">
+        Choose one of the options to click the link, hover over the link or contact Agent Zoey for confirmation.
+      </div>
+    </section>
+  )
+}
+
+function VeteranPortal({ onSubmit }) {
+  const [credentials, setCredentials] = useState({
+    username: '',
+    password: '',
+    accessCode: '',
+  })
+  const canSubmit =
+    credentials.username.trim() &&
+    credentials.password.trim() &&
+    credentials.accessCode.trim()
+
+  function updateField(field, value) {
+    setCredentials((current) => ({ ...current, [field]: value }))
+  }
 
   return (
-    <section className="ss-card p-6 flex flex-col gap-4 max-w-3xl mx-auto">
-      <span className="font-pixel text-sw-pink text-xs">CASE 01 VETERAN</span>
+    <section className="case-form ss-card scene-transition">
+      <h2 className="font-pixel text-sw-pink text-sm">Unit Zero Secure Access</h2>
+      <p className="text-sw-text2">
+        Verify your clearance to open the encrypted case folder.
+      </p>
+      <label>
+        Unit Zero username
+        <input
+          className="ss-input"
+          type="text"
+          value={credentials.username}
+          onChange={(event) => updateField('username', event.target.value)}
+          placeholder="username"
+        />
+      </label>
+      <label>
+        Password
+        <input
+          className="ss-input"
+          type="password"
+          value={credentials.password}
+          onChange={(event) => updateField('password', event.target.value)}
+          placeholder="password"
+        />
+      </label>
+      <label>
+        Access code
+        <input
+          className="ss-input"
+          type="text"
+          value={credentials.accessCode}
+          onChange={(event) => updateField('accessCode', event.target.value)}
+          placeholder="access code"
+        />
+      </label>
+      <button
+        type="button"
+        className="ss-btn ss-btn-red"
+        onClick={onSubmit}
+        disabled={!canSubmit}
+      >
+        Verify Access
+      </button>
+    </section>
+  )
+}
+
+function AccessConfirmed({ onNext }) {
+  return (
+    <section className="case-form ss-card scene-transition veteran-access-confirmed">
+      <span className="font-pixel text-sw-cyan text-sm">SECURE ACCESS</span>
+      <h2 className="font-pixel text-sw-pink text-sm">
+        Access confirmed. Thank you.
+      </h2>
+      <p>
+        Your clearance has been verified. The encrypted case folder will sync
+        shortly.
+      </p>
+      <button type="button" className="ss-btn ss-btn-cyan self-start" onClick={onNext}>
+        Return to workstation
+      </button>
+    </section>
+  )
+}
+
+function OneHourLater({ onNext }) {
+  useEffect(() => {
+    playSfx('missionBriefing')
+  }, [])
+
+  return (
+    <section className="case-glitch ss-card scene-transition veteran-time-skip">
+      <div className="veteran-clock" aria-hidden="true">
+        <span />
+      </div>
+      <h2 className="font-pixel text-sw-cyan text-sm">1 hour later...</h2>
+      <p>Unit Zero internal alerts begin tracing unusual case-folder access.</p>
+      <button type="button" className="ss-btn ss-btn-pink" onClick={onNext}>
+        Enter Zoey's office
+      </button>
+    </section>
+  )
+}
+
+function DomainCheck({ selectedAnswer, onAnswer, onNext }) {
+  const answered = selectedAnswer !== null
+  const correct = selectedAnswer === 'no'
+
+  return (
+    <section className="case-email ss-card scene-transition">
+      <div className="voucher-header veteran-email-header">LINK INSPECTION</div>
+      <p className="text-sw-text2">Hover preview reveals:</p>
+      <div className="veteran-domain-display">https://secure.unitzero.gov.co/login</div>
+      <h3 className="font-pixel text-sw-cyan text-sm">
+        Is this the real Unit Zero website?
+      </h3>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <button
+          type="button"
+          className="ss-btn ss-btn-pink"
+          onClick={() => onAnswer('yes')}
+          disabled={answered}
+        >
+          Yes
+        </button>
+        <button
+          type="button"
+          className="ss-btn ss-btn-cyan"
+          onClick={() => onAnswer('no')}
+          disabled={answered}
+        >
+          No
+        </button>
+      </div>
+      {answered && (
+        <div className={correct ? 'success-banner' : 'breach-banner'}>
+          {correct
+            ? 'Correct. unitzero.gov.co is a lookalike domain.'
+            : 'Not quite. unitzero.gov.co is not the Unit Zero domain.'}
+        </div>
+      )}
+      {answered && (
+        <p className="text-sw-text2">
+          unitzero.gov.co is not the same as unitzero.gov.com. Attackers register
+          close-looking domains so the link feels familiar at a glance.
+        </p>
+      )}
+      {answered && (
+        <button type="button" className="ss-btn ss-btn-cyan self-start" onClick={onNext}>
+          Continue trace
+        </button>
+      )}
+    </section>
+  )
+}
+
+function ZoeyOfficeReveal({ route, onNext, internName }) {
+  const captured = route === 'captured'
+
+  return (
+    <section className="case-scene scene-transition">
+      <div className="case-scene-top">
+        <span>AGENT ZOEY'S OFFICE</span>
+        <span>DAY 8 - 17:25</span>
+      </div>
+
+      <div className="case-office veteran-office">
+        <div className="case-window case-window-left">
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="unit-poster unit-poster-right">
+          UNIT ZERO
+          <br />
+          INCIDENT ROOM
+        </div>
+
+        <PixelPerson
+          role="intern"
+          label={`${internName} - YOU`}
+          position="pixel-intern-left"
+        />
+        <div className="veteran-zoey-real">
+          <PixelPerson role="zoey" label="REAL ZOEY" />
+        </div>
+        {captured && (
+          <div className="veteran-fake-zoey-terminal">
+            <div className="veteran-fake-screen">agentzoey.a</div>
+            <div className="veteran-fake-caption">EMAIL IMPOSTOR</div>
+          </div>
+        )}
+
+        <div className="case-bubble case-bubble-jane veteran-zoey-bubble">
+          <span className="text-sw-yellow">Agent Zoey</span>
+          {captured ? (
+            <p>
+              I did not send that login request. The portal confirmation was the
+              trap closing.
+            </p>
+          ) : route === 'hover' ? (
+            <p>
+              You paused before clicking and found the lookalike domain. That
+              gave us a clean lead.
+            </p>
+          ) : (
+            <p>
+              I did not send that email. Verifying directly kept the attacker
+              out of your account.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <blockquote className="zoey-quote">
+        "This one was designed by professionals, Cadet. You weren't careless -
+        you were targeted. That's the difference between a rookie mistake and a
+        real threat. Now we have a problem to fix."
+      </blockquote>
+
+      <button
+        type="button"
+        className="ss-btn ss-btn-cyan self-end"
+        onClick={onNext}
+      >
+        Trace the attack <IconArrowRight size={16} />
+      </button>
+    </section>
+  )
+}
+
+function TracePuzzle({ selected, onToggle, onSubmit, submitted }) {
+  const selectedSet = new Set(selected)
+  const correctCount = TRACE_INDICATORS.filter(
+    (item) => item.suspicious && selectedSet.has(item.id),
+  ).length
+  const falsePositives = TRACE_INDICATORS.filter(
+    (item) => !item.suspicious && selectedSet.has(item.id),
+  ).length
+  const passed = correctCount === 3 && falsePositives === 0
+  const ready = selected.length === 3
+
+  return (
+    <section className="case-terminal ss-card scene-transition">
+      <div className="case-terminal-header">
+        <span>AGENT ZOEY - TRACE DESK</span>
+        <span>INDICATORS OF COMPROMISE</span>
+      </div>
       <h2 className="font-pixel text-sw-cyan text-sm">
-        Case 01 Veteran - The Double Bluff
+        Trace the phishing attempt
       </h2>
       <p className="text-sw-text2">
-        Advanced phishing investigation coming next.
+        Zoey has pulled five log fragments from the email gateway. Select the
+        three technical indicators that prove this was a phishing attack, then
+        submit your trace report.
       </p>
+      <div className="veteran-trace-status">
+        Selected {selected.length}/3 indicators
+      </div>
+      <div className="veteran-log-list">
+        {TRACE_INDICATORS.map((item) => {
+          const selectedItem = selectedSet.has(item.id)
+          const rowState = submitted
+            ? item.suspicious
+              ? selectedItem
+                ? 'veteran-log-row-correct'
+                : 'veteran-log-row-missed'
+              : selectedItem
+                ? 'veteran-log-row-decoy'
+                : 'veteran-log-row-neutral'
+            : ''
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={`veteran-log-row ${
+                selectedItem ? 'veteran-log-row-selected' : ''
+              } ${rowState}`}
+              onClick={() => onToggle(item.id)}
+              disabled={submitted}
+            >
+              <span>{item.label}</span>
+              {submitted && (
+                <small>
+                  {item.suspicious
+                    ? selectedItem
+                      ? 'Confirmed IOC: '
+                      : 'Missed IOC: '
+                    : selectedItem
+                      ? 'Decoy selected: '
+                      : 'Context only: '}
+                  {item.detail}
+                </small>
+              )}
+            </button>
+          )
+        })}
+      </div>
+      {submitted && (
+        <div className={passed ? 'success-banner' : 'breach-banner'}>
+          {passed
+            ? 'Trace complete. The reply-to, link host, and source reputation identify the attack path.'
+            : 'Trace reviewed. Zoey marks the true IOCs before the final certification.'}
+        </div>
+      )}
+      {submitted && (
+        <p className="text-sw-text2">
+          The useful evidence is technical: where replies go, where the link
+          actually lands, and what the sending infrastructure has done before.
+          Familiar names and convenient timing can mislead you, but they do not
+          prove the attack on their own.
+        </p>
+      )}
       <button
         type="button"
         className="ss-btn ss-btn-cyan self-start"
-        onClick={() => navigate('/play')}
+        onClick={onSubmit}
+        disabled={!submitted && !ready}
       >
-        Return to Case Files
+        {submitted ? 'Begin final certification' : 'Submit trace report'}
       </button>
     </section>
+  )
+}
+
+function VeteranQuiz({
+  answers,
+  currentQuestionIndex,
+  onAnswer,
+  onNextQuestion,
+  onSubmit,
+  submitted,
+}) {
+  const correct = answers.reduce(
+    (count, answer, index) => count + (answer === VETERAN_QUIZ[index].answer ? 1 : 0),
+    0,
+  )
+  const currentQuestion = VETERAN_QUIZ[currentQuestionIndex]
+  const selectedAnswer = answers[currentQuestionIndex]
+  const answered = selectedAnswer !== null
+  const selectedCorrect = selectedAnswer === currentQuestion.answer
+  const isLastQuestion = currentQuestionIndex === VETERAN_QUIZ.length - 1
+  const passed = correct >= 5
+
+  return (
+    <section className="case-debrief scene-transition">
+      <div className="success-banner">FINAL CERTIFICATION - PHISHING FIELD GUIDE</div>
+      <div className="ss-card p-5 flex flex-col gap-4">
+        <h2 className="font-pixel text-sw-cyan text-sm">
+          Case 01 final debrief
+        </h2>
+        <p className="text-sw-text2">
+          This wraps the Rookie bait email and the Veteran double bluff. Each
+          correct answer is worth 10 coins. Passing requires 5 or more correct
+          answers and closes the phishing case arc.
+        </p>
+        {!submitted ? (
+          <>
+            <div className="veteran-quiz-progress">
+              Question {currentQuestionIndex + 1} / {VETERAN_QUIZ.length}
+            </div>
+            <article
+              className={`veteran-quiz-card veteran-quiz-focus ${
+                answered && !selectedCorrect ? 'veteran-quiz-shake' : ''
+              }`}
+            >
+              <h3>{currentQuestion.question}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {currentQuestion.options.map((option, optionIndex) => {
+                  const selected = selectedAnswer === optionIndex
+                  const isCorrect = currentQuestion.answer === optionIndex
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      className={`veteran-answer-btn ${
+                        selected ? 'veteran-answer-selected' : ''
+                      } ${
+                        answered && isCorrect ? 'veteran-answer-correct' : ''
+                      } ${
+                        answered && selected && !isCorrect
+                          ? 'veteran-answer-wrong'
+                          : ''
+                      }`}
+                      onClick={() => onAnswer(currentQuestionIndex, optionIndex)}
+                      disabled={answered}
+                    >
+                      {option}
+                    </button>
+                  )
+                })}
+              </div>
+            </article>
+            {answered && (
+              <div className={selectedCorrect ? 'success-banner' : 'breach-banner'}>
+                {selectedCorrect
+                  ? 'Correct. +10 quiz coins secured.'
+                  : `Not this time. Correct answer: ${
+                      currentQuestion.options[currentQuestion.answer]
+                    }`}
+              </div>
+            )}
+            {answered && (
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan self-start"
+                onClick={isLastQuestion ? onSubmit : onNextQuestion}
+              >
+                {isLastQuestion ? 'View results' : 'Next Question'}
+              </button>
+            )}
+          </>
+        ) : (
+          <>
+            <div className={passed ? 'success-banner' : 'breach-banner'}>
+              {passed ? 'Certification passed' : 'Certification failed'}
+            </div>
+            <div className="veteran-results-grid">
+              <div>
+                <span>Correct</span>
+                <strong>{correct} / 10</strong>
+              </div>
+              <div>
+                <span>Quiz coins</span>
+                <strong>{correct * 10}</strong>
+              </div>
+              <div>
+                <span>Status</span>
+                <strong>{passed ? 'Replay optional' : 'Replay required'}</strong>
+              </div>
+            </div>
+            <p className="text-sw-text2">
+              {passed
+                ? 'You have enough field evidence and quiz score to close the Veteran phishing case.'
+                : 'More than half the answers were missed. Replay the Veteran level before this case can close.'}
+            </p>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start"
+              onClick={onSubmit}
+            >
+              Continue debrief
+            </button>
+          </>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function VeteranDebrief({
+  route,
+  quizCorrect,
+  quizSubmitted,
+  onReplay,
+  onContinue,
+  busy,
+}) {
+  const passed = quizSubmitted && quizCorrect >= 5
+  const failedRoute = route === 'captured'
+
+  return (
+    <section className="case-debrief">
+      <div className={passed && !failedRoute ? 'success-banner' : 'breach-banner'}>
+        {passed && !failedRoute
+          ? 'CASE 01 VETERAN SECURED'
+          : failedRoute
+            ? 'CREDENTIAL CAPTURE - REPLAY REQUIRED'
+            : 'FIELD CHECK FAILED - REPLAY REQUIRED'}
+      </div>
+      <div className="ss-card p-5 flex flex-col gap-4">
+        <div>
+          <h2 className="font-pixel text-sw-cyan text-sm">
+            CASE 01 VETERAN: THE DOUBLE BLUFF
+          </h2>
+          <p className="text-sw-text2">
+            {passed && !failedRoute
+              ? 'You verified the request, traced the infrastructure, and passed the field check.'
+              : 'Review the professional phishing indicators before retrying the Veteran case.'}
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {VETERAN_LESSONS.map((lesson) => (
+            <article key={lesson.title} className="red-flag-card">
+              <IconFlag size={18} />
+              <div>
+                <h3>{lesson.title}</h3>
+                <p>{lesson.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+        {passed && !failedRoute && (
+          <>
+            <div className="badge-card">
+              <span>Badge unlocked</span>
+              <strong>BURNED TWICE, WISER ONCE</strong>
+            </div>
+            <div className="badge-card">
+              <span>Field guide unlocked</span>
+              <strong>PHISHING FIELD GUIDE</strong>
+            </div>
+          </>
+        )}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            type="button"
+            className="ss-btn ss-btn-pink"
+            onClick={onReplay}
+            disabled={busy}
+          >
+            Replay Scene
+          </button>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan"
+            onClick={onContinue}
+            disabled={busy}
+          >
+            {passed && !failedRoute ? 'Continue' : 'Replay Veteran'}
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function VeteranEndScreen({ badge, pointsAwarded, quizCorrect, onReturn, onReplay }) {
+  return (
+    <section className="ss-card p-6 flex flex-col gap-4">
+      <h2 className="font-pixel text-sw-cyan text-sm">
+        Case 01 Veteran Complete
+      </h2>
+      <p className="text-sw-text2">
+        The Double Bluff closed. Quiz score: {quizCorrect}/10.
+      </p>
+      <PixelBadgeCard badge={badge} pointsAwarded={pointsAwarded} />
+      <div className="badge-card">
+        <span>Reference unlock</span>
+        <strong>PHISHING FIELD GUIDE</strong>
+      </div>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <button type="button" className="ss-btn ss-btn-cyan" onClick={onReturn}>
+          Return to Case Files
+        </button>
+        <button type="button" className="ss-btn ss-btn-pink" onClick={onReplay}>
+          Replay Veteran
+        </button>
+      </div>
+    </section>
+  )
+}
+
+function VeteranCase() {
+  const navigate = useNavigate()
+  const { user, token, setUser } = useAuth()
+  const [phase, setPhase] = useState('inbox')
+  const [route, setRoute] = useState(null)
+  const [domainAnswer, setDomainAnswer] = useState(null)
+  const [traceSelected, setTraceSelected] = useState([])
+  const [traceSubmitted, setTraceSubmitted] = useState(false)
+  const [quizAnswers, setQuizAnswers] = useState(
+    () => VETERAN_QUIZ.map(() => null),
+  )
+  const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0)
+  const [quizSubmitted, setQuizSubmitted] = useState(false)
+  const [badge, setBadge] = useState(null)
+  const [pointsAwarded, setPointsAwarded] = useState(0)
+  const [progressError, setProgressError] = useState('')
+  const [resolvingDebrief, setResolvingDebrief] = useState(false)
+  const resolvingRef = useRef(false)
+  const internName = user?.username || 'Nova'
+  const quizCorrect = quizAnswers.reduce(
+    (count, answer, index) => count + (answer === VETERAN_QUIZ[index].answer ? 1 : 0),
+    0,
+  )
+  const passedVeteran = route !== 'captured' && quizSubmitted && quizCorrect >= 5
+
+  function restart() {
+    setPhase('inbox')
+    setRoute(null)
+    setDomainAnswer(null)
+    setTraceSelected([])
+    setTraceSubmitted(false)
+    setQuizAnswers(VETERAN_QUIZ.map(() => null))
+    setCurrentQuizQuestion(0)
+    setQuizSubmitted(false)
+    setBadge(null)
+    setPointsAwarded(0)
+    setProgressError('')
+    setResolvingDebrief(false)
+    resolvingRef.current = false
+  }
+
+  async function spendFailureLife(nextAction) {
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const data = await api.failAttempt(token, {
+        caseId: 1,
+        difficulty: 'veteran',
+      })
+      setUser(data.user)
+      playSfx('lifeLost')
+      playSfx('caseFailed')
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      navigate('/play')
+    } catch (error) {
+      console.error('[progress] Veteran failed attempt update failed', {
+        endpoint: '/progress/fail-attempt',
+        caseId: 1,
+        difficulty: 'veteran',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update lives.')
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  async function finishVeteran() {
+    if (!passedVeteran) {
+      if (route === 'captured') spendFailureLife('replay')
+      else restart()
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const unlockedBadge = BADGES.burnedTwice
+      const data = await api.completeCase(token, {
+        caseId: 1,
+        difficulty: 'veteran',
+        result: 'success',
+        badge: unlockedBadge,
+        bonusPoints: quizCorrect * 10,
+      })
+      setUser(data.user)
+      setBadge(unlockedBadge)
+      setPointsAwarded(data.pointsAwarded)
+      if (data.pointsAwarded > 0) {
+        playSfx('coins')
+        playSfx('badge')
+      }
+      playSfx('caseComplete')
+      setPhase('end')
+    } catch (error) {
+      console.error('[progress] Veteran completion update failed', {
+        endpoint: '/progress/complete-case',
+        caseId: 1,
+        difficulty: 'veteran',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update case progress.')
+    } finally {
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  function toggleTrace(id) {
+    setTraceSelected((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id],
+    )
+  }
+
+  function submitTrace() {
+    if (!traceSubmitted) {
+      setTraceSubmitted(true)
+      return
+    }
+    setPhase('quiz')
+  }
+
+  function answerQuiz(questionIndex, optionIndex) {
+    if (quizAnswers[questionIndex] !== null) return
+    setQuizAnswers((current) =>
+      current.map((answer, index) =>
+        index === questionIndex ? optionIndex : answer,
+      ),
+    )
+    playSfx(
+      optionIndex === VETERAN_QUIZ[questionIndex].answer ? 'correct' : 'wrong',
+    )
+  }
+
+  function nextQuizQuestion() {
+    setCurrentQuizQuestion((value) =>
+      Math.min(value + 1, VETERAN_QUIZ.length - 1),
+    )
+  }
+
+  function submitQuiz() {
+    if (!quizSubmitted) {
+      setQuizSubmitted(true)
+      return
+    }
+    setPhase('debrief')
+  }
+
+  return (
+    <div className="case-shell max-w-5xl mx-auto">
+      <div className="case-title-row">
+        <div>
+          <span className="font-pixel text-sw-pink text-xs">CASE 01 VETERAN</span>
+          <h2 className="font-pixel text-sw-cyan text-sm md:text-base">
+            The Double Bluff
+          </h2>
+        </div>
+      </div>
+      {progressError && (
+        <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
+      )}
+
+      {phase === 'inbox' && (
+        <VeteranInbox
+          internName={internName}
+          onNext={() => setPhase('email')}
+        />
+      )}
+      {phase === 'email' && (
+        <VeteranEmail
+          internName={internName}
+          onClickLink={() => setPhase('portal')}
+          onHoverLink={() => {
+            setRoute('hover')
+            setPhase('domain')
+          }}
+          onMessageZoey={() => {
+            setRoute('message')
+            setPhase('timeSkip')
+          }}
+        />
+      )}
+      {phase === 'portal' && (
+        <VeteranPortal
+          onSubmit={() => {
+            setRoute('captured')
+            setPhase('accessConfirmed')
+          }}
+        />
+      )}
+      {phase === 'accessConfirmed' && (
+        <AccessConfirmed onNext={() => setPhase('timeSkip')} />
+      )}
+      {phase === 'timeSkip' && (
+        <OneHourLater onNext={() => setPhase('zoey')} />
+      )}
+      {phase === 'domain' && (
+        <DomainCheck
+          selectedAnswer={domainAnswer}
+          onAnswer={setDomainAnswer}
+          onNext={() => setPhase('timeSkip')}
+        />
+      )}
+      {phase === 'zoey' && (
+        <ZoeyOfficeReveal
+          route={route}
+          internName={internName}
+          onNext={() => setPhase('trace')}
+        />
+      )}
+      {phase === 'trace' && (
+        <TracePuzzle
+          selected={traceSelected}
+          onToggle={toggleTrace}
+          onSubmit={submitTrace}
+          submitted={traceSubmitted}
+        />
+      )}
+      {phase === 'quiz' && (
+        <VeteranQuiz
+          answers={quizAnswers}
+          currentQuestionIndex={currentQuizQuestion}
+          onAnswer={answerQuiz}
+          onNextQuestion={nextQuizQuestion}
+          onSubmit={submitQuiz}
+          submitted={quizSubmitted}
+        />
+      )}
+      {phase === 'debrief' && (
+        <VeteranDebrief
+          route={route}
+          quizCorrect={quizCorrect}
+          quizSubmitted={quizSubmitted}
+          onReplay={
+            passedVeteran || route !== 'captured'
+              ? restart
+              : () => spendFailureLife('replay')
+          }
+          onContinue={
+            passedVeteran
+              ? finishVeteran
+              : route === 'captured'
+                ? () => spendFailureLife('replay')
+                : restart
+          }
+          busy={resolvingDebrief}
+        />
+      )}
+      {phase === 'end' && (
+        <VeteranEndScreen
+          badge={badge}
+          pointsAwarded={pointsAwarded}
+          quizCorrect={quizCorrect}
+          onReturn={() => navigate('/play')}
+          onReplay={restart}
+        />
+      )}
+    </div>
   )
 }
 
@@ -539,9 +1582,9 @@ export default function Case() {
   }
 
   if (!hasLives) return <NoLivesCase />
-  if (!isCaseUnlocked(user, numericCaseId)) return <LockedCase />
+  if (!isCaseModeUnlocked(user, numericCaseId, difficulty)) return <LockedCase />
   if (numericCaseId !== 1) return <FutureCase caseId={numericCaseId} />
-  if (difficulty === 'veteran') return <VeteranPlaceholder />
+  if (difficulty === 'veteran') return <VeteranCase />
 
   function nextIntro() {
     if (stepIndex < INTRO_STEPS.length - 1) {
