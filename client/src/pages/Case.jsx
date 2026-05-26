@@ -232,7 +232,7 @@ const CASE2_THREADS = [
     source: 'GlowLoop social feed',
     reportId: 'GL-2048-A',
     confidence: 61,
-    queueNote: 'Two users forwarded this comment chain.',
+    queueNote: 'Forwarded by two students in Emma\'s year.',
     evidenceLabel: 'Open replies',
     correctAction: 'flag',
     profile: { handle: '@maxbyte', posts: 42, reports: 2, relation: 'classmate' },
@@ -250,7 +250,7 @@ const CASE2_THREADS = [
     source: 'Photo post replies',
     reportId: 'GL-2048-B',
     confidence: 58,
-    queueNote: "Photo replies were reported from Emma's latest post.",
+    queueNote: 'Pulled from comments under Emma\'s latest photo.',
     evidenceLabel: 'Open replies',
     correctAction: 'flag',
     profile: { handle: '@mirrorfail', posts: 18, reports: 1, relation: 'unknown' },
@@ -268,7 +268,7 @@ const CASE2_THREADS = [
     source: 'GlowLoop replies',
     reportId: 'GL-2048-C',
     confidence: 54,
-    queueNote: 'Several replies arrived close together.',
+    queueNote: 'A short burst of replies after Emma joined the thread.',
     evidenceLabel: 'Open more replies',
     correctAction: 'flag',
     profile: { handle: '@crashpost', posts: 103, reports: 3, relation: 'same year group' },
@@ -288,7 +288,7 @@ const CASE2_THREADS = [
     source: 'Private group export',
     reportId: 'GL-2048-D',
     confidence: 37,
-    queueNote: 'A group chat export came in with missing context.',
+    queueNote: 'Export from a group chat Emma used to be active in.',
     evidenceLabel: 'Open older messages',
     correctAction: 'flag',
     profile: { handle: 'Group: ArtTable', posts: 12, reports: 0, relation: 'friend group' },
@@ -321,7 +321,7 @@ const CASE2_THREADS = [
     source: 'Cross-post activity log',
     reportId: 'GL-2048-E',
     confidence: 33,
-    queueNote: 'One account appears in several short comment threads.',
+    queueNote: 'Short comments copied from a few of Emma\'s recent posts.',
     evidenceLabel: 'Open post history',
     correctAction: 'flag',
     profile: { handle: '@johnhaha67', posts: 9, reports: 0, relation: 'follows Emma' },
@@ -348,7 +348,7 @@ const CASE2_THREADS = [
     source: 'GlowLoop class feed',
     reportId: 'GL-2048-F',
     confidence: 46,
-    queueNote: 'A disagreement was picked up by the filter.',
+    queueNote: 'A classroom thread with a disagreement in the replies.',
     evidenceLabel: 'Open reply context',
     correctAction: 'dismiss',
     profile: { handle: '@rowan7', posts: 27, reports: 0, relation: 'project partner' },
@@ -366,7 +366,7 @@ const CASE2_THREADS = [
     source: 'GlowLoop game clip replies',
     reportId: 'GL-2048-G',
     confidence: 49,
-    queueNote: 'A game clip reply was sent for review.',
+    queueNote: 'A clip from last night\'s game session.',
     evidenceLabel: 'Open reaction chain',
     correctAction: 'dismiss',
     profile: { handle: '@maya-lol', posts: 64, reports: 0, relation: 'friend' },
@@ -384,7 +384,7 @@ const CASE2_THREADS = [
     source: 'GlowLoop creative post',
     reportId: 'GL-2048-H',
     confidence: 41,
-    queueNote: 'Tone filter held this art comment for review.',
+    queueNote: 'A comment under Emma\'s art club post.',
     evidenceLabel: 'Open comment context',
     correctAction: 'dismiss',
     profile: { handle: '@sketchroom', posts: 88, reports: 0, relation: 'art club' },
@@ -1816,9 +1816,6 @@ function Case2ThreadFile({
   decision,
   evidenceOpen,
   processing,
-  feedback,
-  streak,
-  livesRemaining,
   onReveal,
   onDecision,
   onNext,
@@ -1836,18 +1833,13 @@ function Case2ThreadFile({
           <h3>{thread.title}</h3>
           <p>{thread.source} - {thread.reportId}</p>
         </div>
-        <div className="case2-confidence">
-          <span>Platform read</span>
-          <strong>{thread.confidence}%</strong>
-          <em>unverified</em>
-        </div>
       </div>
 
       <div className="case2-file-grid">
         <section className="case2-social-window">
           <div className="case2-social-window-bar">
             <span>GlowLoop thread</span>
-            <span className="case2-notification-pulse">live copy</span>
+            <span>{thread.reportId}</span>
           </div>
           <div className="case2-message-list case2-message-focus">
             {visibleMessages.map((message, messageIndex) => (
@@ -1874,8 +1866,6 @@ function Case2ThreadFile({
           <div className="case2-profile-card">
             <strong>{thread.profile.handle}</strong>
             <span>{thread.profile.relation}</span>
-            <span>{thread.profile.posts} posts scanned</span>
-            <span>{thread.profile.reports} prior reports</span>
           </div>
           <button
             type="button"
@@ -1883,7 +1873,7 @@ function Case2ThreadFile({
             onClick={onReveal}
             disabled={evidenceOpen || processing}
           >
-            {evidenceOpen ? 'Evidence Open' : thread.evidenceLabel}
+            {evidenceOpen ? 'Opened' : thread.evidenceLabel}
           </button>
           {evidenceOpen && (
             <div className="case2-timeline" aria-label="Expanded evidence">
@@ -1899,14 +1889,6 @@ function Case2ThreadFile({
       </div>
 
       <div className="case2-action-console">
-        <div className="case2-streak">
-          <span>Cadet streak</span>
-          <strong>{streak}</strong>
-        </div>
-        <div className={`case2-life-readout ${livesRemaining <= 1 ? 'critical' : ''}`}>
-          <span>Lives</span>
-          <strong>{livesRemaining}</strong>
-        </div>
         <div className="case2-decision-row" role="group" aria-label={`${thread.title} decision`}>
           <button
             type="button"
@@ -1929,11 +1911,6 @@ function Case2ThreadFile({
             DISMISS
           </button>
         </div>
-        <div className={`case2-processing ${processing ? 'active' : ''}`}>
-          {processing
-            ? 'Processing moderation decision...'
-            : feedback || 'Decision pending'}
-        </div>
         <button
           type="button"
           className="ss-btn ss-btn-cyan"
@@ -1952,9 +1929,6 @@ function Case2ReviewBoard({
   activeIndex,
   evidenceOpen,
   processing,
-  feedback,
-  streak,
-  livesRemaining,
   onOpen,
   onReveal,
   onDecision,
@@ -1993,9 +1967,6 @@ function Case2ReviewBoard({
           decision={decisions[activeThread.id]}
           evidenceOpen={evidenceOpen}
           processing={processing}
-          feedback={feedback}
-          streak={streak}
-          livesRemaining={livesRemaining}
           onReveal={onReveal}
           onDecision={onDecision}
           onNext={onNext}
@@ -2161,8 +2132,6 @@ function Case2Rookie() {
   const [activeThreadIndex, setActiveThreadIndex] = useState(0)
   const [openEvidence, setOpenEvidence] = useState({})
   const [processingDecision, setProcessingDecision] = useState(false)
-  const [decisionFeedback, setDecisionFeedback] = useState('')
-  const [streak, setStreak] = useState(0)
   const [badge, setBadge] = useState(null)
   const [pointsAwarded, setPointsAwarded] = useState(0)
   const [progressError, setProgressError] = useState('')
@@ -2194,8 +2163,6 @@ function Case2Rookie() {
     setActiveThreadIndex(0)
     setOpenEvidence({})
     setProcessingDecision(false)
-    setDecisionFeedback('')
-    setStreak(0)
     setBadge(null)
     setPointsAwarded(0)
     setProgressError('')
@@ -2207,34 +2174,21 @@ function Case2Rookie() {
     if (processingDecision || decisions[threadId]) return
     playSfx('click')
     setProcessingDecision(true)
-    setDecisionFeedback('')
     window.setTimeout(() => {
-      const thread = CASE2_THREADS.find((item) => item.id === threadId)
-      const correct = thread?.correctAction === action
       setDecisions((current) => ({ ...current, [threadId]: action }))
-      setStreak((current) => (correct ? current + 1 : 0))
-      setDecisionFeedback(
-        correct
-          ? action === 'flag'
-            ? 'CASE FILE UPDATED - escalation logged'
-            : 'THREAD ARCHIVED - no action filed'
-          : 'SIGNAL CONFLICT - Ricky will review this call',
-      )
-      playSfx(correct ? 'correct' : 'wrong')
+      playSfx('click')
       setProcessingDecision(false)
     }, 720)
   }
 
   function revealEvidence(threadId) {
     setOpenEvidence((current) => ({ ...current, [threadId]: true }))
-      setDecisionFeedback('Drawer opened')
     playSfx('click')
   }
 
   function openThread(index) {
     if (processingDecision) return
     setActiveThreadIndex(index)
-    setDecisionFeedback('')
   }
 
   function nextThreadOrSubmit() {
@@ -2243,7 +2197,6 @@ function Case2Rookie() {
     if (!decisions[activeThread.id]) return
     if (activeThreadIndex < CASE2_THREADS.length - 1) {
       setActiveThreadIndex((value) => value + 1)
-      setDecisionFeedback('')
       playSfx('click')
       return
     }
@@ -2251,7 +2204,6 @@ function Case2Rookie() {
       const firstUnresolved = CASE2_THREADS.findIndex((thread) => !decisions[thread.id])
       if (firstUnresolved >= 0) {
         setActiveThreadIndex(firstUnresolved)
-        setDecisionFeedback('Unresolved file reopened')
       }
       return
     }
@@ -2365,9 +2317,6 @@ function Case2Rookie() {
           activeIndex={activeThreadIndex}
           evidenceOpen={Boolean(openEvidence[CASE2_THREADS[activeThreadIndex].id])}
           processing={processingDecision}
-          feedback={decisionFeedback}
-          streak={streak}
-          livesRemaining={user?.livesRemaining ?? 0}
           onOpen={openThread}
           onReveal={() => revealEvidence(CASE2_THREADS[activeThreadIndex].id)}
           onDecision={setDecision}

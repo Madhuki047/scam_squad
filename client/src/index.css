@@ -2388,11 +2388,11 @@ html.ss-high-contrast {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: auto auto minmax(12rem, 1fr) minmax(12rem, 1.2fr) auto;
+  grid-template-columns: minmax(12rem, 1fr) auto;
   gap: 0.75rem;
   align-items: center;
   margin-top: 1rem;
-  border-top: 1px solid rgba(93, 213, 232, 0.25);
+  border-top: 1px solid rgba(93, 213, 232, 0.16);
   padding-top: 1rem;
 }
 
