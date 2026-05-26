@@ -111,12 +111,13 @@ function PhoneIntro({ onComplete, busy, error }) {
   useEffect(() => {
     if (answered || finished) {
       stopSfxLoop('phoneRing')
-      return undefined
     }
-
-    startSfxLoop('phoneRing')
     return () => stopSfxLoop('phoneRing')
   }, [answered, finished])
+
+  function startRingFromScene() {
+    if (!answered && !finished) startSfxLoop('phoneRing')
+  }
 
   async function advance() {
     if (!answered) {
@@ -163,7 +164,10 @@ function PhoneIntro({ onComplete, busy, error }) {
   }
 
   return (
-    <section className="ss-card home-phone-card">
+    <section
+      className="ss-card home-phone-card"
+      onPointerDown={startRingFromScene}
+    >
       <div className="home-phone-scene">
         <div className={`home-phone ${answered ? 'home-phone-answered' : ''}`}>
           <div className="home-phone-receiver" />

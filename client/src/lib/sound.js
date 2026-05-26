@@ -54,6 +54,11 @@ function getPhoneRingAudio() {
   return phoneRingAudio
 }
 
+function playPhoneRing() {
+  const audio = getPhoneRingAudio()
+  return audio.play()
+}
+
 function gainNode(ctx, volume) {
   const gain = ctx.createGain()
   gain.gain.setValueAtTime(0.0001, ctx.currentTime)
@@ -206,7 +211,7 @@ export function playSfx(name) {
       tone(260, 0.06, VOLUME.pickup, 'square', 0.025)
       break
     case 'phoneRing':
-      getPhoneRingAudio().play().catch(() => {})
+      playPhoneRing().catch(() => {})
       break
     case 'missionBriefing':
       if (!recentlyPlayed('missionBriefing', 900)) missionBriefingCue()
@@ -250,8 +255,14 @@ export function playSfx(name) {
 export function startSfxLoop(name) {
   if (muted || loops.has(name)) return
   if (name === 'phoneRing') {
-    playSfx(name)
-    loops.set(name, 'audio')
+    const audio = getPhoneRingAudio()
+    unlockAudio()
+    audio
+      .play()
+      .then(() => {
+        if (!audio.paused) loops.set(name, 'audio')
+      })
+      .catch(() => {})
     return
   }
   playSfx(name)
