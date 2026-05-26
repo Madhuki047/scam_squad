@@ -669,13 +669,27 @@ function VeteranEmail({ onClickLink, onHoverLink, onMessageZoey, internName }) {
         </button>
       </div>
       <div className="case-choice-hint">
-        This one has no typos, no prize, and no obvious panic hook.
+        Choose one of the options to click the link, hover over the link or contact Agent Zoey for confirmation.
       </div>
     </section>
   )
 }
 
 function VeteranPortal({ onSubmit }) {
+  const [credentials, setCredentials] = useState({
+    username: '',
+    password: '',
+    accessCode: '',
+  })
+  const canSubmit =
+    credentials.username.trim() &&
+    credentials.password.trim() &&
+    credentials.accessCode.trim()
+
+  function updateField(field, value) {
+    setCredentials((current) => ({ ...current, [field]: value }))
+  }
+
   return (
     <section className="case-form ss-card scene-transition">
       <h2 className="font-pixel text-sw-pink text-sm">Unit Zero Secure Access</h2>
@@ -684,40 +698,78 @@ function VeteranPortal({ onSubmit }) {
       </p>
       <label>
         Unit Zero username
-        <input className="ss-input" type="text" defaultValue="cadet.user" />
+        <input
+          className="ss-input"
+          type="text"
+          value={credentials.username}
+          onChange={(event) => updateField('username', event.target.value)}
+          placeholder="username"
+        />
       </label>
       <label>
         Password
-        <input className="ss-input" type="password" defaultValue="casefiles" />
+        <input
+          className="ss-input"
+          type="password"
+          value={credentials.password}
+          onChange={(event) => updateField('password', event.target.value)}
+          placeholder="password"
+        />
       </label>
       <label>
         Access code
-        <input className="ss-input" type="text" defaultValue="S109" />
+        <input
+          className="ss-input"
+          type="text"
+          value={credentials.accessCode}
+          onChange={(event) => updateField('accessCode', event.target.value)}
+          placeholder="access code"
+        />
       </label>
-      <button type="button" className="ss-btn ss-btn-red" onClick={onSubmit}>
+      <button
+        type="button"
+        className="ss-btn ss-btn-red"
+        onClick={onSubmit}
+        disabled={!canSubmit}
+      >
         Verify Access
       </button>
     </section>
   )
 }
 
-function CredentialCaptureReveal({ onNext }) {
+function AccessConfirmed({ onNext }) {
   return (
-    <section className="case-glitch ss-card scene-transition">
-      <span className="font-pixel text-sw-red text-sm">
+    <section className="case-form ss-card scene-transition veteran-access-confirmed">
+      <span className="font-pixel text-sw-cyan text-sm">SECURE ACCESS</span>
+      <h2 className="font-pixel text-sw-pink text-sm">
         Access confirmed. Thank you.
-      </span>
-      <div className="glitch-bars">
-        <span />
-        <span />
+      </h2>
+      <p>
+        Your clearance has been verified. The encrypted case folder will sync
+        shortly.
+      </p>
+      <button type="button" className="ss-btn ss-btn-cyan self-start" onClick={onNext}>
+        Return to workstation
+      </button>
+    </section>
+  )
+}
+
+function OneHourLater({ onNext }) {
+  useEffect(() => {
+    playSfx('missionBriefing')
+  }, [])
+
+  return (
+    <section className="case-glitch ss-card scene-transition veteran-time-skip">
+      <div className="veteran-clock" aria-hidden="true">
         <span />
       </div>
-      <p>
-        The portal was a credential capture page. The attacker now has whatever
-        was typed into the form.
-      </p>
+      <h2 className="font-pixel text-sw-cyan text-sm">1 hour later...</h2>
+      <p>Unit Zero internal alerts begin tracing unusual case-folder access.</p>
       <button type="button" className="ss-btn ss-btn-pink" onClick={onNext}>
-        Alert Agent Zoey
+        Enter Zoey's office
       </button>
     </section>
   )
@@ -775,45 +827,78 @@ function DomainCheck({ selectedAnswer, onAnswer, onNext }) {
   )
 }
 
-function ZoeyVeteranBrief({ route, onNext }) {
+function ZoeyOfficeReveal({ route, onNext, internName }) {
+  const captured = route === 'captured'
+
   return (
-    <section className="case-zoey ss-card scene-transition">
-      <div className="agent-avatar">
-        <PixelPerson role="zoey" label="AGENT ZOEY" />
+    <section className="case-scene scene-transition">
+      <div className="case-scene-top">
+        <span>AGENT ZOEY'S OFFICE</span>
+        <span>DAY 8 - 17:25</span>
       </div>
-      <div>
-        <h2 className="font-pixel text-sw-cyan text-sm">Agent Zoey</h2>
-        {route === 'message' && (
-          <p>
-            I did not send that email. Good instinct verifying it directly
-            instead of trusting the thread.
-          </p>
+
+      <div className="case-office veteran-office">
+        <div className="case-window case-window-left">
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="unit-poster unit-poster-right">
+          UNIT ZERO
+          <br />
+          INCIDENT ROOM
+        </div>
+
+        <PixelPerson
+          role="intern"
+          label={`${internName} - YOU`}
+          position="pixel-intern-left"
+        />
+        <div className="veteran-zoey-real">
+          <PixelPerson role="zoey" label="REAL ZOEY" />
+        </div>
+        {captured && (
+          <div className="veteran-fake-zoey-terminal">
+            <div className="veteran-fake-screen">agentzoey.a</div>
+            <div className="veteran-fake-caption">EMAIL IMPOSTOR</div>
+          </div>
         )}
-        {route === 'hover' && (
-          <p>
-            Good catch on the domain. That one letter sequence was the whole
-            trap.
-          </p>
-        )}
-        {route === 'captured' && (
-          <p>
-            We caught it after the fake portal confirmed access. Assume the
-            credentials are exposed and contain the breach.
-          </p>
-        )}
-        <blockquote className="zoey-quote mt-3">
-          "This one was designed by professionals, Cadet. You weren't careless -
-          you were targeted. That's the difference between a rookie mistake and
-          a real threat. Now we have a problem to fix."
-        </blockquote>
-        <button
-          type="button"
-          className="ss-btn ss-btn-cyan mt-3"
-          onClick={onNext}
-        >
-          Trace indicators
-        </button>
+
+        <div className="case-bubble case-bubble-jane veteran-zoey-bubble">
+          <span className="text-sw-yellow">Agent Zoey</span>
+          {captured ? (
+            <p>
+              I did not send that login request. The portal confirmation was the
+              trap closing.
+            </p>
+          ) : route === 'hover' ? (
+            <p>
+              You paused before clicking and found the lookalike domain. That
+              gave us a clean lead.
+            </p>
+          ) : (
+            <p>
+              I did not send that email. Verifying directly kept the attacker
+              out of your account.
+            </p>
+          )}
+        </div>
       </div>
+
+      <blockquote className="zoey-quote">
+        "This one was designed by professionals, Cadet. You weren't careless -
+        you were targeted. That's the difference between a rookie mistake and a
+        real threat. Now we have a problem to fix."
+      </blockquote>
+
+      <button
+        type="button"
+        className="ss-btn ss-btn-cyan self-end"
+        onClick={onNext}
+      >
+        Trace the attack <IconArrowRight size={16} />
+      </button>
     </section>
   )
 }
@@ -827,41 +912,87 @@ function TracePuzzle({ selected, onToggle, onSubmit, submitted }) {
     (item) => !item.suspicious && selectedSet.has(item.id),
   ).length
   const passed = correctCount === 3 && falsePositives === 0
+  const ready = selected.length === 3
 
   return (
     <section className="case-terminal ss-card scene-transition">
       <div className="case-terminal-header">
-        <span>SERVER LOG TRACE</span>
-        <span>IOC REVIEW</span>
+        <span>AGENT ZOEY - TRACE DESK</span>
+        <span>INDICATORS OF COMPROMISE</span>
       </div>
+      <h2 className="font-pixel text-sw-cyan text-sm">
+        Trace the phishing attempt
+      </h2>
       <p className="text-sw-text2">
-        Select the three indicators that prove this was a phishing attempt.
+        Zoey has pulled five log fragments from the email gateway. Select the
+        three technical indicators that prove this was a phishing attack, then
+        submit your trace report.
       </p>
+      <div className="veteran-trace-status">
+        Selected {selected.length}/3 indicators
+      </div>
       <div className="veteran-log-list">
-        {TRACE_INDICATORS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={`veteran-log-row ${
-              selectedSet.has(item.id) ? 'veteran-log-row-selected' : ''
-            }`}
-            onClick={() => onToggle(item.id)}
-            disabled={submitted}
-          >
-            <span>{item.label}</span>
-            {submitted && <small>{item.detail}</small>}
-          </button>
-        ))}
+        {TRACE_INDICATORS.map((item) => {
+          const selectedItem = selectedSet.has(item.id)
+          const rowState = submitted
+            ? item.suspicious
+              ? selectedItem
+                ? 'veteran-log-row-correct'
+                : 'veteran-log-row-missed'
+              : selectedItem
+                ? 'veteran-log-row-decoy'
+                : 'veteran-log-row-neutral'
+            : ''
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={`veteran-log-row ${
+                selectedItem ? 'veteran-log-row-selected' : ''
+              } ${rowState}`}
+              onClick={() => onToggle(item.id)}
+              disabled={submitted}
+            >
+              <span>{item.label}</span>
+              {submitted && (
+                <small>
+                  {item.suspicious
+                    ? selectedItem
+                      ? 'Confirmed IOC: '
+                      : 'Missed IOC: '
+                    : selectedItem
+                      ? 'Decoy selected: '
+                      : 'Context only: '}
+                  {item.detail}
+                </small>
+              )}
+            </button>
+          )
+        })}
       </div>
       {submitted && (
         <div className={passed ? 'success-banner' : 'breach-banner'}>
           {passed
-            ? 'Trace complete. The infrastructure, reply-to, and link domain line up.'
-            : 'Zoey helps you isolate the real indicators before the final briefing.'}
+            ? 'Trace complete. The reply-to, link host, and source reputation identify the attack path.'
+            : 'Trace reviewed. Zoey marks the true IOCs before the final certification.'}
         </div>
       )}
-      <button type="button" className="ss-btn ss-btn-cyan self-start" onClick={onSubmit}>
-        {submitted ? 'Open field quiz' : 'Submit indicators'}
+      {submitted && (
+        <p className="text-sw-text2">
+          The useful evidence is technical: where replies go, where the link
+          actually lands, and what the sending infrastructure has done before.
+          Familiar names and convenient timing can mislead you, but they do not
+          prove the attack on their own.
+        </p>
+      )}
+      <button
+        type="button"
+        className="ss-btn ss-btn-cyan self-start"
+        onClick={onSubmit}
+        disabled={!submitted && !ready}
+      >
+        {submitted ? 'Begin final certification' : 'Submit trace report'}
       </button>
     </section>
   )
@@ -876,11 +1007,15 @@ function VeteranQuiz({ answers, onAnswer, onSubmit, submitted }) {
 
   return (
     <section className="case-debrief scene-transition">
-      <div className="success-banner">FINAL MCQ - PHISHING FIELD CHECK</div>
+      <div className="success-banner">FINAL CERTIFICATION - PHISHING FIELD GUIDE</div>
       <div className="ss-card p-5 flex flex-col gap-4">
+        <h2 className="font-pixel text-sw-cyan text-sm">
+          Case 01 final debrief
+        </h2>
         <p className="text-sw-text2">
-          Each correct answer is worth 10 coins. Passing requires 5 or more
-          correct answers.
+          This wraps the Rookie bait email and the Veteran double bluff. Each
+          correct answer is worth 10 coins. Passing requires 5 or more correct
+          answers and closes the phishing case arc.
         </p>
         <div className="veteran-quiz-list">
           {VETERAN_QUIZ.map((item, questionIndex) => (
@@ -1188,7 +1323,6 @@ function VeteranCase() {
             The Double Bluff
           </h2>
         </div>
-        <div className="case-threat">Hard phishing continuation</div>
       </div>
       {progressError && (
         <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
@@ -1210,7 +1344,7 @@ function VeteranCase() {
           }}
           onMessageZoey={() => {
             setRoute('message')
-            setPhase('zoey')
+            setPhase('timeSkip')
           }}
         />
       )}
@@ -1218,22 +1352,29 @@ function VeteranCase() {
         <VeteranPortal
           onSubmit={() => {
             setRoute('captured')
-            setPhase('captured')
+            setPhase('accessConfirmed')
           }}
         />
       )}
-      {phase === 'captured' && (
-        <CredentialCaptureReveal onNext={() => setPhase('zoey')} />
+      {phase === 'accessConfirmed' && (
+        <AccessConfirmed onNext={() => setPhase('timeSkip')} />
+      )}
+      {phase === 'timeSkip' && (
+        <OneHourLater onNext={() => setPhase('zoey')} />
       )}
       {phase === 'domain' && (
         <DomainCheck
           selectedAnswer={domainAnswer}
           onAnswer={setDomainAnswer}
-          onNext={() => setPhase('zoey')}
+          onNext={() => setPhase('timeSkip')}
         />
       )}
       {phase === 'zoey' && (
-        <ZoeyVeteranBrief route={route} onNext={() => setPhase('trace')} />
+        <ZoeyOfficeReveal
+          route={route}
+          internName={internName}
+          onNext={() => setPhase('trace')}
+        />
       )}
       {phase === 'trace' && (
         <TracePuzzle
