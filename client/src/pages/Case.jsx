@@ -1936,6 +1936,13 @@ function Case2ThreadPreview({ thread }) {
     },
   }
   const copy = previewCopy[thread.id] || previewCopy['direct-insults']
+  const previewInitials = copy.title
+    .replace('@', '')
+    .split(/\s|-/)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 
   return (
     <div className={`case2-thread-preview preview-${thread.id}`} aria-hidden="true">
@@ -1944,19 +1951,63 @@ function Case2ThreadPreview({ thread }) {
         <span>{thread.moment}</span>
       </div>
       <div className="case2-preview-body">
-        <div className="case2-preview-avatar">{copy.title.slice(0, 2).replace('@', '').toUpperCase()}</div>
+        <div className="case2-preview-avatar">{previewInitials}</div>
         <div className="case2-preview-main">
           <strong>{copy.title}</strong>
           <p>{copy.caption}</p>
           <div className="case2-preview-art">
-            <span className="shape shape-one" />
-            <span className="shape shape-two" />
-            <span className="shape shape-three" />
-            <span className="shape shape-four" />
+            <div className="visual visual-profile">
+              <span className="profile-ring" />
+              <span className="profile-photo" />
+              <span className="profile-caption" />
+              <span className="profile-reply" />
+            </div>
+            <div className="visual visual-photo">
+              <span className="photo-sky" />
+              <span className="photo-person" />
+              <span className="photo-flash" />
+              <span className="photo-comment" />
+            </div>
+            <div className="visual visual-class">
+              <span className="class-header" />
+              <span className="class-post" />
+              <span className="class-avatar a" />
+              <span className="class-avatar b" />
+              <span className="class-avatar c" />
+            </div>
+            <div className="visual visual-chat">
+              <span className="chat-bubble left" />
+              <span className="chat-bubble right" />
+              <span className="chat-bubble left short" />
+              <span className="chat-seen" />
+            </div>
+            <div className="visual visual-snippets">
+              <span className="snippet-card one" />
+              <span className="snippet-card two" />
+              <span className="snippet-card three" />
+            </div>
+            <div className="visual visual-project">
+              <span className="poster-page" />
+              <span className="poster-title" />
+              <span className="poster-chart" />
+              <span className="poster-note" />
+            </div>
+            <div className="visual visual-game">
+              <span className="game-screen" />
+              <span className="game-reticle" />
+              <span className="game-score" />
+              <span className="game-chat" />
+            </div>
+            <div className="visual visual-art">
+              <span className="canvas-frame" />
+              <span className="canvas-stroke one" />
+              <span className="canvas-stroke two" />
+              <span className="canvas-palette" />
+            </div>
           </div>
           <div className="case2-preview-reactions">
-            <span>like</span>
-            <span>reply</span>
+            <span className="reaction-icon">like</span>
+            <span className="reaction-icon">reply</span>
             <span>{copy.meta}</span>
           </div>
         </div>

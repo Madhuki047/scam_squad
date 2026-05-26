@@ -2679,45 +2679,315 @@ html.ss-high-contrast {
     rgba(13, 0, 30, 0.72);
 }
 
-.case2-preview-art .shape {
+.case2-preview-art .visual {
+  display: none;
+  position: absolute;
+  inset: 0;
+}
+
+.preview-direct-insults .visual-profile,
+.preview-appearance-mockery .visual-photo,
+.preview-repeated-targeting .visual-class,
+.preview-group-exclusion .visual-chat,
+.preview-plausible-deniability .visual-snippets,
+.preview-one-off-disagreement .visual-project,
+.preview-consensual-banter .visual-game,
+.preview-constructive-comment .visual-art {
+  display: block;
+}
+
+.case2-preview-art .visual span {
   position: absolute;
   display: block;
-  border: 1px solid rgba(93, 213, 232, 0.3);
-  background: rgba(93, 213, 232, 0.1);
 }
 
-.case2-preview-art .shape-one {
-  left: 0.75rem;
-  top: 0.75rem;
-  width: 38%;
-  height: 1rem;
+.profile-ring {
+  left: 0.8rem;
+  top: 0.7rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid rgba(255, 78, 201, 0.55);
+  border-radius: 999px;
+  box-shadow: 0 0 0.8rem rgba(255, 78, 201, 0.16);
 }
 
-.case2-preview-art .shape-two {
+.profile-photo {
+  left: 4rem;
   right: 0.8rem;
-  top: 0.85rem;
-  width: 2.2rem;
-  height: 2.2rem;
-  border-color: rgba(255, 78, 201, 0.38);
+  top: 0.7rem;
+  height: 3.4rem;
+  border: 1px solid rgba(93, 213, 232, 0.24);
+  border-radius: 0.28rem;
+  background:
+    radial-gradient(circle at 72% 34%, rgba(255, 217, 61, 0.25), transparent 14%),
+    linear-gradient(135deg, rgba(93, 213, 232, 0.18), rgba(255, 78, 201, 0.1));
+}
+
+.profile-caption,
+.profile-reply {
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 1.35rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: rgba(228, 198, 255, 0.16);
+}
+
+.profile-reply {
+  right: 42%;
+  bottom: 0.65rem;
+  background: rgba(255, 78, 201, 0.18);
+}
+
+.photo-sky {
+  inset: 0.55rem;
+  border-radius: 0.35rem;
+  background:
+    radial-gradient(circle at 68% 24%, rgba(255, 217, 61, 0.5), transparent 10%),
+    linear-gradient(160deg, rgba(93, 213, 232, 0.32), rgba(255, 78, 201, 0.18) 48%, rgba(8, 7, 22, 0.88));
+}
+
+.photo-person {
+  left: 44%;
+  bottom: 1rem;
+  width: 1.4rem;
+  height: 2.9rem;
+  border-radius: 999px 999px 0.3rem 0.3rem;
+  background: rgba(228, 198, 255, 0.34);
+}
+
+.photo-flash {
+  right: 1.2rem;
+  top: 1rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 999px;
+  background: rgba(255, 217, 61, 0.24);
+}
+
+.photo-comment {
+  left: 1rem;
+  bottom: 0.85rem;
+  width: 44%;
+  height: 0.65rem;
+  border-radius: 999px;
+  background: rgba(8, 7, 22, 0.55);
+}
+
+.class-header {
+  left: 0.75rem;
+  right: 0.75rem;
+  top: 0.65rem;
+  height: 1rem;
+  border-radius: 0.22rem;
+  background: rgba(93, 213, 232, 0.15);
+}
+
+.class-post {
+  left: 0.75rem;
+  right: 0.75rem;
+  top: 2rem;
+  height: 2.1rem;
+  border: 1px solid rgba(255, 217, 61, 0.22);
+  border-radius: 0.28rem;
+  background: rgba(255, 217, 61, 0.08);
+}
+
+.class-avatar {
+  bottom: 0.8rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1px solid rgba(255, 78, 201, 0.45);
   border-radius: 999px;
   background: rgba(255, 78, 201, 0.1);
 }
 
-.case2-preview-art .shape-three {
-  left: 0.75rem;
-  right: 0.75rem;
-  bottom: 1.55rem;
-  height: 0.55rem;
-  background: rgba(228, 198, 255, 0.1);
+.class-avatar.a {
+  left: 1rem;
 }
 
-.case2-preview-art .shape-four {
-  left: 0.75rem;
-  bottom: 0.7rem;
-  width: 54%;
-  height: 0.55rem;
-  border-color: rgba(255, 217, 61, 0.28);
+.class-avatar.b {
+  left: 2rem;
+}
+
+.class-avatar.c {
+  left: 3rem;
+  opacity: 0.42;
+}
+
+.chat-bubble {
+  min-width: 42%;
+  height: 0.95rem;
+  border-radius: 999px;
+  background: rgba(93, 213, 232, 0.14);
+}
+
+.chat-bubble.left {
+  left: 0.8rem;
+  top: 0.8rem;
+}
+
+.chat-bubble.right {
+  right: 0.8rem;
+  top: 2.15rem;
+  background: rgba(255, 78, 201, 0.14);
+}
+
+.chat-bubble.short {
+  top: 3.5rem;
+  width: 32%;
+}
+
+.chat-seen {
+  right: 0.9rem;
+  bottom: 0.75rem;
+  width: 3.8rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: rgba(228, 198, 255, 0.14);
+}
+
+.snippet-card {
+  top: 0.7rem;
+  width: 29%;
+  bottom: 0.75rem;
+  border: 1px solid rgba(93, 213, 232, 0.22);
+  border-radius: 0.28rem;
+  background:
+    linear-gradient(180deg, rgba(93, 213, 232, 0.16), transparent 38%),
+    rgba(8, 7, 22, 0.58);
+}
+
+.snippet-card::after {
+  content: 'lol';
+  position: absolute;
+  left: 0.35rem;
+  bottom: 0.45rem;
+  color: rgba(228, 198, 255, 0.54);
+  font-size: 0.62rem;
+}
+
+.snippet-card.one {
+  left: 0.7rem;
+}
+
+.snippet-card.two {
+  left: 36%;
+  opacity: 0.72;
+}
+
+.snippet-card.three {
+  right: 0.7rem;
+  opacity: 0.52;
+}
+
+.poster-page {
+  inset: 0.65rem 1rem;
+  border: 1px solid rgba(255, 217, 61, 0.32);
+  border-radius: 0.2rem;
   background: rgba(255, 217, 61, 0.08);
+}
+
+.poster-title {
+  left: 1.45rem;
+  right: 1.45rem;
+  top: 1.2rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgba(93, 213, 232, 0.22);
+}
+
+.poster-chart {
+  left: 1.45rem;
+  bottom: 1.15rem;
+  width: 2.6rem;
+  height: 2rem;
+  background:
+    linear-gradient(90deg, rgba(255, 78, 201, 0.32) 0 28%, transparent 29% 38%, rgba(93, 213, 232, 0.25) 39% 66%, transparent 67%);
+}
+
+.poster-note {
+  right: 1.45rem;
+  bottom: 1.45rem;
+  width: 38%;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(228, 198, 255, 0.16);
+}
+
+.game-screen {
+  inset: 0.65rem;
+  border: 1px solid rgba(45, 255, 136, 0.24);
+  border-radius: 0.3rem;
+  background:
+    linear-gradient(90deg, rgba(45, 255, 136, 0.1), transparent),
+    radial-gradient(circle at 64% 42%, rgba(93, 213, 232, 0.32), transparent 16%),
+    rgba(8, 7, 22, 0.72);
+}
+
+.game-reticle {
+  left: 48%;
+  top: 36%;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 1px solid rgba(45, 255, 136, 0.52);
+  border-radius: 999px;
+}
+
+.game-score {
+  left: 1rem;
+  top: 1rem;
+  width: 2.2rem;
+  height: 0.55rem;
+  background: rgba(45, 255, 136, 0.18);
+}
+
+.game-chat {
+  right: 1rem;
+  bottom: 1rem;
+  width: 42%;
+  height: 0.62rem;
+  border-radius: 999px;
+  background: rgba(228, 198, 255, 0.16);
+}
+
+.canvas-frame {
+  inset: 0.65rem 1rem;
+  border: 1px solid rgba(255, 78, 201, 0.28);
+  border-radius: 0.24rem;
+  background: rgba(228, 198, 255, 0.08);
+}
+
+.canvas-stroke {
+  left: 1.5rem;
+  width: 58%;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 78, 201, 0.32);
+  transform: rotate(-10deg);
+}
+
+.canvas-stroke.one {
+  top: 2rem;
+}
+
+.canvas-stroke.two {
+  top: 3rem;
+  width: 42%;
+  background: rgba(93, 213, 232, 0.28);
+  transform: rotate(12deg);
+}
+
+.canvas-palette {
+  right: 1.35rem;
+  bottom: 1.05rem;
+  width: 2rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 44%, rgba(255, 78, 201, 0.7), transparent 18%),
+    radial-gradient(circle at 62% 42%, rgba(255, 217, 61, 0.68), transparent 18%),
+    rgba(93, 213, 232, 0.16);
 }
 
 .case2-preview-reactions {
@@ -2765,64 +3035,6 @@ html.ss-high-contrast {
   filter: blur(0.2px);
 }
 
-.preview-appearance-mockery .shape-one {
-  width: 100%;
-  height: 100%;
-  inset: 0;
-  border: 0;
-  background:
-    linear-gradient(90deg, transparent 0 18%, rgba(93, 213, 232, 0.16) 19% 21%, transparent 22%),
-    linear-gradient(180deg, rgba(228, 198, 255, 0.08), transparent);
-}
-
-.preview-repeated-targeting .case2-preview-art,
-.preview-one-off-disagreement .case2-preview-art {
-  display: grid;
-  gap: 0.35rem;
-  padding: 0.6rem;
-}
-
-.preview-repeated-targeting .shape,
-.preview-one-off-disagreement .shape {
-  position: static;
-  width: auto;
-  height: 0.62rem;
-  border-radius: 0.15rem;
-}
-
-.preview-group-exclusion .case2-preview-art {
-  padding: 0.65rem;
-}
-
-.preview-group-exclusion .shape {
-  position: static;
-  display: block;
-  width: 72%;
-  height: 0.82rem;
-  margin-bottom: 0.42rem;
-  border-radius: 999px;
-}
-
-.preview-group-exclusion .shape-two,
-.preview-group-exclusion .shape-four {
-  margin-left: auto;
-  opacity: 0.42;
-}
-
-.preview-plausible-deniability .case2-preview-art {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.38rem;
-  padding: 0.55rem;
-}
-
-.preview-plausible-deniability .shape {
-  position: static;
-  width: auto;
-  height: 4.7rem;
-  border-radius: 0.25rem;
-}
-
 .preview-consensual-banter .case2-preview-art {
   background:
     linear-gradient(90deg, rgba(45, 255, 136, 0.12), transparent),
@@ -2830,21 +3042,11 @@ html.ss-high-contrast {
     rgba(8, 7, 22, 0.86);
 }
 
-.preview-consensual-banter .shape-two {
-  border-radius: 0.2rem;
-  transform: rotate(12deg);
-}
-
 .preview-constructive-comment .case2-preview-art {
   background:
     linear-gradient(135deg, rgba(255, 78, 201, 0.14), transparent 35%),
     linear-gradient(45deg, transparent 48%, rgba(255, 217, 61, 0.18) 49% 52%, transparent 53%),
     rgba(8, 7, 22, 0.88);
-}
-
-.preview-constructive-comment .shape-two {
-  border-radius: 0.15rem;
-  transform: rotate(-8deg);
 }
 
 .case2-notification-pulse {
