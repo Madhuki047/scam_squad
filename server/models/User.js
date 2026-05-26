@@ -67,6 +67,7 @@ const userSchema = new mongoose.Schema(
     rank: { type: Number, default: 0 },
     level: { type: Number, default: 1, min: 1 },
     xp: { type: Number, default: 0, min: 0 },
+    introCompleted: { type: Boolean, default: false },
 
     // --- Badges -------------------------------------------------------
     badges: [
@@ -116,6 +117,14 @@ userSchema.pre('save', async function hashPassword(next) {
   if (!this.isModified('password')) return next()
   const salt = await bcrypt.genSalt(10)
   this.password = await bcrypt.hash(this.password, salt)
+  next()
+})
+
+// Accounts created before the lives cap was reduced may still have
+// livesRemaining > 3 in Mongo. Clamp before validation so those legacy
+// records can still be saved during login/profile hydration.
+userSchema.pre('validate', function clampLegacyLives(next) {
+  if (this.livesRemaining > 3) this.livesRemaining = 3
   next()
 })
 

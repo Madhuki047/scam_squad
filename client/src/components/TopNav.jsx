@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { IconVolume, IconVolumeOff } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useSettings } from '../context/SettingsContext.jsx'
 import { MAX_LIVES } from '../lib/gameRules.js'
 
 const REGEN_INTERVAL_MS = 30 * 60 * 1000 // mirrors server livesService
@@ -18,6 +20,7 @@ function formatCountdown(ms) {
 // fresh /me which settles regen on the server.
 export default function TopNav({ title }) {
   const { user, refreshUser } = useAuth()
+  const { settings, toggle } = useSettings()
 
   // Re-render every second to update the countdown - only while not full.
   const [, force] = useState(0)
@@ -75,6 +78,16 @@ export default function TopNav({ title }) {
         </span>
 
         <span className="text-sw-yellow">{user?.points ?? 0} PTS</span>
+
+        <button
+          type="button"
+          className="top-sfx-toggle"
+          onClick={() => toggle('sfx')}
+          title={settings.sfx ? 'Mute sound effects' : 'Unmute sound effects'}
+          aria-label={settings.sfx ? 'Mute sound effects' : 'Unmute sound effects'}
+        >
+          {settings.sfx ? <IconVolume size={18} /> : <IconVolumeOff size={18} />}
+        </button>
 
         <span className="text-sw-text2 hidden sm:inline">{user?.username}</span>
       </div>

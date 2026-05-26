@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { isCaseUnlocked } from '../lib/caseProgress.js'
 import { api } from '../lib/api.js'
 import { BADGES } from '../lib/badges.js'
+import { playSfx } from '../lib/sound.js'
 
 const INTRO_STEPS = [
   {
@@ -587,6 +588,8 @@ export default function Case() {
     setProgressError('')
     try {
       await spendFailureLife()
+      playSfx('lifeLost')
+      playSfx('caseFailed')
       if (nextAction === 'replay') {
         restart()
         return
@@ -618,6 +621,11 @@ export default function Case() {
     })
     setUser(data.user)
     setPointsAwarded(data.pointsAwarded)
+    if (data.pointsAwarded > 0) {
+      playSfx('coins')
+      playSfx('badge')
+    }
+    playSfx('caseComplete')
     return { unlockedBadge, awarded: data.pointsAwarded }
   }
 

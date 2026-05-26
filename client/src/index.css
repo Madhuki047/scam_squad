@@ -163,6 +163,409 @@ html.ss-high-contrast {
   --line2: rgba(93, 213, 232, 0.7);
 }
 
+.top-sfx-toggle {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--line2);
+  border-radius: 0.35rem;
+  color: var(--cyan);
+  background: rgba(13, 0, 30, 0.45);
+  transition:
+    border-color 150ms ease,
+    color 150ms ease,
+    background 150ms ease;
+}
+
+.top-sfx-toggle:hover {
+  border-color: var(--pink);
+  color: var(--pink);
+  background: rgba(255, 78, 201, 0.1);
+}
+
+/* ---------------------------------------------------------------------
+   Home intro transmission.
+--------------------------------------------------------------------- */
+.home-phone-card,
+.home-verify-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.home-phone-scene {
+  position: relative;
+  min-height: 18rem;
+  overflow: hidden;
+  border: 1.5px solid var(--line2);
+  border-radius: 0.5rem;
+  background:
+    linear-gradient(rgba(93, 213, 232, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 78, 201, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 65% 20%, rgba(255, 217, 61, 0.14), transparent 28%),
+    linear-gradient(180deg, #17002d, #28004d 55%, #110021);
+  background-size:
+    28px 28px,
+    28px 28px,
+    auto,
+    auto;
+}
+
+.home-phone-scene::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5rem;
+  background: linear-gradient(180deg, transparent, rgba(13, 0, 30, 0.42));
+}
+
+.home-phone {
+  position: absolute;
+  left: 50%;
+  bottom: 2rem;
+  width: 11rem;
+  height: 8rem;
+  transform: translateX(-50%);
+  animation: phone-ring 900ms steps(2) infinite;
+  transition:
+    left 240ms steps(4),
+    bottom 240ms steps(4),
+    transform 240ms steps(4);
+}
+
+.home-phone-answered {
+  left: 25%;
+  bottom: 2.2rem;
+  animation: none;
+}
+
+.home-phone-receiver {
+  position: absolute;
+  left: 0.7rem;
+  top: 0;
+  z-index: 2;
+  width: 9.6rem;
+  height: 2rem;
+  border: 3px solid #12001f;
+  border-radius: 1.4rem 1.4rem 0.55rem 0.55rem;
+  background: var(--pink);
+  box-shadow: 0.3rem 0.3rem 0 rgba(0, 0, 0, 0.35);
+  transition:
+    transform 180ms steps(3),
+    background 180ms ease;
+}
+
+.home-phone-answered .home-phone-receiver {
+  transform: translate(-1.6rem, -2.2rem) rotate(-18deg);
+  background: var(--cyan);
+}
+
+.home-phone-body {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 9rem;
+  height: 6.5rem;
+  transform: translateX(-50%);
+  border: 3px solid #12001f;
+  border-radius: 0.8rem 0.8rem 0.45rem 0.45rem;
+  background: linear-gradient(180deg, var(--pink-soft), var(--pink));
+  box-shadow:
+    0.35rem 0.35rem 0 rgba(0, 0, 0, 0.35),
+    0 0 1rem rgba(255, 78, 201, 0.35);
+}
+
+.home-phone-dial {
+  position: absolute;
+  left: 50%;
+  top: 1.25rem;
+  display: grid;
+  width: 4.6rem;
+  height: 4.1rem;
+  transform: translateX(-50%);
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.32rem;
+}
+
+.home-phone-dial span {
+  border: 2px solid #12001f;
+  border-radius: 50%;
+  background: rgba(255, 217, 61, 0.9);
+}
+
+.home-phone-cord {
+  position: absolute;
+  right: 0.7rem;
+  bottom: -1.35rem;
+  width: 3.5rem;
+  height: 2rem;
+  border-right: 3px solid var(--cyan);
+  border-bottom: 3px solid var(--cyan);
+  border-radius: 0 0 2rem 0;
+}
+
+.home-phone-bubble {
+  position: absolute;
+  left: auto;
+  right: 1.35rem;
+  top: 2rem;
+  z-index: 3;
+  width: min(28rem, 55%);
+  min-height: 8rem;
+  border: 1.5px solid var(--line2);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: rgba(13, 0, 30, 0.92);
+  box-shadow: 0.25rem 0.25rem 0 rgba(255, 78, 201, 0.18);
+}
+
+.home-phone-bubble::after {
+  content: '';
+  position: absolute;
+  left: -0.55rem;
+  bottom: 2.1rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  rotate: 45deg;
+  border-left: 1.5px solid var(--line2);
+  border-bottom: 1.5px solid var(--line2);
+  background: rgba(13, 0, 30, 0.92);
+}
+
+.home-phone-bubble p,
+.home-verify-card p {
+  margin: 0.35rem 0 0;
+  color: var(--text2);
+}
+
+.home-verify-card h3 {
+  margin: 0;
+  color: var(--pink);
+  font-family: var(--mono);
+  font-size: 1.75rem;
+  text-transform: uppercase;
+}
+
+.home-assignment-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.85fr) minmax(16rem, 1fr);
+  min-height: 14rem;
+  overflow: hidden;
+  text-align: left;
+  background:
+    linear-gradient(rgba(93, 213, 232, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 78, 201, 0.07) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(255, 78, 201, 0.15), rgba(93, 213, 232, 0.1)),
+    rgba(13, 0, 30, 0.76);
+  background-size:
+    26px 26px,
+    26px 26px,
+    auto,
+    auto;
+}
+
+.home-assignment-scene {
+  position: relative;
+  min-height: 14rem;
+  border-right: 1.5px solid rgba(93, 213, 232, 0.22);
+}
+
+.home-assignment-scene::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3.4rem;
+  background: rgba(7, 0, 20, 0.72);
+  border-top: 1.5px solid rgba(93, 213, 232, 0.22);
+}
+
+.home-agent-shadow {
+  position: absolute;
+  left: 17%;
+  bottom: 2.2rem;
+  z-index: 2;
+  width: 4.6rem;
+  height: 8.4rem;
+  filter: drop-shadow(0.35rem 0.35rem 0 rgba(0, 0, 0, 0.4));
+}
+
+.home-agent-head {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  transform: translateX(-50%);
+  border: 2px solid #05000d;
+  border-radius: 50%;
+  background: #06000f;
+}
+
+.home-agent-head::before {
+  content: '';
+  position: absolute;
+  left: -0.5rem;
+  right: -0.5rem;
+  top: -0.45rem;
+  height: 0.75rem;
+  border: 2px solid #05000d;
+  background: #030008;
+}
+
+.home-agent-coat {
+  position: absolute;
+  left: 50%;
+  top: 2rem;
+  width: 3.9rem;
+  height: 6.2rem;
+  transform: translateX(-50%);
+  clip-path: polygon(22% 0, 78% 0, 100% 100%, 0 100%);
+  background: #05000d;
+}
+
+.home-agent-coat::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0.55rem;
+  bottom: 0.6rem;
+  width: 2px;
+  transform: translateX(-50%);
+  background: rgba(93, 213, 232, 0.5);
+}
+
+.home-mission-desk {
+  position: absolute;
+  right: 13%;
+  bottom: 2.2rem;
+  z-index: 2;
+  width: 8.2rem;
+}
+
+.home-monitor {
+  display: grid;
+  height: 5.5rem;
+  place-items: center;
+  border: 3px solid #12001f;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(93, 213, 232, 0.95), rgba(93, 213, 232, 0.28));
+  background-size:
+    auto 0.55rem,
+    auto;
+  color: #12001f;
+  text-align: center;
+  box-shadow:
+    0 0 1rem rgba(93, 213, 232, 0.45),
+    0.3rem 0.3rem 0 rgba(0, 0, 0, 0.35);
+}
+
+.home-monitor span {
+  align-self: end;
+  font-size: 0.9rem;
+}
+
+.home-monitor strong {
+  align-self: start;
+  font-family: var(--mono);
+  font-size: 1.15rem;
+}
+
+.home-keyboard {
+  width: 6.4rem;
+  height: 0.85rem;
+  margin: 0.45rem auto 0;
+  border: 2px solid #12001f;
+  background: var(--pink);
+}
+
+.home-assignment-brief {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 1.5rem;
+}
+
+.home-assignment-brief::before {
+  content: '';
+  width: 3.6rem;
+  height: 0.28rem;
+  margin-bottom: 0.35rem;
+  background: var(--cyan);
+  box-shadow: 4.2rem 0 0 var(--pink);
+}
+
+.home-mission-chip {
+  align-self: flex-start;
+  margin-top: 0.75rem;
+  border: 1.5px solid rgba(255, 217, 61, 0.58);
+  border-radius: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  background: rgba(255, 217, 61, 0.1);
+  color: var(--yellow);
+  text-transform: uppercase;
+}
+
+@keyframes phone-ring {
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(0);
+  }
+  25% {
+    transform: translateX(-50%) rotate(-3deg);
+  }
+  75% {
+    transform: translateX(-50%) rotate(3deg);
+  }
+}
+
+@media (max-width: 760px) {
+  .home-phone-scene {
+    min-height: 24rem;
+  }
+
+  .home-phone,
+  .home-phone-answered {
+    left: 50%;
+    bottom: 1.7rem;
+  }
+
+  .home-phone-bubble {
+    left: 1rem;
+    right: 1rem;
+    top: 1rem;
+    width: auto;
+    min-height: 0;
+  }
+
+  .home-phone-bubble::after {
+    left: 48%;
+    bottom: -0.55rem;
+    border-left: 0;
+    border-right: 1.5px solid var(--line2);
+  }
+
+  .home-assignment-card {
+    grid-template-columns: 1fr;
+  }
+
+  .home-assignment-scene {
+    border-right: 0;
+    border-bottom: 1.5px solid rgba(93, 213, 232, 0.22);
+  }
+}
+
 /* ---------------------------------------------------------------------
    Case files and Case 01 story mission.
 --------------------------------------------------------------------- */

@@ -38,6 +38,7 @@ function progressPayload(user) {
     completedCases: user.completedCases || [],
     badges: user.badges || [],
     casesSolved: user.casesSolved || 0,
+    introCompleted: Boolean(user.introCompleted),
   }
 }
 
@@ -137,6 +138,26 @@ export async function completeCase(req, res, next) {
       progress: progressPayload(user),
       pointsAwarded,
       alreadyComplete,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function completeIntro(req, res, next) {
+  try {
+    const user = await User.findById(req.userId)
+    if (!user) return res.status(404).json({ message: 'Account not found.' })
+
+    if (!user.introCompleted) {
+      user.introCompleted = true
+      await user.save()
+    }
+
+    res.json({
+      user: safeUser(user),
+      progress: progressPayload(user),
+      introCompleted: true,
     })
   } catch (error) {
     next(error)

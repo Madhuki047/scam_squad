@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
+import { playSfx } from '../lib/sound.js'
 
 // Adaptive MCQ quiz: 5 questions, server tracks streak + difficulty.
 // 4/5 correct earns +1 life.
@@ -55,10 +56,12 @@ export default function Quiz() {
     setSubmitting(true)
     try {
       const data = await api.quizAnswer(token, idx)
+      playSfx(data.correct ? 'correct' : 'wrong')
       setResult({ correct: data.correct, correctIndex: data.correctIndex })
       setLevel(data.nextLevel)
       setProgress(data.progress)
       if (!data.correct && Number.isInteger(data.livesRemaining)) {
+        playSfx('lifeLost')
         setUser((current) =>
           current
             ? {
