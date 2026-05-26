@@ -1884,6 +1884,91 @@ function Case2QueueList({ activeIndex, decisions, onOpen }) {
   )
 }
 
+function Case2ThreadPreview({ thread }) {
+  const previewCopy = {
+    'direct-insults': {
+      label: 'Profile post',
+      title: '@emma.draws',
+      caption: 'new sketch later if i finish homework',
+      meta: '5 seen - 0 likes',
+    },
+    'appearance-mockery': {
+      label: 'Photo post',
+      title: '@emma.draws',
+      caption: 'trying something different today',
+      meta: 'photo replies open',
+    },
+    'repeated-targeting': {
+      label: 'Class feed',
+      title: 'Year 9 chat',
+      caption: 'planning table groups for tomorrow',
+      meta: '12 replies',
+    },
+    'group-exclusion': {
+      label: 'Group chat',
+      title: 'ArtTable',
+      caption: 'movie later? new table today',
+      meta: 'seen by 5',
+    },
+    'plausible-deniability': {
+      label: 'Recent posts',
+      title: '@johnhaha67 replies',
+      caption: 'lol / imagine / sure Emma',
+      meta: 'repeated across posts',
+    },
+    'one-off-disagreement': {
+      label: 'Project post',
+      title: 'Group project',
+      caption: 'poster draft: sources and layout',
+      meta: '3 comments',
+    },
+    'consensual-banter': {
+      label: 'Game clip',
+      title: 'Friday lobby',
+      caption: 'missed shot, won the round',
+      meta: 'friends replying',
+    },
+    'constructive-comment': {
+      label: 'Art club',
+      title: '@emma.draws',
+      caption: 'poster concept feedback',
+      meta: 'art club thread',
+    },
+  }
+  const copy = previewCopy[thread.id] || previewCopy['direct-insults']
+
+  return (
+    <div className={`case2-thread-preview preview-${thread.id}`} aria-hidden="true">
+      <div className="case2-preview-topline">
+        <span>{copy.label}</span>
+        <span>{thread.moment}</span>
+      </div>
+      <div className="case2-preview-body">
+        <div className="case2-preview-avatar">{copy.title.slice(0, 2).replace('@', '').toUpperCase()}</div>
+        <div className="case2-preview-main">
+          <strong>{copy.title}</strong>
+          <p>{copy.caption}</p>
+          <div className="case2-preview-art">
+            <span className="shape shape-one" />
+            <span className="shape shape-two" />
+            <span className="shape shape-three" />
+            <span className="shape shape-four" />
+          </div>
+          <div className="case2-preview-reactions">
+            <span>like</span>
+            <span>reply</span>
+            <span>{copy.meta}</span>
+          </div>
+        </div>
+      </div>
+      <div className="case2-preview-glitch">
+        <span />
+        <span />
+      </div>
+    </div>
+  )
+}
+
 function Case2ThreadFile({
   thread,
   index,
@@ -1913,6 +1998,7 @@ function Case2ThreadFile({
             <span>GlowLoop</span>
             <span>{thread.place}</span>
           </div>
+          <Case2ThreadPreview thread={thread} />
           <div className="case2-message-list case2-message-focus">
             {thread.messages.map((message, messageIndex) => (
               <div
