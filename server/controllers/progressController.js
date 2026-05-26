@@ -13,7 +13,7 @@ const CASE_REWARDS = {
   veteran: 500,
 }
 
-const VALID_BADGES = new Set(['sharp-eyes', 'hooked-once'])
+const VALID_BADGES = new Set(['sharp-eyes', 'hooked-once', 'burned-twice'])
 
 function safeUser(user) {
   const obj = user.toObject()
@@ -56,8 +56,9 @@ export async function getProgress(req, res, next) {
 
 export async function completeCase(req, res, next) {
   try {
-    const { caseId, difficulty, badge, result } = req.body
+    const { caseId, difficulty, badge, result, bonusPoints = 0 } = req.body
     const numericCaseId = Number(caseId)
+    const numericBonusPoints = Number(bonusPoints)
 
     if (!Number.isInteger(numericCaseId) || numericCaseId < 1) {
       return res.status(400).json({ message: 'caseId must be a positive integer.' })
@@ -73,9 +74,16 @@ export async function completeCase(req, res, next) {
     if (badge?.id && !VALID_BADGES.has(badge.id)) {
       return res.status(400).json({ message: 'Unknown badge.' })
     }
+    if (
+      !Number.isInteger(numericBonusPoints) ||
+      numericBonusPoints < 0 ||
+      numericBonusPoints > 100
+    ) {
+      return res.status(400).json({ message: 'bonusPoints must be an integer from 0 to 100.' })
+    }
 
     const key = completionKey(numericCaseId, difficulty)
-    const reward = CASE_REWARDS[difficulty]
+    const reward = CASE_REWARDS[difficulty] + numericBonusPoints
     let alreadyComplete = false
     let pointsAwarded = reward
     let user = await User.findOneAndUpdate(
