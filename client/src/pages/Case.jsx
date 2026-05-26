@@ -230,11 +230,12 @@ const CASE2_THREADS = [
     id: 'direct-insults',
     title: "Thread 01 - Comment chain on Emma's profile",
     source: 'GlowLoop social feed',
-    difficulty: 'Obvious',
-    scan: 'High risk',
-    signal: 'Direct attack',
+    reportId: 'GL-2048-A',
+    confidence: 61,
+    queueNote: 'Auto-flagged after two reports from witnesses.',
+    evidenceLabel: 'Open witness report',
     correctAction: 'flag',
-    hint: 'Direct name-calling aimed at one person.',
+    profile: { handle: '@maxbyte', posts: 42, reports: 2, relation: 'classmate' },
     messages: [
       { author: '@maxbyte', text: 'Emma is such a loser. Nobody wants her here.' },
       { author: '@maxbyte', text: 'Can someone tell her to stop posting?' },
@@ -247,11 +248,12 @@ const CASE2_THREADS = [
     id: 'appearance-mockery',
     title: 'Thread 02 - Photo reply pile-on',
     source: 'Photo post replies',
-    difficulty: 'Obvious',
-    scan: 'High risk',
-    signal: 'Humiliation',
+    reportId: 'GL-2048-B',
+    confidence: 58,
+    queueNote: 'Image replies spiked after one post.',
+    evidenceLabel: 'Open photo context',
     correctAction: 'flag',
-    hint: 'Mocking someone for how they look is personal abuse.',
+    profile: { handle: '@mirrorfail', posts: 18, reports: 1, relation: 'unknown' },
     messages: [
       { author: '@mirrorfail', text: 'That haircut is tragic.' },
       { author: '@mirrorfail', text: 'Emma looks like she got dressed in the dark.' },
@@ -264,11 +266,12 @@ const CASE2_THREADS = [
     id: 'repeated-targeting',
     title: 'Thread 03 - Repeated replies across one afternoon',
     source: 'Moderation queue',
-    difficulty: 'Pattern',
-    scan: 'High risk',
-    signal: 'Repeated targeting',
+    reportId: 'GL-2048-C',
+    confidence: 54,
+    queueNote: 'Same account appears across several replies.',
+    evidenceLabel: 'Open activity chain',
     correctAction: 'flag',
-    hint: 'The same target is being hit again and again.',
+    profile: { handle: '@crashpost', posts: 103, reports: 3, relation: 'same year group' },
     timeline: ['Mon 15:12', 'Mon 15:19', 'Mon 15:27', 'Mon 15:40'],
     messages: [
       { author: '@crashpost', text: 'Emma ruins every group.' },
@@ -283,17 +286,23 @@ const CASE2_THREADS = [
     id: 'group-exclusion',
     title: 'Thread 04 - Group chat planning timeline',
     source: 'Private group report',
-    difficulty: 'Subtle',
-    scan: 'Pattern risk',
-    signal: 'Passive exclusion',
+    reportId: 'GL-2048-D',
+    confidence: 37,
+    queueNote: 'Low-confidence group chat sample. Context may matter.',
+    evidenceLabel: 'Expand three-week timeline',
     correctAction: 'flag',
-    hint: 'No single message is explosive. The exclusion pattern is the evidence.',
-    timeline: ['Tue - film night', 'Thu - lunch table', 'Sat - gaming lobby', 'Next Mon - project chat'],
+    profile: { handle: 'Group: ArtTable', posts: 12, reports: 0, relation: 'friend group' },
+    timeline: [
+      'Week 1 Tue - film plan moved to side chat; Emma not added',
+      'Week 1 Thu - lunch table changed; Emma arrived alone',
+      'Week 2 Sat - gaming lobby started before Emma joined',
+      'Week 3 Mon - project chat moved; Emma left in old room',
+    ],
     messages: [
-      { author: '@nina', text: 'Movie tonight. Everyone except Emma in the lobby?' },
-      { author: '@kai', text: 'New lunch table tomorrow. Do not add Emma.' },
-      { author: '@mika', text: 'Start the game before she gets online.' },
-      { author: '@nina', text: 'Project chat moved. Keep the old one for Emma.' },
+      { author: '@nina', text: 'Movie tonight? Same group as last time.' },
+      { author: '@kai', text: 'New lunch table tomorrow. I made a smaller chat.' },
+      { author: '@mika', text: 'Start the game at 7 so we can finish early.' },
+      { author: '@nina', text: 'Project chat moved. Use the new one from now on.' },
     ],
     explanation:
       'Passive exclusion can be cyberbullying when it is repeated and coordinated to isolate someone.',
@@ -302,18 +311,19 @@ const CASE2_THREADS = [
     id: 'plausible-deniability',
     title: 'Thread 05 - @johnhaha67 repeated replies',
     source: 'Cross-post activity log',
-    difficulty: 'Subtle',
-    scan: 'Pattern risk',
-    signal: 'Plausible deniability',
+    reportId: 'GL-2048-E',
+    confidence: 33,
+    queueNote: 'Tiny comments across separate posts. Pattern uncertain.',
+    evidenceLabel: 'Compare posts',
     correctAction: 'flag',
-    hint: 'Small comments can become harassment when they follow the same person everywhere.',
+    profile: { handle: '@johnhaha67', posts: 9, reports: 0, relation: 'follows Emma' },
     timeline: ['Post 1', 'Post 2', 'Post 3', 'Post 4', 'Post 5'],
     messages: [
       { author: '@johnhaha67', text: 'lol' },
       { author: '@johnhaha67', text: 'imagine' },
       { author: '@johnhaha67', text: 'sure Emma' },
-      { author: '@johnhaha67', text: 'lol again' },
-      { author: '@johnhaha67', text: 'this is so Emma' },
+      { author: '@johnhaha67', text: '😭' },
+      { author: '@johnhaha67', text: 'lol' },
     ],
     explanation:
       '"Just joking" comments can be plausible deniability. The pattern shows repeated targeting.',
@@ -322,11 +332,12 @@ const CASE2_THREADS = [
     id: 'one-off-disagreement',
     title: 'Thread 06 - Debate under a group project post',
     source: 'GlowLoop class feed',
-    difficulty: 'Normal conflict',
-    scan: 'Low risk',
-    signal: 'One-off disagreement',
+    reportId: 'GL-2048-F',
+    confidence: 46,
+    queueNote: 'Keyword detector caught disagreement language.',
+    evidenceLabel: 'Open reply context',
     correctAction: 'dismiss',
-    hint: 'Both people disagree once, then stop. No repeated targeting.',
+    profile: { handle: '@rowan7', posts: 27, reports: 0, relation: 'project partner' },
     messages: [
       { author: '@emma.draws', text: 'I think our poster needs sources before we post it.' },
       { author: '@rowan7', text: 'I disagree. It is fine as it is.' },
@@ -339,11 +350,12 @@ const CASE2_THREADS = [
     id: 'consensual-banter',
     title: 'Thread 07 - Friends joking after a game',
     source: 'GlowLoop game clip replies',
-    difficulty: 'Normal banter',
-    scan: 'Low risk',
-    signal: 'Mutual context',
+    reportId: 'GL-2048-G',
+    confidence: 49,
+    queueNote: 'Clip comments contain teasing. Tone unclear.',
+    evidenceLabel: 'Open reaction chain',
     correctAction: 'dismiss',
-    hint: 'The replies are mutual, friendly, and not aimed at isolating Emma.',
+    profile: { handle: '@maya-lol', posts: 64, reports: 0, relation: 'friend' },
     messages: [
       { author: '@emma.draws', text: 'I cannot believe I missed that easy shot.' },
       { author: '@maya-lol', text: 'legendary fail, but you carried us last round' },
@@ -356,11 +368,12 @@ const CASE2_THREADS = [
     id: 'constructive-comment',
     title: 'Thread 08 - Art club feedback',
     source: 'GlowLoop creative post',
-    difficulty: 'Safe feedback',
-    scan: 'Low risk',
-    signal: 'Constructive',
+    reportId: 'GL-2048-H',
+    confidence: 41,
+    queueNote: 'Feedback was reported by the automated tone filter.',
+    evidenceLabel: 'Open comment context',
     correctAction: 'dismiss',
-    hint: 'This is neutral feedback about the work, not an attack on the person.',
+    profile: { handle: '@sketchroom', posts: 88, reports: 0, relation: 'art club' },
     messages: [
       { author: '@sketchroom', text: 'The color palette is strong.' },
       { author: '@sketchroom', text: 'Maybe add more contrast around the title so it is easier to read.' },
@@ -1758,85 +1771,183 @@ function Case2Intro({ internName, onNext }) {
   )
 }
 
-function Case2ThreadCard({ thread, decision, onDecision }) {
-  const riskPercent =
-    thread.scan === 'High risk' ? 92 : thread.scan === 'Pattern risk' ? 68 : 24
+function Case2QueueList({ activeIndex, decisions, onOpen }) {
+  return (
+    <aside className="case2-queue-panel">
+      <div className="case2-queue-title">
+        <span>GLOWLOOP QUEUE</span>
+        <strong>{CASE2_THREADS.length} FILES</strong>
+      </div>
+      {CASE2_THREADS.map((thread, index) => (
+        <button
+          key={thread.id}
+          type="button"
+          className={`case2-queue-item ${index === activeIndex ? 'active' : ''} ${
+            decisions[thread.id] ? 'resolved' : ''
+          }`}
+          onClick={() => onOpen(index)}
+        >
+          <span>{thread.reportId}</span>
+          <strong>{String(index + 1).padStart(2, '0')}</strong>
+          <em>{decisions[thread.id] ? decisions[thread.id] : 'unopened'}</em>
+        </button>
+      ))}
+    </aside>
+  )
+}
+
+function Case2ThreadFile({
+  thread,
+  index,
+  total,
+  decision,
+  evidenceOpen,
+  processing,
+  feedback,
+  streak,
+  livesRemaining,
+  onReveal,
+  onDecision,
+  onNext,
+}) {
+  const visibleMessages = evidenceOpen ? thread.messages : thread.messages.slice(0, 2)
+  const canAdvance = Boolean(decision) && !processing
 
   return (
-    <article
-      className={`case2-thread-card ${
-        thread.difficulty === 'Subtle' ? 'case2-thread-subtle' : ''
-      } ${decision ? 'case2-thread-selected' : ''}`}
-    >
-      <div className="case2-thread-header">
+    <article className="case2-file scene-transition">
+      <div className="case2-file-top">
         <div>
-          <span>{thread.source}</span>
+          <span className="font-pixel text-sw-pink text-xs">
+            THREAD {index + 1} OF {total}
+          </span>
           <h3>{thread.title}</h3>
+          <p>{thread.source} - {thread.reportId}</p>
         </div>
-        <span className="case2-difficulty-chip">{thread.difficulty}</span>
+        <div className="case2-confidence">
+          <span>Auto confidence</span>
+          <strong>{thread.confidence}%</strong>
+          <em>unverified</em>
+        </div>
       </div>
 
-      <div className="case2-scan-panel">
-        <div>
-          <span>MOD SCAN</span>
-          <strong>{thread.scan}</strong>
-        </div>
-        <div className="case2-risk-meter" aria-label={`${thread.scan} meter`}>
-          <span style={{ width: `${riskPercent}%` }} />
-        </div>
-        <em>{thread.signal}</em>
-      </div>
-
-      {thread.timeline && (
-        <div className="case2-timeline" aria-label="Timeline evidence">
-          <strong>Timeline detected</strong>
-          {thread.timeline.map((item) => (
-            <span key={item}>{item}</span>
-          ))}
-        </div>
-      )}
-
-      <div className="case2-message-list">
-        {thread.messages.map((message, index) => (
-          <div key={`${thread.id}-${index}`} className="case2-message">
-            <strong>{message.author}</strong>
-            <p>{message.text}</p>
+      <div className="case2-file-grid">
+        <section className="case2-social-window">
+          <div className="case2-social-window-bar">
+            <span>GlowLoop activity</span>
+            <span className="case2-notification-pulse">activity detected</span>
           </div>
-        ))}
+          <div className="case2-message-list case2-message-focus">
+            {visibleMessages.map((message, messageIndex) => (
+              <div
+                key={`${thread.id}-${messageIndex}`}
+                className="case2-message case2-post-message"
+              >
+                <div className="case2-avatar" aria-hidden="true">
+                  {message.author.slice(1, 3).toUpperCase()}
+                </div>
+                <div>
+                  <strong>{message.author}</strong>
+                  <p>{message.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <aside className="case2-evidence-panel">
+          <span className="font-pixel text-sw-yellow text-xs">UNIT ZERO TOOLS</span>
+          <p>{thread.queueNote}</p>
+          <div className="case2-profile-card">
+            <strong>{thread.profile.handle}</strong>
+            <span>{thread.profile.relation}</span>
+            <span>{thread.profile.posts} posts scanned</span>
+            <span>{thread.profile.reports} prior reports</span>
+          </div>
+          <button
+            type="button"
+            className="case2-evidence-button"
+            onClick={onReveal}
+            disabled={evidenceOpen || processing}
+          >
+            {evidenceOpen ? 'Evidence Open' : thread.evidenceLabel}
+          </button>
+          {evidenceOpen && (
+            <div className="case2-timeline" aria-label="Expanded evidence">
+              <strong>Evidence trace</strong>
+              {(thread.timeline || ['Original post', 'Reply context', 'Reporter note']).map(
+                (item) => (
+                  <span key={item}>{item}</span>
+                ),
+              )}
+            </div>
+          )}
+        </aside>
       </div>
 
-      <p className="case2-thread-hint">{thread.hint}</p>
-
-      <div className="case2-decision-row" role="group" aria-label={`${thread.title} decision`}>
+      <div className="case2-action-console">
+        <div className="case2-streak">
+          <span>Cadet streak</span>
+          <strong>{streak}</strong>
+        </div>
+        <div className={`case2-life-readout ${livesRemaining <= 1 ? 'critical' : ''}`}>
+          <span>Lives</span>
+          <strong>{livesRemaining}</strong>
+        </div>
+        <div className="case2-decision-row" role="group" aria-label={`${thread.title} decision`}>
+          <button
+            type="button"
+            className={`case2-decision-btn case2-flag-btn ${
+              decision === 'flag' ? 'selected' : ''
+            }`}
+            onClick={() => onDecision(thread.id, 'flag')}
+            disabled={processing || Boolean(decision)}
+          >
+            FLAG
+          </button>
+          <button
+            type="button"
+            className={`case2-decision-btn case2-dismiss-btn ${
+              decision === 'dismiss' ? 'selected' : ''
+            }`}
+            onClick={() => onDecision(thread.id, 'dismiss')}
+            disabled={processing || Boolean(decision)}
+          >
+            DISMISS
+          </button>
+        </div>
+        <div className={`case2-processing ${processing ? 'active' : ''}`}>
+          {processing
+            ? 'Processing moderation decision...'
+            : feedback || 'Decision pending'}
+        </div>
         <button
           type="button"
-          className={`case2-decision-btn case2-flag-btn ${
-            decision === 'flag' ? 'selected' : ''
-          }`}
-          onClick={() => onDecision(thread.id, 'flag')}
+          className="ss-btn ss-btn-cyan"
+          onClick={onNext}
+          disabled={!canAdvance}
         >
-          FLAG
+          {index === total - 1 ? 'Submit Report' : 'Next File'} <IconArrowRight size={16} />
         </button>
-        <button
-          type="button"
-          className={`case2-decision-btn case2-dismiss-btn ${
-            decision === 'dismiss' ? 'selected' : ''
-          }`}
-          onClick={() => onDecision(thread.id, 'dismiss')}
-        >
-          DISMISS
-        </button>
-        <span className={`case2-status-chip ${decision ? 'active' : ''}`}>
-          {decision ? decision.toUpperCase() : 'PENDING'}
-        </span>
       </div>
     </article>
   )
 }
 
-function Case2ReviewBoard({ decisions, onDecision, onSubmit }) {
+function Case2ReviewBoard({
+  decisions,
+  activeIndex,
+  evidenceOpen,
+  processing,
+  feedback,
+  streak,
+  livesRemaining,
+  onOpen,
+  onReveal,
+  onDecision,
+  onNext,
+}) {
   const answeredCount = CASE2_THREADS.filter((thread) => decisions[thread.id]).length
-  const ready = answeredCount === CASE2_THREADS.length
+  const activeThread = CASE2_THREADS[activeIndex]
 
   return (
     <section className="case2-board scene-transition">
@@ -1851,31 +1962,32 @@ function Case2ReviewBoard({ decisions, onDecision, onSubmit }) {
       </div>
 
       <div className="case2-briefing-strip">
-        <strong>Agent Ricky:</strong> Decide whether each thread should be
-        flagged for cyberbullying or dismissed as normal conflict. The last two
-        cyberbullying cases need timeline thinking, and the queue includes safe
-        posts so flagging everything will not clear the file.
+        <strong>Agent Ricky:</strong> The platform scanner is noisy. Open each
+        file, inspect the activity, and decide whether it crosses the line. Do
+        not trust the machine to understand context for you.
       </div>
 
-      <div className="case2-thread-grid">
-        {CASE2_THREADS.map((thread) => (
-          <Case2ThreadCard
-            key={thread.id}
-            thread={thread}
-            decision={decisions[thread.id]}
-            onDecision={onDecision}
-          />
-        ))}
+      <div className="case2-investigation-layout">
+        <Case2QueueList
+          activeIndex={activeIndex}
+          decisions={decisions}
+          onOpen={onOpen}
+        />
+        <Case2ThreadFile
+          thread={activeThread}
+          index={activeIndex}
+          total={CASE2_THREADS.length}
+          decision={decisions[activeThread.id]}
+          evidenceOpen={evidenceOpen}
+          processing={processing}
+          feedback={feedback}
+          streak={streak}
+          livesRemaining={livesRemaining}
+          onReveal={onReveal}
+          onDecision={onDecision}
+          onNext={onNext}
+        />
       </div>
-
-      <button
-        type="button"
-        className="ss-btn ss-btn-cyan self-end"
-        disabled={!ready}
-        onClick={onSubmit}
-      >
-        Submit Moderator Report <IconArrowRight size={16} />
-      </button>
     </section>
   )
 }
@@ -2033,6 +2145,11 @@ function Case2Rookie() {
   const { user, token, setUser } = useAuth()
   const [phase, setPhase] = useState('intro')
   const [decisions, setDecisions] = useState({})
+  const [activeThreadIndex, setActiveThreadIndex] = useState(0)
+  const [openEvidence, setOpenEvidence] = useState({})
+  const [processingDecision, setProcessingDecision] = useState(false)
+  const [decisionFeedback, setDecisionFeedback] = useState('')
+  const [streak, setStreak] = useState(0)
   const [badge, setBadge] = useState(null)
   const [pointsAwarded, setPointsAwarded] = useState(0)
   const [progressError, setProgressError] = useState('')
@@ -2061,6 +2178,11 @@ function Case2Rookie() {
   function restart() {
     setPhase('intro')
     setDecisions({})
+    setActiveThreadIndex(0)
+    setOpenEvidence({})
+    setProcessingDecision(false)
+    setDecisionFeedback('')
+    setStreak(0)
     setBadge(null)
     setPointsAwarded(0)
     setProgressError('')
@@ -2069,12 +2191,57 @@ function Case2Rookie() {
   }
 
   function setDecision(threadId, action) {
-    setDecisions((current) => ({ ...current, [threadId]: action }))
+    if (processingDecision || decisions[threadId]) return
+    playSfx('click')
+    setProcessingDecision(true)
+    setDecisionFeedback('')
+    window.setTimeout(() => {
+      const thread = CASE2_THREADS.find((item) => item.id === threadId)
+      const correct = thread?.correctAction === action
+      setDecisions((current) => ({ ...current, [threadId]: action }))
+      setStreak((current) => (correct ? current + 1 : 0))
+      setDecisionFeedback(
+        correct
+          ? action === 'flag'
+            ? 'CASE FILE UPDATED - escalation logged'
+            : 'THREAD ARCHIVED - no action filed'
+          : 'SIGNAL CONFLICT - Ricky will review this call',
+      )
+      playSfx(correct ? 'correct' : 'wrong')
+      setProcessingDecision(false)
+    }, 720)
+  }
+
+  function revealEvidence(threadId) {
+    setOpenEvidence((current) => ({ ...current, [threadId]: true }))
+    setDecisionFeedback('New evidence found')
     playSfx('click')
   }
 
-  function submitReport() {
-    if (Object.keys(decisions).length !== CASE2_THREADS.length) return
+  function openThread(index) {
+    if (processingDecision) return
+    setActiveThreadIndex(index)
+    setDecisionFeedback('')
+  }
+
+  function nextThreadOrSubmit() {
+    if (processingDecision) return
+    const activeThread = CASE2_THREADS[activeThreadIndex]
+    if (!decisions[activeThread.id]) return
+    if (activeThreadIndex < CASE2_THREADS.length - 1) {
+      setActiveThreadIndex((value) => value + 1)
+      setDecisionFeedback('')
+      playSfx('click')
+      return
+    }
+    if (Object.keys(decisions).length !== CASE2_THREADS.length) {
+      const firstUnresolved = CASE2_THREADS.findIndex((thread) => !decisions[thread.id])
+      if (firstUnresolved >= 0) {
+        setActiveThreadIndex(firstUnresolved)
+        setDecisionFeedback('Unresolved file reopened')
+      }
+      return
+    }
     playSfx(passed ? 'correct' : 'wrong')
     setPhase('debrief')
   }
@@ -2182,8 +2349,16 @@ function Case2Rookie() {
       {phase === 'review' && (
         <Case2ReviewBoard
           decisions={decisions}
+          activeIndex={activeThreadIndex}
+          evidenceOpen={Boolean(openEvidence[CASE2_THREADS[activeThreadIndex].id])}
+          processing={processingDecision}
+          feedback={decisionFeedback}
+          streak={streak}
+          livesRemaining={user?.livesRemaining ?? 0}
+          onOpen={openThread}
+          onReveal={() => revealEvidence(CASE2_THREADS[activeThreadIndex].id)}
           onDecision={setDecision}
-          onSubmit={submitReport}
+          onNext={nextThreadOrSubmit}
         />
       )}
       {phase === 'debrief' && (
