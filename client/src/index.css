@@ -397,6 +397,22 @@ html.ss-high-contrast {
     auto;
 }
 
+.home-assignment-network {
+  border-color: rgba(255, 217, 61, 0.48);
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 217, 61, 0.14), transparent 28%),
+    linear-gradient(rgba(93, 213, 232, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 78, 201, 0.07) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(93, 213, 232, 0.14), rgba(255, 217, 61, 0.08)),
+    rgba(13, 0, 30, 0.78);
+  background-size:
+    auto,
+    22px 22px,
+    22px 22px,
+    auto,
+    auto;
+}
+
 .home-assignment-scene {
   position: relative;
   min-height: 14rem;
@@ -512,6 +528,37 @@ html.ss-high-contrast {
   margin: 0.45rem auto 0;
   border: 2px solid #12001f;
   background: var(--pink);
+}
+
+.home-network-feed {
+  position: absolute;
+  right: 8%;
+  top: 1.25rem;
+  z-index: 3;
+  display: grid;
+  gap: 0.35rem;
+  width: 5.4rem;
+  padding: 0.55rem;
+  border: 1.5px solid rgba(255, 217, 61, 0.6);
+  border-radius: 0.35rem;
+  background: rgba(8, 7, 22, 0.86);
+  box-shadow: 0 0 0.85rem rgba(255, 217, 61, 0.18);
+}
+
+.home-network-feed span {
+  display: block;
+  height: 0.45rem;
+  background: var(--cyan);
+}
+
+.home-network-feed span:nth-child(2) {
+  width: 72%;
+  background: var(--pink);
+}
+
+.home-network-feed span:nth-child(3) {
+  width: 44%;
+  background: var(--yellow);
 }
 
 .home-assignment-brief {
@@ -1976,7 +2023,22 @@ html.ss-high-contrast {
   border: 1.5px solid rgba(255, 217, 61, 0.35);
   border-radius: 0.45rem;
   padding: 1rem;
-  background: rgba(255, 217, 61, 0.07);
+  background:
+    linear-gradient(90deg, rgba(255, 217, 61, 0.09), rgba(93, 213, 232, 0.06)),
+    rgba(255, 217, 61, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(255, 217, 61, 0.08);
+}
+
+.case2-ricky-panel::before {
+  content: 'COMMS ONLINE';
+  align-self: flex-start;
+  border: 1px solid rgba(93, 213, 232, 0.45);
+  border-radius: 0.3rem;
+  padding: 0.15rem 0.45rem;
+  color: var(--cyan);
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+  animation: case2-scan-pulse 1.6s ease-in-out infinite;
 }
 
 .case2-board {
@@ -2022,6 +2084,7 @@ html.ss-high-contrast {
 }
 
 .case2-thread-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -2032,6 +2095,39 @@ html.ss-high-contrast {
     linear-gradient(180deg, rgba(13, 0, 30, 0.76), rgba(8, 7, 22, 0.9)),
     rgba(8, 7, 22, 0.92);
   box-shadow: inset 0 0 0 1px rgba(255, 78, 201, 0.08);
+  overflow: hidden;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.case2-thread-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0,
+    rgba(93, 213, 232, 0.1) 48%,
+    transparent 52%
+  );
+  opacity: 0.18;
+  transform: translateY(-100%);
+  animation: case2-scan-line 4.5s linear infinite;
+}
+
+.case2-thread-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(93, 213, 232, 0.62);
+  box-shadow:
+    0 0 0.9rem rgba(93, 213, 232, 0.13),
+    inset 0 0 0 1px rgba(255, 78, 201, 0.1);
+}
+
+.case2-thread-selected {
+  animation: case2-card-confirm 180ms ease-out both;
 }
 
 .case2-thread-subtle {
@@ -2039,6 +2135,50 @@ html.ss-high-contrast {
   box-shadow:
     inset 0 0 0 1px rgba(255, 217, 61, 0.1),
     0 0 0.8rem rgba(255, 217, 61, 0.08);
+}
+
+.case2-scan-panel {
+  display: grid;
+  grid-template-columns: minmax(5rem, 0.7fr) minmax(5rem, 1fr) auto;
+  gap: 0.6rem;
+  align-items: center;
+  border: 1px solid rgba(93, 213, 232, 0.22);
+  border-radius: 0.35rem;
+  padding: 0.55rem;
+  background: rgba(93, 213, 232, 0.06);
+}
+
+.case2-scan-panel span {
+  display: block;
+  color: var(--text3);
+  font-size: 0.72rem;
+}
+
+.case2-scan-panel strong {
+  color: var(--yellow);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+}
+
+.case2-scan-panel em {
+  justify-self: end;
+  color: var(--text2);
+  font-style: normal;
+  font-size: 0.82rem;
+}
+
+.case2-risk-meter {
+  height: 0.5rem;
+  border: 1px solid rgba(255, 217, 61, 0.35);
+  background: rgba(8, 7, 22, 0.7);
+  overflow: hidden;
+}
+
+.case2-risk-meter span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--yellow), var(--pink));
+  box-shadow: 0 0 0.55rem rgba(255, 78, 201, 0.35);
 }
 
 .case2-thread-header {
@@ -2065,6 +2205,14 @@ html.ss-high-contrast {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+  align-items: center;
+}
+
+.case2-timeline strong {
+  width: 100%;
+  color: var(--yellow);
+  font-size: 0.82rem;
+  text-transform: uppercase;
 }
 
 .case2-timeline span {
@@ -2134,6 +2282,11 @@ html.ss-high-contrast {
   color: var(--cyan);
 }
 
+.case2-decision-btn.selected {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0.65rem rgba(93, 213, 232, 0.16);
+}
+
 .case2-flag-btn.selected {
   border-color: var(--pink);
   color: var(--pink);
@@ -2150,6 +2303,38 @@ html.ss-high-contrast {
   border-color: var(--yellow);
   color: var(--yellow);
   background: rgba(255, 217, 61, 0.1);
+}
+
+@keyframes case2-scan-line {
+  0% {
+    transform: translateY(-100%);
+  }
+  45%,
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes case2-card-confirm {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.012);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes case2-scan-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .case2-score-grid {
@@ -2183,6 +2368,14 @@ html.ss-high-contrast {
 
   .case2-decision-row {
     grid-template-columns: 1fr;
+  }
+
+  .case2-scan-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .case2-scan-panel em {
+    justify-self: start;
   }
 }
 

@@ -19,7 +19,7 @@ export const BADGES = {
   },
   patternBeginner: {
     id: 'pattern-recognition-beginner',
-    name: 'Pattern Recognition - Beginner',
+    name: 'Pattern Recognition — Beginner',
     message: 'You spotted cyberbullying patterns beyond the obvious insults.',
     icon: 'eye',
   },

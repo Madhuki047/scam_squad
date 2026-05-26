@@ -25,7 +25,7 @@ export default function Sidebar() {
 
   return (
     <nav
-      className="w-16 shrink-0 flex flex-col items-center py-4 gap-1"
+      className="w-16 h-screen shrink-0 flex flex-col items-center py-4 gap-1 overflow-hidden"
       style={{
         background: 'rgba(13,0,30,.9)',
         borderRight: '1.5px solid var(--line)',

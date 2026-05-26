@@ -231,6 +231,8 @@ const CASE2_THREADS = [
     title: "Thread 01 - Comment chain on Emma's profile",
     source: 'GlowLoop social feed',
     difficulty: 'Obvious',
+    scan: 'High risk',
+    signal: 'Direct attack',
     correctAction: 'flag',
     hint: 'Direct name-calling aimed at one person.',
     messages: [
@@ -246,6 +248,8 @@ const CASE2_THREADS = [
     title: 'Thread 02 - Photo reply pile-on',
     source: 'Photo post replies',
     difficulty: 'Obvious',
+    scan: 'High risk',
+    signal: 'Humiliation',
     correctAction: 'flag',
     hint: 'Mocking someone for how they look is personal abuse.',
     messages: [
@@ -261,6 +265,8 @@ const CASE2_THREADS = [
     title: 'Thread 03 - Repeated replies across one afternoon',
     source: 'Moderation queue',
     difficulty: 'Pattern',
+    scan: 'High risk',
+    signal: 'Repeated targeting',
     correctAction: 'flag',
     hint: 'The same target is being hit again and again.',
     timeline: ['Mon 15:12', 'Mon 15:19', 'Mon 15:27', 'Mon 15:40'],
@@ -278,6 +284,8 @@ const CASE2_THREADS = [
     title: 'Thread 04 - Group chat planning timeline',
     source: 'Private group report',
     difficulty: 'Subtle',
+    scan: 'Pattern risk',
+    signal: 'Passive exclusion',
     correctAction: 'flag',
     hint: 'No single message is explosive. The exclusion pattern is the evidence.',
     timeline: ['Tue - film night', 'Thu - lunch table', 'Sat - gaming lobby', 'Next Mon - project chat'],
@@ -295,6 +303,8 @@ const CASE2_THREADS = [
     title: 'Thread 05 - @johnhaha67 repeated replies',
     source: 'Cross-post activity log',
     difficulty: 'Subtle',
+    scan: 'Pattern risk',
+    signal: 'Plausible deniability',
     correctAction: 'flag',
     hint: 'Small comments can become harassment when they follow the same person everywhere.',
     timeline: ['Post 1', 'Post 2', 'Post 3', 'Post 4', 'Post 5'],
@@ -307,6 +317,57 @@ const CASE2_THREADS = [
     ],
     explanation:
       '"Just joking" comments can be plausible deniability. The pattern shows repeated targeting.',
+  },
+  {
+    id: 'one-off-disagreement',
+    title: 'Thread 06 - Debate under a group project post',
+    source: 'GlowLoop class feed',
+    difficulty: 'Normal conflict',
+    scan: 'Low risk',
+    signal: 'One-off disagreement',
+    correctAction: 'dismiss',
+    hint: 'Both people disagree once, then stop. No repeated targeting.',
+    messages: [
+      { author: '@emma.draws', text: 'I think our poster needs sources before we post it.' },
+      { author: '@rowan7', text: 'I disagree. It is fine as it is.' },
+      { author: '@emma.draws', text: 'Okay, let us ask the group.' },
+    ],
+    explanation:
+      'A one-off disagreement between equal participants is conflict, not cyberbullying.',
+  },
+  {
+    id: 'consensual-banter',
+    title: 'Thread 07 - Friends joking after a game',
+    source: 'GlowLoop game clip replies',
+    difficulty: 'Normal banter',
+    scan: 'Low risk',
+    signal: 'Mutual context',
+    correctAction: 'dismiss',
+    hint: 'The replies are mutual, friendly, and not aimed at isolating Emma.',
+    messages: [
+      { author: '@emma.draws', text: 'I cannot believe I missed that easy shot.' },
+      { author: '@maya-lol', text: 'legendary fail, but you carried us last round' },
+      { author: '@emma.draws', text: 'Fair. I deserve that one.' },
+    ],
+    explanation:
+      'Playful banter with consent and friendly context should not be treated as bullying.',
+  },
+  {
+    id: 'constructive-comment',
+    title: 'Thread 08 - Art club feedback',
+    source: 'GlowLoop creative post',
+    difficulty: 'Safe feedback',
+    scan: 'Low risk',
+    signal: 'Constructive',
+    correctAction: 'dismiss',
+    hint: 'This is neutral feedback about the work, not an attack on the person.',
+    messages: [
+      { author: '@sketchroom', text: 'The color palette is strong.' },
+      { author: '@sketchroom', text: 'Maybe add more contrast around the title so it is easier to read.' },
+      { author: '@emma.draws', text: 'Good idea, thanks.' },
+    ],
+    explanation:
+      'Constructive comments focus on the work and do not target, shame, or repeat harm.',
   },
 ]
 
@@ -333,7 +394,7 @@ const CASE2_TEACHING_POINTS = [
   },
 ]
 
-const CASE2_PASS_THRESHOLD = 4
+const CASE2_PASS_THRESHOLD = 6
 const CASE2_DECISION_REWARD = 10
 
 function PixelPerson({ role, label, position = '' }) {
@@ -1679,13 +1740,14 @@ function Case2Intro({ internName, onNext }) {
           <h2 className="font-pixel text-sw-cyan text-sm">The Network: Just Jokes</h2>
           <p>
             Two weeks in, Cadet. We are moving from scam inboxes to social
-            platforms. A student named Emma filed a report about comments and
-            exclusion. Review the five flagged threads and decide what needs
-            action.
+            platforms. Unit Zero was tipped off after a teenager named Emma
+            filed a minor complaint. GlowLoop's moderation system flagged a
+            wider activity queue around her account.
           </p>
           <p className="text-sw-text3">
-            Look for patterns, not just loud messages. Cyberbullying often hides
-            behind soft jokes and repeated exclusion.
+            Review each thread and decide what crosses the line. Look for
+            patterns, not just loud messages. Some posts are normal conflict;
+            some are cyberbullying hiding behind soft jokes and exclusion.
           </p>
           <button type="button" className="ss-btn ss-btn-cyan self-start" onClick={onNext}>
             Open Review Queue <IconArrowRight size={16} />
@@ -1697,11 +1759,14 @@ function Case2Intro({ internName, onNext }) {
 }
 
 function Case2ThreadCard({ thread, decision, onDecision }) {
+  const riskPercent =
+    thread.scan === 'High risk' ? 92 : thread.scan === 'Pattern risk' ? 68 : 24
+
   return (
     <article
       className={`case2-thread-card ${
         thread.difficulty === 'Subtle' ? 'case2-thread-subtle' : ''
-      }`}
+      } ${decision ? 'case2-thread-selected' : ''}`}
     >
       <div className="case2-thread-header">
         <div>
@@ -1711,8 +1776,20 @@ function Case2ThreadCard({ thread, decision, onDecision }) {
         <span className="case2-difficulty-chip">{thread.difficulty}</span>
       </div>
 
+      <div className="case2-scan-panel">
+        <div>
+          <span>MOD SCAN</span>
+          <strong>{thread.scan}</strong>
+        </div>
+        <div className="case2-risk-meter" aria-label={`${thread.scan} meter`}>
+          <span style={{ width: `${riskPercent}%` }} />
+        </div>
+        <em>{thread.signal}</em>
+      </div>
+
       {thread.timeline && (
         <div className="case2-timeline" aria-label="Timeline evidence">
+          <strong>Timeline detected</strong>
           {thread.timeline.map((item) => (
             <span key={item}>{item}</span>
           ))}
@@ -1776,7 +1853,8 @@ function Case2ReviewBoard({ decisions, onDecision, onSubmit }) {
       <div className="case2-briefing-strip">
         <strong>Agent Ricky:</strong> Decide whether each thread should be
         flagged for cyberbullying or dismissed as normal conflict. The last two
-        need timeline thinking.
+        cyberbullying cases need timeline thinking, and the queue includes safe
+        posts so flagging everything will not clear the file.
       </div>
 
       <div className="case2-thread-grid">
@@ -1804,7 +1882,9 @@ function Case2ReviewBoard({ decisions, onDecision, onSubmit }) {
 
 function Case2Debrief({
   correctCount,
-  missedSubtle,
+  missedGroupExclusion,
+  missedPlausibleDeniability,
+  flaggedEverything,
   passed,
   decisions,
   onReplay,
@@ -1830,13 +1910,26 @@ function Case2Debrief({
               ? 'You tracked the behaviour pattern and protected Emma from a campaign hiding in plain sight.'
               : 'This file needs another pass before we can act on it.'}
           </p>
-          {missedSubtle && (
+          {missedGroupExclusion && (
             <blockquote className="zoey-quote">
-              "You caught the easy ones. You missed the ones that broke her.
-              Look at the timeline, Cadet. This group chat? Emma stopped coming
-              to school three weeks after it started. She did not lose friends in
-              one big fight. They just... quietly stopped including her. Every
-              single day. That is not banter - that is a campaign."
+              "You caught the easy ones. You missed the one that broke her.
+              Look at the timeline, Cadet. Emma did not lose friends in one big
+              fight. They just quietly stopped including her. Every single day.
+              That is not banter - that is a campaign."
+            </blockquote>
+          )}
+          {missedPlausibleDeniability && (
+            <blockquote className="zoey-quote">
+              "Sometimes harassment hides behind tiny comments. 'lol' once
+              might mean nothing. 'lol' under every post, always from the same
+              person, always aimed at Emma, becomes a pattern."
+            </blockquote>
+          )}
+          {flaggedEverything && (
+            <blockquote className="zoey-quote">
+              "Flagging everything feels safe, but it weakens real moderation
+              decisions. Cyberbullying depends on repetition, targeting, power
+              imbalance, and harm. Normal conflict still needs room to exist."
             </blockquote>
           )}
         </div>
@@ -1851,7 +1944,13 @@ function Case2Debrief({
               >
                 <IconFlag size={18} />
                 <div>
-                  <h3>{correct ? 'Correct flag' : 'Missed pattern'}</h3>
+                  <h3>
+                    {correct
+                      ? `Correct ${thread.correctAction}`
+                      : thread.correctAction === 'flag'
+                        ? 'Missed pattern'
+                        : 'Over-flagged'}
+                  </h3>
                   <p>{thread.explanation}</p>
                 </div>
               </article>
@@ -1880,7 +1979,7 @@ function Case2Debrief({
         {passed && (
           <div className="badge-card">
             <span>Badge unlocked</span>
-            <strong>PATTERN RECOGNITION - BEGINNER</strong>
+            <strong>PATTERN RECOGNITION — BEGINNER</strong>
           </div>
         )}
 
@@ -1945,12 +2044,19 @@ function Case2Rookie() {
       count + (decisions[thread.id] === thread.correctAction ? 1 : 0),
     0,
   )
-  const passed = correctCount >= CASE2_PASS_THRESHOLD
-  const missedSubtle = ['group-exclusion', 'plausible-deniability'].some(
-    (id) =>
-      decisions[id] &&
-      decisions[id] !== CASE2_THREADS.find((thread) => thread.id === id)?.correctAction,
+  const subtleCorrectCount = ['group-exclusion', 'plausible-deniability'].reduce(
+    (count, id) => count + (decisions[id] === 'flag' ? 1 : 0),
+    0,
   )
+  const passed = correctCount >= CASE2_PASS_THRESHOLD && subtleCorrectCount >= 1
+  const missedGroupExclusion =
+    decisions['group-exclusion'] && decisions['group-exclusion'] !== 'flag'
+  const missedPlausibleDeniability =
+    decisions['plausible-deniability'] &&
+    decisions['plausible-deniability'] !== 'flag'
+  const flaggedEverything =
+    CASE2_THREADS.length > 0 &&
+    CASE2_THREADS.every((thread) => decisions[thread.id] === 'flag')
 
   function restart() {
     setPhase('intro')
@@ -2083,7 +2189,9 @@ function Case2Rookie() {
       {phase === 'debrief' && (
         <Case2Debrief
           correctCount={correctCount}
-          missedSubtle={missedSubtle}
+          missedGroupExclusion={missedGroupExclusion}
+          missedPlausibleDeniability={missedPlausibleDeniability}
+          flaggedEverything={flaggedEverything}
           passed={passed}
           decisions={decisions}
           onReplay={passed ? () => finishRookie('replay') : () => spendFailureLife('replay')}

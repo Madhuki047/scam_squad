@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
 import { MAX_LIVES } from '../lib/gameRules.js'
+import { isCaseModeComplete } from '../lib/caseProgress.js'
 import { playSfx, startSfxLoop, stopSfxLoop } from '../lib/sound.js'
 
 const INTRO_LINES = [
@@ -68,11 +69,52 @@ const INTRO_LINES = [
   },
 ]
 
-function AssignmentCard() {
+function getHomeAssignment(user) {
+  if (!isCaseModeComplete(user, 1, 'rookie')) {
+    return {
+      to: '/case/1/rookie',
+      caseLabel: 'CASE 01',
+      title: 'CONTINUE CASE 01',
+      monitorTitle: 'THE BAIT',
+      subtitle: 'The Bait - phishing investigation',
+      variant: 'phishing',
+    }
+  }
+  if (!isCaseModeComplete(user, 1, 'veteran')) {
+    return {
+      to: '/case/1/veteran',
+      caseLabel: 'CASE 01',
+      title: 'CONTINUE CASE 01',
+      monitorTitle: 'DOUBLE BLUFF',
+      subtitle: 'The Bait - veteran phishing continuation',
+      variant: 'phishing',
+    }
+  }
+  if (!isCaseModeComplete(user, 2, 'rookie')) {
+    return {
+      to: '/case/2/rookie',
+      caseLabel: 'CASE 02',
+      title: 'START CASE 02',
+      monitorTitle: 'THE NETWORK',
+      subtitle: 'The Network - social moderation investigation',
+      variant: 'network',
+    }
+  }
+  return {
+    to: '/play',
+    caseLabel: 'CASE FILES',
+    title: 'CONTINUE CASE FILES',
+    monitorTitle: 'NEXT FILE',
+    subtitle: 'Review your unlocked investigations',
+    variant: 'network',
+  }
+}
+
+function AssignmentCard({ assignment }) {
   return (
     <Link
-      to="/play"
-      className="ss-card home-assignment-card hover:border-sw-cyan transition-colors"
+      to={assignment.to}
+      className={`ss-card home-assignment-card home-assignment-${assignment.variant} hover:border-sw-cyan transition-colors`}
       onClick={() => playSfx('missionBriefing')}
     >
       <div className="home-assignment-scene" aria-hidden="true">
@@ -82,19 +124,26 @@ function AssignmentCard() {
         </div>
         <div className="home-mission-desk">
           <div className="home-monitor">
-            <span>CASE 01</span>
-            <strong>THE BAIT</strong>
+            <span>{assignment.caseLabel}</span>
+            <strong>{assignment.monitorTitle}</strong>
           </div>
           <div className="home-keyboard" />
         </div>
+        {assignment.variant === 'network' && (
+          <div className="home-network-feed">
+            <span />
+            <span />
+            <span />
+          </div>
+        )}
       </div>
 
       <div className="home-assignment-brief">
         <span className="text-sw-text3">CURRENT ASSIGNMENT</span>
         <span className="font-pixel text-sw-pink text-xl md:text-2xl">
-          CONTINUE CASE 01
+          {assignment.title}
         </span>
-        <span className="text-sw-text2">The Bait - phishing investigation</span>
+        <span className="text-sw-text2">{assignment.subtitle}</span>
         <span className="home-mission-chip">Open mission briefing</span>
       </div>
     </Link>
@@ -245,6 +294,7 @@ export default function Home() {
   }, [token, user?.points, user?.totalScore])
 
   const introComplete = Boolean(user?.introCompleted)
+  const assignment = useMemo(() => getHomeAssignment(user), [user])
   const lives = Math.min(user?.livesRemaining ?? 0, MAX_LIVES)
   const stats = useMemo(
     () => [
@@ -291,7 +341,7 @@ export default function Home() {
       </div>
 
       {introComplete && !introJustCompleted ? (
-        <AssignmentCard />
+        <AssignmentCard assignment={assignment} />
       ) : (
         <PhoneIntro
           onComplete={completeIntro}
