@@ -1,3 +1,5 @@
+import phoneRingSrc from '../assets/audio/phone-ring.mp3'
+
 const SETTINGS_KEY = 'ss_device_settings'
 
 const VOLUME = {
@@ -18,6 +20,7 @@ const VOLUME = {
 let audioContext = null
 let muted = readMuted()
 let unlocked = false
+let phoneRingAudio = null
 const loops = new Map()
 const groupedSources = new Map()
 const lastPlayedAt = new Map()
@@ -39,6 +42,16 @@ function getContext() {
   if (!AudioCtx) return null
   if (!audioContext) audioContext = new AudioCtx()
   return audioContext
+}
+
+function getPhoneRingAudio() {
+  if (!phoneRingAudio) {
+    phoneRingAudio = new Audio(phoneRingSrc)
+    phoneRingAudio.loop = true
+    phoneRingAudio.volume = Math.min(1, VOLUME.phoneRing)
+    phoneRingAudio.preload = 'auto'
+  }
+  return phoneRingAudio
 }
 
 function gainNode(ctx, volume) {
@@ -142,86 +155,6 @@ function noise(duration = 0.05, volume = 0.04) {
   source.start()
 }
 
-function filteredNoise(
-  duration = 0.04,
-  volume = 0.05,
-  frequency = 2600,
-  delay = 0,
-  group = null,
-) {
-  const ctx = getContext()
-  if (!ctx || !unlocked) return
-
-  const start = ctx.currentTime + delay
-  const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate)
-  const data = buffer.getChannelData(0)
-  for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1
-
-  const source = ctx.createBufferSource()
-  const filter = ctx.createBiquadFilter()
-  const gain = gainNode(ctx, volume)
-
-  filter.type = 'bandpass'
-  filter.frequency.setValueAtTime(frequency, start)
-  filter.Q.setValueAtTime(8, start)
-  gain.gain.setValueAtTime(0.0001, start)
-  gain.gain.exponentialRampToValueAtTime(volume, start + 0.006)
-  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration)
-
-  source.buffer = buffer
-  source.connect(filter)
-  filter.connect(gain)
-  rememberSource(group, source)
-  source.start(start)
-  source.stop(start + duration + 0.01)
-}
-
-function vintagePhoneRing() {
-  const makeBellRing = (startDelay, offset = 0) => {
-    const strikes = [0, 0.14, 0.28, 0.42]
-    strikes.forEach((strikeDelay, index) => {
-      const delay = startDelay + strikeDelay
-      const wobble = index % 2 === 0 ? 0 : -16
-
-      filteredNoise(
-        0.032,
-        VOLUME.phoneRing * 0.95,
-        3200 + offset,
-        delay,
-        'phoneRing',
-      )
-      tone(
-        438 + offset + wobble,
-        0.34,
-        VOLUME.phoneRing,
-        'sine',
-        delay,
-        'phoneRing',
-      )
-      tone(
-        552 + offset - wobble,
-        0.32,
-        VOLUME.phoneRing * 0.88,
-        'sine',
-        delay + 0.006,
-        'phoneRing',
-      )
-      tone(
-        704 + offset + wobble,
-        0.22,
-        VOLUME.phoneRing * 0.52,
-        'triangle',
-        delay + 0.012,
-        'phoneRing',
-      )
-      tone(176, 0.28, VOLUME.phoneRing * 0.42, 'sine', delay, 'phoneRing')
-    })
-  }
-
-  makeBellRing(0)
-  makeBellRing(0.78, -22)
-}
-
 function missionBriefingCue() {
   noise(0.05, VOLUME.missionBriefing * 0.42)
   sweepTone(95, 155, 0.34, VOLUME.missionBriefing * 0.82, 'sine')
@@ -273,7 +206,7 @@ export function playSfx(name) {
       tone(260, 0.06, VOLUME.pickup, 'square', 0.025)
       break
     case 'phoneRing':
-      vintagePhoneRing()
+      getPhoneRingAudio().play().catch(() => {})
       break
     case 'missionBriefing':
       if (!recentlyPlayed('missionBriefing', 900)) missionBriefingCue()
@@ -316,23 +249,37 @@ export function playSfx(name) {
 
 export function startSfxLoop(name) {
   if (muted || loops.has(name)) return
+  if (name === 'phoneRing') {
+    playSfx(name)
+    loops.set(name, 'audio')
+    return
+  }
   playSfx(name)
-  const interval = name === 'phoneRing' ? 2600 : 1550
-  const id = window.setInterval(() => playSfx(name), interval)
+  const id = window.setInterval(() => playSfx(name), 1550)
   loops.set(name, id)
 }
 
 export function stopSfxLoop(name) {
   const id = loops.get(name)
-  if (id) {
+  if (id && id !== 'audio') {
     window.clearInterval(id)
-    loops.delete(name)
+  }
+  if (id) loops.delete(name)
+  if (name === 'phoneRing' && phoneRingAudio) {
+    phoneRingAudio.pause()
+    phoneRingAudio.currentTime = 0
   }
   stopGroupedSources(name)
 }
 
 export function stopAllSfxLoops() {
-  loops.forEach((id) => window.clearInterval(id))
+  loops.forEach((id) => {
+    if (id !== 'audio') window.clearInterval(id)
+  })
   loops.clear()
+  if (phoneRingAudio) {
+    phoneRingAudio.pause()
+    phoneRingAudio.currentTime = 0
+  }
   groupedSources.forEach((_, group) => stopGroupedSources(group))
 }
