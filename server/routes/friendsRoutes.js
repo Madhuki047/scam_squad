@@ -2,6 +2,7 @@ import { Router } from 'express'
 import protect from '../middleware/auth.js'
 import {
   listFriends,
+  listOutgoingRequests,
   listRequests,
   searchPlayers,
   sendRequest,
@@ -17,6 +18,7 @@ const router = Router()
 
 router.get('/', protect, listFriends)
 router.get('/requests', protect, listRequests)
+router.get('/outgoing', protect, listOutgoingRequests)
 router.get('/search', protect, searchPlayers)
 
 router.post('/request/:userId', protect, sendRequest)
