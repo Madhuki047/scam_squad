@@ -2,11 +2,13 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { IconSettings, IconLogout } from '@tabler/icons-react'
 import { navItems } from '../lib/nav.js'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useSocialNotifications } from '../context/SocialNotificationsContext.jsx'
 
 // Fixed 64px vertical nav, shown on every in-app screen. The active
 // route's icon turns pink (handled by NavLink's isActive).
 export default function Sidebar() {
   const { logout } = useAuth()
+  const { hasNotifications } = useSocialNotifications()
   const navigate = useNavigate()
 
   async function handleSignOut() {
@@ -17,7 +19,7 @@ export default function Sidebar() {
   // Shared icon-button styling; pink when the route is active.
   const linkClass = ({ isActive }) =>
     [
-      'flex items-center justify-center w-10 h-10 rounded transition-colors',
+      'relative flex items-center justify-center w-10 h-10 rounded transition-colors',
       isActive ? 'text-sw-pink' : 'text-sw-text3 hover:text-sw-cyan',
     ].join(' ')
 
@@ -40,6 +42,9 @@ export default function Sidebar() {
       {navItems.map(({ path, label, Icon }) => (
         <NavLink key={path} to={path} className={linkClass} title={label}>
           <Icon size={22} stroke={1.5} />
+          {path === '/friends' && hasNotifications && (
+            <span className="social-notification-dot" aria-label="New squad activity" />
+          )}
         </NavLink>
       ))}
 

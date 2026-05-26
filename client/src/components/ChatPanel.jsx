@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
 import { createSocket } from '../services/socket.js'
+import { useSocialNotifications } from '../context/SocialNotificationsContext.jsx'
 
 // 1:1 chat overlay anchored to the bottom-right of the screen. Squad
 // opens one of these per active conversation. Closing it disconnects
 // the socket so an idle player doesn't hold a long-lived connection.
 export default function ChatPanel({ peer, onClose }) {
   const { token, user } = useAuth()
+  const { markChatRead } = useSocialNotifications()
   const [messages, setMessages] = useState(null)
   const [draft, setDraft] = useState('')
   const [peerTyping, setPeerTyping] = useState(false)
@@ -26,7 +28,10 @@ export default function ChatPanel({ peer, onClose }) {
     api
       .getChatHistory(token, peer._id)
       .then((data) => {
-        if (!cancelled) setMessages(data.items)
+        if (!cancelled) {
+          setMessages(data.items)
+          markChatRead(peer._id).catch(() => {})
+        }
       })
       .catch((err) => {
         if (!cancelled) setError(err.message)
@@ -48,6 +53,9 @@ export default function ChatPanel({ peer, onClose }) {
         return
       }
       setMessages((m) => [...(m || []), msg])
+      if (String(msg.from) === String(peer._id)) {
+        markChatRead(peer._id).catch(() => {})
+      }
     })
 
     sock.on('chat:typing', ({ from }) => {
@@ -63,7 +71,7 @@ export default function ChatPanel({ peer, onClose }) {
       sock.disconnect()
       socketRef.current = null
     }
-  }, [token, peer?._id])
+  }, [token, peer?._id, markChatRead])
 
   // Auto-scroll to bottom on new message.
   useEffect(() => {

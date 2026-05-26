@@ -780,9 +780,14 @@ function OneHourLater({ onNext }) {
   )
 }
 
-function DomainCheck({ selectedAnswer, onAnswer, onNext }) {
+function DomainCheck({ selectedAnswer, onAnswer, onNext, onWrongAnswer }) {
   const answered = selectedAnswer !== null
   const correct = selectedAnswer === 'no'
+
+  function chooseAnswer(answer) {
+    onAnswer(answer)
+    if (answer === 'yes') onWrongAnswer()
+  }
 
   return (
     <section className="case-email ss-card scene-transition">
@@ -796,7 +801,7 @@ function DomainCheck({ selectedAnswer, onAnswer, onNext }) {
         <button
           type="button"
           className="ss-btn ss-btn-pink"
-          onClick={() => onAnswer('yes')}
+          onClick={() => chooseAnswer('yes')}
           disabled={answered}
         >
           Yes
@@ -804,7 +809,7 @@ function DomainCheck({ selectedAnswer, onAnswer, onNext }) {
         <button
           type="button"
           className="ss-btn ss-btn-cyan"
-          onClick={() => onAnswer('no')}
+          onClick={() => chooseAnswer('no')}
           disabled={answered}
         >
           No
@@ -1138,15 +1143,21 @@ function VeteranDebrief({
 }) {
   const passed = quizSubmitted && quizCorrect >= 5
   const failedRoute = route === 'captured'
+  const fieldFailed = route === 'fieldFailed'
+  const quizFailed = route === 'quizFailed'
 
   return (
     <section className="case-debrief">
-      <div className={passed && !failedRoute ? 'success-banner' : 'breach-banner'}>
-        {passed && !failedRoute
+      <div className={passed && !failedRoute && !fieldFailed && !quizFailed ? 'success-banner' : 'breach-banner'}>
+        {passed && !failedRoute && !fieldFailed && !quizFailed
           ? 'CASE 01 VETERAN SECURED'
           : failedRoute
             ? 'CREDENTIAL CAPTURE - REPLAY REQUIRED'
-            : 'FIELD CHECK FAILED - REPLAY REQUIRED'}
+            : fieldFailed
+              ? 'FIELD TRACE FAILED - REPLAY REQUIRED'
+              : quizFailed
+                ? 'FINAL QUIZ FAILED - REPLAY REQUIRED'
+                : 'FIELD CHECK FAILED - REPLAY REQUIRED'}
       </div>
       <div className="ss-card p-5 flex flex-col gap-4">
         <div>
@@ -1154,9 +1165,13 @@ function VeteranDebrief({
             CASE 01 VETERAN: THE DOUBLE BLUFF
           </h2>
           <p className="text-sw-text2">
-            {passed && !failedRoute
+            {passed && !failedRoute && !fieldFailed && !quizFailed
               ? 'You verified the request, traced the infrastructure, and passed the field check.'
-              : 'Review the professional phishing indicators before retrying the Veteran case.'}
+              : fieldFailed
+                ? 'The trace report missed the attack path. Review the indicators before retrying the Veteran investigation.'
+                : quizFailed
+                  ? 'The final certification score was below 50%. Replay is required before the Veteran case can close.'
+                  : 'Review the professional phishing indicators before retrying the Veteran case.'}
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1170,7 +1185,7 @@ function VeteranDebrief({
             </article>
           ))}
         </div>
-        {passed && !failedRoute && (
+        {passed && !failedRoute && !fieldFailed && !quizFailed && (
           <>
             <div className="badge-card">
               <span>Badge unlocked</span>
@@ -1197,7 +1212,7 @@ function VeteranDebrief({
             onClick={onContinue}
             disabled={busy}
           >
-            {passed && !failedRoute ? 'Continue' : 'Replay Veteran'}
+            Continue to Case Files
           </button>
         </div>
       </div>
@@ -1254,7 +1269,15 @@ function VeteranCase() {
     (count, answer, index) => count + (answer === VETERAN_QUIZ[index].answer ? 1 : 0),
     0,
   )
-  const passedVeteran = route !== 'captured' && quizSubmitted && quizCorrect >= 5
+  const selectedTraceSet = new Set(traceSelected)
+  const tracePassed =
+    traceSubmitted &&
+    TRACE_INDICATORS.every(
+      (item) => selectedTraceSet.has(item.id) === item.suspicious,
+    )
+  const failedOutcome =
+    route === 'captured' || route === 'fieldFailed' || route === 'quizFailed'
+  const passedVeteran = !failedOutcome && quizSubmitted && quizCorrect >= 5
 
   function restart() {
     setPhase('inbox')
@@ -1303,9 +1326,9 @@ function VeteranCase() {
     }
   }
 
-  async function finishVeteran() {
+  async function finishVeteran(nextAction = 'end') {
     if (!passedVeteran) {
-      if (route === 'captured') spendFailureLife('replay')
+      if (failedOutcome) spendFailureLife('replay')
       else restart()
       return
     }
@@ -1330,6 +1353,10 @@ function VeteranCase() {
         playSfx('badge')
       }
       playSfx('caseComplete')
+      if (nextAction === 'caseFiles') {
+        navigate('/play')
+        return
+      }
       setPhase('end')
     } catch (error) {
       console.error('[progress] Veteran completion update failed', {
@@ -1358,6 +1385,11 @@ function VeteranCase() {
       setTraceSubmitted(true)
       return
     }
+    if (!tracePassed) {
+      setRoute('fieldFailed')
+      setPhase('debrief')
+      return
+    }
     setPhase('quiz')
   }
 
@@ -1384,6 +1416,7 @@ function VeteranCase() {
       setQuizSubmitted(true)
       return
     }
+    if (quizCorrect < 5) setRoute('quizFailed')
     setPhase('debrief')
   }
 
@@ -1439,6 +1472,10 @@ function VeteranCase() {
         <DomainCheck
           selectedAnswer={domainAnswer}
           onAnswer={setDomainAnswer}
+          onWrongAnswer={() => {
+            setRoute('captured')
+            setPhase('portal')
+          }}
           onNext={() => setPhase('timeSkip')}
         />
       )}
@@ -1473,16 +1510,16 @@ function VeteranCase() {
           quizCorrect={quizCorrect}
           quizSubmitted={quizSubmitted}
           onReplay={
-            passedVeteran || route !== 'captured'
+            passedVeteran || !failedOutcome
               ? restart
               : () => spendFailureLife('replay')
           }
           onContinue={
             passedVeteran
-              ? finishVeteran
-              : route === 'captured'
-                ? () => spendFailureLife('replay')
-                : restart
+              ? () => finishVeteran('caseFiles')
+              : failedOutcome
+                ? () => spendFailureLife('continue')
+                : () => navigate('/play')
           }
           busy={resolvingDebrief}
         />

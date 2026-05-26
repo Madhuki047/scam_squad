@@ -185,6 +185,33 @@ html.ss-high-contrast {
   background: rgba(255, 78, 201, 0.1);
 }
 
+.social-notification-dot {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 0.62rem;
+  height: 0.62rem;
+  border: 1.5px solid #12001f;
+  border-radius: 999px;
+  background: var(--pink);
+  box-shadow: 0 0 0.55rem rgba(255, 78, 201, 0.75);
+}
+
+.social-inline-badge {
+  display: inline-flex;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--pink);
+  border-radius: 999px;
+  padding: 0 0.3rem;
+  color: var(--pink);
+  background: rgba(255, 78, 201, 0.12);
+  box-shadow: 0 0 0.45rem rgba(255, 78, 201, 0.35);
+  font-size: 0.72rem;
+}
+
 /* ---------------------------------------------------------------------
    Home intro transmission.
 --------------------------------------------------------------------- */

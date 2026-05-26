@@ -2,15 +2,22 @@ import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
 import ChatPanel from '../components/ChatPanel.jsx'
+import { useSocialNotifications } from '../context/SocialNotificationsContext.jsx'
 
 // Squad screen: the signed-in player's friends, incoming requests, and a
 // search box for sending new requests. Clicking Chat on a friend opens a
 // real-time chat panel anchored to the bottom-right.
 export default function Squad() {
   const { token } = useAuth()
+  const {
+    unreadByFriend,
+    markChatRead,
+    refresh: refreshNotifications,
+  } = useSocialNotifications()
 
   const [friends, setFriends] = useState(null)
   const [requests, setRequests] = useState(null)
+  const [outgoing, setOutgoing] = useState(null)
   const [error, setError] = useState('')
   const [activeChat, setActiveChat] = useState(null)
 
@@ -18,16 +25,19 @@ export default function Squad() {
   // in sync without hand-rolling optimistic updates.
   const refresh = useCallback(async () => {
     try {
-      const [a, b] = await Promise.all([
+      const [a, b, c] = await Promise.all([
         api.getFriends(token),
         api.getFriendRequests(token),
+        api.getOutgoingFriendRequests(token),
       ])
       setFriends(a.items)
       setRequests(b.items)
+      setOutgoing(c.items)
+      refreshNotifications().catch(() => {})
     } catch (err) {
       setError(err.message)
     }
-  }, [token])
+  }, [token, refreshNotifications])
 
   useEffect(() => {
     refresh()
@@ -44,6 +54,10 @@ export default function Squad() {
   async function handleRemove(userId) {
     await api.removeFriend(token, userId)
     refresh()
+  }
+  function openChat(player) {
+    setActiveChat(player)
+    markChatRead(player._id).catch(() => {})
   }
 
   return (
@@ -90,6 +104,27 @@ export default function Squad() {
         )}
       </Section>
 
+      <Section title={`OUTGOING REQUESTS — ${outgoing?.length ?? 0}`}>
+        {outgoing === null ? (
+          <p className="text-sw-text3">Loading…</p>
+        ) : outgoing.length === 0 ? (
+          <p className="text-sw-text3">No sent requests waiting right now.</p>
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {outgoing.map((p) => (
+              <li
+                key={p._id}
+                className="flex items-center justify-between gap-3"
+                style={{ borderBottom: '1px solid var(--line)', paddingBottom: 8 }}
+              >
+                <PlayerLine player={p} />
+                <span className="text-sw-text3 text-sm shrink-0">Pending</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
       <Section title={`MY SQUAD — ${friends?.length ?? 0}`}>
         {friends === null ? (
           <p className="text-sw-text3">Loading…</p>
@@ -99,31 +134,39 @@ export default function Squad() {
           </p>
         ) : (
           <ul className="flex flex-col gap-3">
-            {friends.map((p) => (
-              <li
-                key={p._id}
-                className="flex items-center justify-between gap-3"
-                style={{ borderBottom: '1px solid var(--line)', paddingBottom: 8 }}
-              >
-                <PlayerLine player={p} />
-                <div className="flex gap-2 shrink-0">
-                  <button
-                    type="button"
-                    className="ss-btn ss-btn-cyan"
-                    onClick={() => setActiveChat(p)}
-                  >
-                    Chat
-                  </button>
-                  <button
-                    type="button"
-                    className="ss-btn ss-btn-red"
-                    onClick={() => handleRemove(p._id)}
-                  >
-                    Remove
-                  </button>
-                </div>
-              </li>
-            ))}
+            {friends.map((p) => {
+              const unreadCount = unreadByFriend[String(p._id)] || 0
+              return (
+                <li
+                  key={p._id}
+                  className="flex items-center justify-between gap-3"
+                  style={{ borderBottom: '1px solid var(--line)', paddingBottom: 8 }}
+                >
+                  <PlayerLine player={p} unreadCount={unreadCount} />
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      type="button"
+                      className="ss-btn ss-btn-cyan"
+                      onClick={() => openChat(p)}
+                    >
+                      Chat
+                      {unreadCount > 0 && (
+                        <span className="social-inline-badge ml-2">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className="ss-btn ss-btn-red"
+                      onClick={() => handleRemove(p._id)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </li>
+              )
+            })}
           </ul>
         )}
       </Section>
@@ -144,7 +187,7 @@ function Section({ title, children }) {
   )
 }
 
-function PlayerLine({ player }) {
+function PlayerLine({ player, unreadCount = 0 }) {
   return (
     <div className="flex items-center gap-3 min-w-0">
       <div
@@ -157,7 +200,12 @@ function PlayerLine({ player }) {
         }}
       />
       <div className="min-w-0">
-        <div className="text-sw-text truncate">{player.username}</div>
+        <div className="text-sw-text truncate flex items-center gap-2">
+          {player.username}
+          {unreadCount > 0 && (
+            <span className="social-inline-badge">{unreadCount}</span>
+          )}
+        </div>
         <div className="text-sw-text3 text-sm">
           Lvl {player.level || 1} · {player.totalScore || 0} score
         </div>

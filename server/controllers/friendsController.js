@@ -49,6 +49,20 @@ export async function listRequests(req, res, next) {
   }
 }
 
+// GET /api/friends/outgoing - requests this player has sent that are
+// still waiting in another player's incoming queue.
+export async function listOutgoingRequests(req, res, next) {
+  try {
+    const items = await User.find({
+      pendingRequests: req.userId,
+      friends: { $ne: req.userId },
+    }).select(PUBLIC_FIELDS)
+    res.json({ items })
+  } catch (error) {
+    next(error)
+  }
+}
+
 // GET /api/friends/search?q=... - find players to add. Excludes the
 // signed-in player and anyone already in their friends / pendingRequests
 // list, so the UI shows only actionable matches.
@@ -58,14 +72,18 @@ export async function searchPlayers(req, res, next) {
     if (q.length < 2) {
       return res.json({ items: [] })
     }
-    const me = await User.findById(req.userId).select(
-      'friends pendingRequests',
-    )
+    const me = await User.findById(req.userId).select('friends pendingRequests')
     if (!me) return res.status(404).json({ message: 'Account not found.' })
+    const outgoing = await User.find({ pendingRequests: req.userId }).select('_id')
 
     // Anchor the prefix to keep the query cheap. Escape regex metachars.
     const safe = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const excluded = [req.userId, ...(me.friends || []), ...(me.pendingRequests || [])]
+    const excluded = [
+      req.userId,
+      ...(me.friends || []),
+      ...(me.pendingRequests || []),
+      ...outgoing.map((user) => user._id),
+    ]
     const items = await User.find({
       _id: { $nin: excluded },
       username: { $regex: new RegExp('^' + safe, 'i') },

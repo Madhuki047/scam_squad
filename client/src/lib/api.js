@@ -108,6 +108,7 @@ export const api = {
   // --- friends ---
   getFriends: (token) => request('/friends', { token }),
   getFriendRequests: (token) => request('/friends/requests', { token }),
+  getOutgoingFriendRequests: (token) => request('/friends/outgoing', { token }),
   searchPlayers: (token, q) =>
     request(`/friends/search?q=${encodeURIComponent(q)}`, { token }),
   sendFriendRequest: (token, userId) =>
@@ -121,6 +122,9 @@ export const api = {
 
   // --- chat (history only; live delivery goes through the socket) ---
   getChatHistory: (token, peerId) => request(`/chat/${peerId}`, { token }),
+  getChatUnreadSummary: (token) => request('/chat/unread/summary', { token }),
+  markChatRead: (token, peerId) =>
+    request(`/chat/${peerId}/read`, { method: 'POST', token }),
 }
 
 export { request, API_URL }

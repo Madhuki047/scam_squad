@@ -18,6 +18,7 @@ const chatMessageSchema = new mongoose.Schema(
       index: true,
     },
     text: { type: String, required: true, maxlength: 1000 },
+    readAt: { type: Date, default: null },
   },
   { timestamps: true },
 )

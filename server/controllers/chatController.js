@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import ChatMessage from '../models/ChatMessage.js'
 import User from '../models/User.js'
 
@@ -29,7 +30,59 @@ export async function getHistory(req, res, next) {
       .sort({ createdAt: -1 })
       .limit(100)
 
+    await ChatMessage.updateMany(
+      { from: peer, to: me, readAt: null },
+      { $set: { readAt: new Date() } },
+    )
+
     res.json({ items: items.reverse() })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function getUnreadSummary(req, res, next) {
+  try {
+    const rows = await ChatMessage.aggregate([
+      {
+        $match: {
+          to: new mongoose.Types.ObjectId(req.userId),
+          readAt: null,
+        },
+      },
+      {
+        $group: {
+          _id: '$from',
+          count: { $sum: 1 },
+        },
+      },
+    ])
+
+    const byFriend = {}
+    let total = 0
+    rows.forEach((row) => {
+      const count = row.count || 0
+      byFriend[String(row._id)] = count
+      total += count
+    })
+
+    res.json({ total, byFriend })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function markRead(req, res, next) {
+  try {
+    const me = req.userId
+    const peer = req.params.peerId
+
+    const result = await ChatMessage.updateMany(
+      { from: peer, to: me, readAt: null },
+      { $set: { readAt: new Date() } },
+    )
+
+    res.json({ ok: true, marked: result.modifiedCount || 0 })
   } catch (error) {
     next(error)
   }
