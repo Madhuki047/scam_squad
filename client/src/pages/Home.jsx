@@ -96,7 +96,7 @@ function getHomeAssignment(user) {
       caseLabel: 'CASE 02',
       title: 'START CASE 02',
       monitorTitle: 'THE NETWORK',
-      subtitle: 'The Network - social moderation investigation',
+      subtitle: 'The Network - cyberbullying and group dynamics',
       variant: 'network',
     }
   }
