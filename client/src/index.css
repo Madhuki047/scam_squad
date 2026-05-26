@@ -2006,6 +2006,128 @@ html.ss-high-contrast {
   animation-delay: -7s;
 }
 
+.case2-network-lines {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.42;
+}
+
+.case2-network-lines .node {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid rgba(93, 213, 232, 0.65);
+  border-radius: 999px;
+  background: rgba(93, 213, 232, 0.16);
+  box-shadow: 0 0 0.55rem rgba(93, 213, 232, 0.22);
+  animation: case2-node-pulse 3.8s ease-in-out infinite;
+}
+
+.case2-network-lines .node-a {
+  left: 18%;
+  top: 26%;
+}
+
+.case2-network-lines .node-b {
+  right: 22%;
+  top: 34%;
+  animation-delay: 900ms;
+}
+
+.case2-network-lines .node-c {
+  right: 28%;
+  bottom: 24%;
+  animation-delay: 1.7s;
+}
+
+.case2-network-lines .line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(93, 213, 232, 0.32), transparent);
+  transform-origin: left center;
+}
+
+.case2-network-lines .line-a {
+  left: 19%;
+  top: 27%;
+  width: 57%;
+  transform: rotate(9deg);
+}
+
+.case2-network-lines .line-b {
+  right: 27%;
+  top: 37%;
+  width: 24%;
+  transform: rotate(79deg);
+}
+
+.case2-profile-mini,
+.case2-notification-bubble {
+  position: absolute;
+  z-index: 2;
+  border: 1px solid rgba(93, 213, 232, 0.2);
+  border-radius: 0.4rem;
+  background: rgba(8, 7, 22, 0.68);
+  box-shadow: 0 0 0.75rem rgba(8, 7, 22, 0.28);
+}
+
+.case2-profile-mini {
+  left: 5%;
+  bottom: 8%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.48rem;
+  opacity: 0.72;
+  animation: case2-soft-notification 7.5s ease-in-out infinite;
+}
+
+.case2-profile-mini strong,
+.case2-phone-header strong {
+  display: block;
+  color: var(--pink);
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.case2-profile-mini span,
+.case2-phone-header span {
+  color: var(--text3);
+  font-size: 0.66rem;
+}
+
+.case2-avatar-dot {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  place-items: center;
+  border: 1px solid rgba(255, 78, 201, 0.58);
+  border-radius: 999px;
+  color: var(--pink);
+  background: rgba(255, 78, 201, 0.1);
+  font-size: 0.64rem;
+}
+
+.case2-notification-bubble {
+  padding: 0.32rem 0.48rem;
+  color: rgba(228, 198, 255, 0.66);
+  font-size: 0.68rem;
+  animation: case2-soft-notification 8s ease-in-out infinite;
+}
+
+.case2-notification-bubble.bubble-one {
+  top: 10%;
+  right: 11%;
+}
+
+.case2-notification-bubble.bubble-two {
+  left: 10%;
+  top: 39%;
+  animation-delay: -3.5s;
+}
+
 .case2-phone-frame {
   position: relative;
   z-index: 1;
@@ -2019,6 +2141,16 @@ html.ss-high-contrast {
     0 0 1rem rgba(93, 213, 232, 0.26),
     inset 0 0 0 2px rgba(255, 78, 201, 0.2);
   animation: case2-phone-breathe 5.6s ease-in-out infinite;
+}
+
+.case2-phone-header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.45rem;
+  align-items: center;
+  margin-bottom: 0.7rem;
+  border-bottom: 1px solid rgba(93, 213, 232, 0.16);
+  padding-bottom: 0.55rem;
 }
 
 .case2-phone-notch {
@@ -2058,6 +2190,20 @@ html.ss-high-contrast {
 }
 
 .case2-post-card span.case2-post-meta {
+  display: inline;
+  width: auto;
+  height: auto;
+  background: transparent;
+}
+
+.case2-reaction-row {
+  display: flex;
+  gap: 0.55rem;
+  color: var(--text3);
+  font-size: 0.68rem;
+}
+
+.case2-post-card .case2-reaction-row span {
   display: inline;
   width: auto;
   height: auto;
@@ -2161,6 +2307,26 @@ html.ss-high-contrast {
   animation-duration: 5.8s;
 }
 
+.case2-glitch-strip {
+  position: absolute;
+  right: 0.85rem;
+  height: 1px;
+  background: rgba(255, 78, 201, 0.45);
+  opacity: 0;
+  animation: case2-message-strip 6.5s ease-in-out infinite;
+}
+
+.case2-glitch-strip.strip-one {
+  bottom: 2.75rem;
+  width: 36%;
+}
+
+.case2-glitch-strip.strip-two {
+  bottom: 2.35rem;
+  width: 24%;
+  animation-delay: 120ms;
+}
+
 .case2-ricky-panel {
   position: relative;
   display: flex;
@@ -2204,13 +2370,37 @@ html.ss-high-contrast {
 }
 
 .case2-briefing-type {
-  width: fit-content;
-  max-width: 100%;
-  overflow: hidden;
-  border-right: 1px solid rgba(93, 213, 232, 0.65);
-  animation:
-    case2-briefing-type 3.6s steps(96, end) both,
-    case2-briefing-caret 900ms step-end infinite;
+  min-height: 4.6rem;
+  margin: 0;
+  color: var(--text2);
+  line-height: 1.65;
+}
+
+.case2-briefing-cursor {
+  display: inline-block;
+  width: 0.55rem;
+  height: 1em;
+  margin-left: 0.12rem;
+  border-bottom: 2px solid rgba(93, 213, 232, 0.8);
+  transform: translateY(0.12rem);
+  animation: case2-briefing-caret 750ms step-end infinite;
+}
+
+.case2-start-btn {
+  opacity: 0.58;
+  transform: translateY(0.08rem);
+  transition:
+    box-shadow 220ms ease,
+    opacity 220ms ease,
+    transform 220ms ease,
+    border-color 220ms ease;
+}
+
+.case2-start-btn.ready {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: rgba(93, 213, 232, 0.95);
+  box-shadow: 0 0 0.9rem rgba(93, 213, 232, 0.22);
 }
 
 .case2-board {
@@ -2883,6 +3073,34 @@ html.ss-high-contrast {
   }
 }
 
+@keyframes case2-node-pulse {
+  0%,
+  100% {
+    opacity: 0.32;
+    transform: scale(0.86);
+  }
+  45% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes case2-soft-notification {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translateY(0.2rem);
+  }
+  24%,
+  58% {
+    opacity: 0.72;
+    transform: translateY(0);
+  }
+  75% {
+    opacity: 0.36;
+  }
+}
+
 @keyframes case2-typing-vanish {
   0%,
   26% {
@@ -2910,6 +3128,27 @@ html.ss-high-contrast {
   45% {
     opacity: 1;
     transform: translateY(-0.12rem);
+  }
+}
+
+@keyframes case2-message-strip {
+  0%,
+  76%,
+  100% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  79% {
+    opacity: 0.8;
+    transform: translateX(-0.2rem);
+  }
+  82% {
+    opacity: 0.12;
+    transform: translateX(0.15rem);
+  }
+  85% {
+    opacity: 0.56;
+    transform: translateX(0);
   }
 }
 
@@ -2983,15 +3222,6 @@ html.ss-high-contrast {
   90% {
     opacity: 0.08;
     transform: translateY(100%);
-  }
-}
-
-@keyframes case2-briefing-type {
-  from {
-    max-width: 0;
-  }
-  to {
-    max-width: 100%;
   }
 }
 

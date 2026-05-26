@@ -1745,6 +1745,25 @@ function VeteranCase() {
 }
 
 function Case2Intro({ internName, onNext }) {
+  const briefingText =
+    'Emma sent over a quiet note after a week on GlowLoop. It does not look dramatic: comments, group chats, a few deleted replies.'
+  const [typedBriefing, setTypedBriefing] = useState('')
+  const briefingComplete = typedBriefing.length === briefingText.length
+
+  useEffect(() => {
+    setTypedBriefing('')
+    let index = 0
+    const typingTimer = window.setInterval(() => {
+      index += 1
+      setTypedBriefing(briefingText.slice(0, index))
+      if (index >= briefingText.length) {
+        window.clearInterval(typingTimer)
+      }
+    }, 24)
+
+    return () => window.clearInterval(typingTimer)
+  }, [briefingText])
+
   return (
     <section className="case-terminal ss-card scene-transition">
       <div className="case-terminal-header">
@@ -1760,17 +1779,48 @@ function Case2Intro({ internName, onNext }) {
           <div className="case2-ambient-comment ambient-one">@nina: oh nvm</div>
           <div className="case2-ambient-comment ambient-two">seen by 5</div>
           <div className="case2-ambient-comment ambient-three">@mika: inside joke</div>
+          <div className="case2-network-lines">
+            <span className="node node-a" />
+            <span className="node node-b" />
+            <span className="node node-c" />
+            <span className="line line-a" />
+            <span className="line line-b" />
+          </div>
+          <div className="case2-profile-mini">
+            <span className="case2-avatar-dot">EM</span>
+            <div>
+              <strong>@emma.draws</strong>
+              <span>quiet report</span>
+            </div>
+          </div>
+          <div className="case2-notification-bubble bubble-one">new reply</div>
+          <div className="case2-notification-bubble bubble-two">mentioned</div>
           <div className="case2-phone-frame">
             <span className="case2-phone-notch" />
+            <div className="case2-phone-header">
+              <span className="case2-avatar-dot">EM</span>
+              <div>
+                <strong>@emma.draws</strong>
+                <span>profile</span>
+              </div>
+            </div>
             <div className="case2-post-card case2-floating-comment">
               <strong>@emma.draws</strong>
               <p>did everyone leave the old chat?</p>
               <span className="case2-post-meta">sent 18:42</span>
+              <div className="case2-reaction-row">
+                <span>0 likes</span>
+                <span>5 seen</span>
+              </div>
             </div>
             <div className="case2-post-card muted case2-floating-comment">
               <strong>@johnhaha67</strong>
               <p>lol</p>
               <span className="case2-post-meta">1 reply</span>
+              <div className="case2-reaction-row">
+                <span>3 likes</span>
+                <span>reply</span>
+              </div>
             </div>
             <div className="case2-typing-row">
               <span />
@@ -1779,20 +1829,28 @@ function Case2Intro({ internName, onNext }) {
             </div>
             <div className="case2-feed-fragment fragment-one">seen by 5</div>
             <div className="case2-feed-fragment fragment-two">reply deleted</div>
+            <div className="case2-glitch-strip strip-one" />
+            <div className="case2-glitch-strip strip-two" />
           </div>
         </div>
         <div className="case2-ricky-panel">
           <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
           <h2 className="font-pixel text-sw-cyan text-sm">The Network: Just Jokes</h2>
-          <p className="case2-briefing-type">
-            Emma sent over a quiet note after a week on GlowLoop. It does not
-            look dramatic: comments, group chats, a few deleted replies.
+          <p className="case2-briefing-type" aria-live="polite">
+            {typedBriefing}
+            <span className="case2-briefing-cursor" aria-hidden="true" />
           </p>
           <p className="text-sw-text3">
             Read each thread, then decide. Some are normal awkward moments.
             Some are not.
           </p>
-          <button type="button" className="ss-btn ss-btn-cyan self-start" onClick={onNext}>
+          <button
+            type="button"
+            className={`ss-btn ss-btn-cyan self-start case2-start-btn ${
+              briefingComplete ? 'ready' : ''
+            }`}
+            onClick={onNext}
+          >
             Start Reading <IconArrowRight size={16} />
           </button>
         </div>
