@@ -232,14 +232,14 @@ const CASE2_THREADS = [
     source: 'GlowLoop social feed',
     reportId: 'GL-2048-A',
     confidence: 61,
-    queueNote: 'Auto-flagged after two reports from witnesses.',
-    evidenceLabel: 'Open witness report',
+    queueNote: 'Two users forwarded this comment chain.',
+    evidenceLabel: 'Open replies',
     correctAction: 'flag',
     profile: { handle: '@maxbyte', posts: 42, reports: 2, relation: 'classmate' },
     messages: [
-      { author: '@maxbyte', text: 'Emma is such a loser. Nobody wants her here.' },
-      { author: '@maxbyte', text: 'Can someone tell her to stop posting?' },
-      { author: '@emma.draws', text: 'Please leave me alone.' },
+      { author: '@maxbyte', time: '15:04', text: 'emma is actually so annoying' },
+      { author: '@maxbyte', time: '15:05', text: 'like why is she even here' },
+      { author: '@emma.draws', time: '15:06', text: 'can you stop please' },
     ],
     explanation:
       'Direct insults targeting Emma are abusive comments, not normal disagreement.',
@@ -250,80 +250,94 @@ const CASE2_THREADS = [
     source: 'Photo post replies',
     reportId: 'GL-2048-B',
     confidence: 58,
-    queueNote: 'Image replies spiked after one post.',
-    evidenceLabel: 'Open photo context',
+    queueNote: "Photo replies were reported from Emma's latest post.",
+    evidenceLabel: 'Open replies',
     correctAction: 'flag',
     profile: { handle: '@mirrorfail', posts: 18, reports: 1, relation: 'unknown' },
     messages: [
-      { author: '@mirrorfail', text: 'That haircut is tragic.' },
-      { author: '@mirrorfail', text: 'Emma looks like she got dressed in the dark.' },
-      { author: '@tess88', text: 'Stop. That is mean.' },
+      { author: '@mirrorfail', time: '19:22', text: 'not the haircut again' },
+      { author: '@mirrorfail', time: '19:23', text: 'someone tell her mirrors exist' },
+      { author: '@tess88', time: '19:24', text: 'leave her alone' },
     ],
     explanation:
       'Appearance mockery is targeted humiliation. Platforms should treat that as bullying.',
   },
   {
     id: 'repeated-targeting',
-    title: 'Thread 03 - Repeated replies across one afternoon',
-    source: 'Moderation queue',
+    title: 'Thread 03 - Replies after Emma joins',
+    source: 'GlowLoop replies',
     reportId: 'GL-2048-C',
     confidence: 54,
-    queueNote: 'Same account appears across several replies.',
-    evidenceLabel: 'Open activity chain',
+    queueNote: 'Several replies arrived close together.',
+    evidenceLabel: 'Open more replies',
     correctAction: 'flag',
     profile: { handle: '@crashpost', posts: 103, reports: 3, relation: 'same year group' },
-    timeline: ['Mon 15:12', 'Mon 15:19', 'Mon 15:27', 'Mon 15:40'],
+    timeline: ['15:12', '15:19', '15:27', '15:40'],
     messages: [
-      { author: '@crashpost', text: 'Emma ruins every group.' },
-      { author: '@crashpost', text: 'Still talking? Embarrassing.' },
-      { author: '@crashpost', text: 'Nobody asked you, Emma.' },
-      { author: '@crashpost', text: 'Go away already.' },
+      { author: '@crashpost', time: '15:12', text: 'not this again' },
+      { author: '@crashpost', time: '15:19', text: 'emma always makes it weird' },
+      { author: '@crashpost', time: '15:27', text: 'nobody was talking to you' },
+      { author: '@crashpost', time: '15:40', text: 'okayyy...' },
     ],
     explanation:
       'Repetition is a key bullying signal. One comment might be conflict; a repeated stream becomes targeting.',
   },
   {
     id: 'group-exclusion',
-    title: 'Thread 04 - Group chat planning timeline',
-    source: 'Private group report',
+    title: 'Thread 04 - ArtTable group chat',
+    source: 'Private group export',
     reportId: 'GL-2048-D',
     confidence: 37,
-    queueNote: 'Low-confidence group chat sample. Context may matter.',
-    evidenceLabel: 'Expand three-week timeline',
+    queueNote: 'A group chat export came in with missing context.',
+    evidenceLabel: 'Open older messages',
     correctAction: 'flag',
     profile: { handle: 'Group: ArtTable', posts: 12, reports: 0, relation: 'friend group' },
     timeline: [
-      'Week 1 Tue - film plan moved to side chat; Emma not added',
-      'Week 1 Thu - lunch table changed; Emma arrived alone',
-      'Week 2 Sat - gaming lobby started before Emma joined',
-      'Week 3 Mon - project chat moved; Emma left in old room',
+      'Tue 18:42 - Emma: are we still doing the film thing?',
+      'Tue 18:44 - Nina: oh nvm',
+      'Thu 12:10 - Emma: where did everyone sit?',
+      'Thu 12:31 - Kai: we already filled the spots sorry',
+      'Sat 19:03 - Emma: invite did not work',
+      'Sat 19:04 - Mika: inside joke, do not worry',
+      'Mon 16:18 - Emma: is this still the project chat?',
+      'Mon 16:52 - seen by 5',
     ],
     messages: [
-      { author: '@nina', text: 'Movie tonight? Same group as last time.' },
-      { author: '@kai', text: 'New lunch table tomorrow. I made a smaller chat.' },
-      { author: '@mika', text: 'Start the game at 7 so we can finish early.' },
-      { author: '@nina', text: 'Project chat moved. Use the new one from now on.' },
+      { author: '@nina', time: 'Tue 18:41', text: 'movie later?' },
+      { author: '@emma.draws', time: 'Tue 18:42', text: 'i can come if there is space' },
+      { author: '@nina', time: 'Tue 18:44', text: 'oh nvm' },
+      { author: '@kai', time: 'Thu 12:10', text: 'new table today' },
+      { author: '@emma.draws', time: 'Thu 12:11', text: 'where?' },
+      { author: '@kai', time: 'Thu 12:31', text: 'we already filled the spots sorry' },
+      { author: '@mika', time: 'Sat 19:03', text: 'wait who added Emma' },
+      { author: '@nina', time: 'Mon 16:52', text: 'seen by 5' },
     ],
     explanation:
       'Passive exclusion can be cyberbullying when it is repeated and coordinated to isolate someone.',
   },
   {
     id: 'plausible-deniability',
-    title: 'Thread 05 - @johnhaha67 repeated replies',
+    title: 'Thread 05 - Short comments from @johnhaha67',
     source: 'Cross-post activity log',
     reportId: 'GL-2048-E',
     confidence: 33,
-    queueNote: 'Tiny comments across separate posts. Pattern uncertain.',
-    evidenceLabel: 'Compare posts',
+    queueNote: 'One account appears in several short comment threads.',
+    evidenceLabel: 'Open post history',
     correctAction: 'flag',
     profile: { handle: '@johnhaha67', posts: 9, reports: 0, relation: 'follows Emma' },
-    timeline: ['Post 1', 'Post 2', 'Post 3', 'Post 4', 'Post 5'],
+    timeline: [
+      'Mon - Emma posts sketch: @johnhaha67 "lol"',
+      'Tue - Emma posts lunch photo: @johnhaha67 "imagine"',
+      'Thu - Emma posts homework win: @johnhaha67 "sure Emma"',
+      'Fri - Emma posts outfit: @johnhaha67 "interesting timing"',
+      'Sun - Emma deletes reply after @johnhaha67 "not this again"',
+    ],
     messages: [
-      { author: '@johnhaha67', text: 'lol' },
-      { author: '@johnhaha67', text: 'imagine' },
-      { author: '@johnhaha67', text: 'sure Emma' },
-      { author: '@johnhaha67', text: '😭' },
-      { author: '@johnhaha67', text: 'lol' },
+      { author: '@johnhaha67', time: 'Mon 20:14', text: 'lol' },
+      { author: '@johnhaha67', time: 'Tue 12:03', text: 'imagine' },
+      { author: '@johnhaha67', time: 'Thu 18:20', text: 'sure Emma' },
+      { author: '@johnhaha67', time: 'Fri 21:09', text: 'interesting timing' },
+      { author: '@johnhaha67', time: 'Sun 16:44', text: 'not this again' },
     ],
     explanation:
       '"Just joking" comments can be plausible deniability. The pattern shows repeated targeting.',
@@ -334,14 +348,14 @@ const CASE2_THREADS = [
     source: 'GlowLoop class feed',
     reportId: 'GL-2048-F',
     confidence: 46,
-    queueNote: 'Keyword detector caught disagreement language.',
+    queueNote: 'A disagreement was picked up by the filter.',
     evidenceLabel: 'Open reply context',
     correctAction: 'dismiss',
     profile: { handle: '@rowan7', posts: 27, reports: 0, relation: 'project partner' },
     messages: [
-      { author: '@emma.draws', text: 'I think our poster needs sources before we post it.' },
-      { author: '@rowan7', text: 'I disagree. It is fine as it is.' },
-      { author: '@emma.draws', text: 'Okay, let us ask the group.' },
+      { author: '@emma.draws', time: '10:11', text: 'i think the poster needs sources first' },
+      { author: '@rowan7', time: '10:12', text: 'i disagree, it is fine as it is' },
+      { author: '@emma.draws', time: '10:13', text: "okay, let's ask the group" },
     ],
     explanation:
       'A one-off disagreement between equal participants is conflict, not cyberbullying.',
@@ -352,14 +366,14 @@ const CASE2_THREADS = [
     source: 'GlowLoop game clip replies',
     reportId: 'GL-2048-G',
     confidence: 49,
-    queueNote: 'Clip comments contain teasing. Tone unclear.',
+    queueNote: 'A game clip reply was sent for review.',
     evidenceLabel: 'Open reaction chain',
     correctAction: 'dismiss',
     profile: { handle: '@maya-lol', posts: 64, reports: 0, relation: 'friend' },
     messages: [
-      { author: '@emma.draws', text: 'I cannot believe I missed that easy shot.' },
-      { author: '@maya-lol', text: 'legendary fail, but you carried us last round' },
-      { author: '@emma.draws', text: 'Fair. I deserve that one.' },
+      { author: '@emma.draws', time: '21:30', text: 'i cannot believe i missed that easy shot' },
+      { author: '@maya-lol', time: '21:31', text: 'legendary fail, but you carried us last round' },
+      { author: '@emma.draws', time: '21:31', text: 'fair. i deserve that one' },
     ],
     explanation:
       'Playful banter with consent and friendly context should not be treated as bullying.',
@@ -370,14 +384,14 @@ const CASE2_THREADS = [
     source: 'GlowLoop creative post',
     reportId: 'GL-2048-H',
     confidence: 41,
-    queueNote: 'Feedback was reported by the automated tone filter.',
+    queueNote: 'Tone filter held this art comment for review.',
     evidenceLabel: 'Open comment context',
     correctAction: 'dismiss',
     profile: { handle: '@sketchroom', posts: 88, reports: 0, relation: 'art club' },
     messages: [
-      { author: '@sketchroom', text: 'The color palette is strong.' },
-      { author: '@sketchroom', text: 'Maybe add more contrast around the title so it is easier to read.' },
-      { author: '@emma.draws', text: 'Good idea, thanks.' },
+      { author: '@sketchroom', time: '17:02', text: 'the color palette is strong' },
+      { author: '@sketchroom', time: '17:03', text: 'maybe add contrast around the title so it is easier to read' },
+      { author: '@emma.draws', time: '17:05', text: 'good idea, thanks' },
     ],
     explanation:
       'Constructive comments focus on the work and do not target, shame, or repeat harm.',
@@ -1737,30 +1751,29 @@ function Case2Intro({ internName, onNext }) {
         <div className="case2-social-stack" aria-hidden="true">
           <div className="case2-phone-frame">
             <span className="case2-phone-notch" />
-            <div className="case2-post-card">
-              <span />
-              <span />
-              <span />
+            <div className="case2-post-card case2-floating-comment">
+              <strong>@emma.draws</strong>
+              <p>did everyone leave the old chat?</p>
             </div>
-            <div className="case2-post-card muted">
-              <span />
-              <span />
+            <div className="case2-post-card muted case2-floating-comment">
+              <strong>@johnhaha67</strong>
+              <p>lol</p>
             </div>
+            <div className="case2-feed-fragment fragment-one">seen by 5</div>
+            <div className="case2-feed-fragment fragment-two">reply deleted</div>
           </div>
         </div>
         <div className="case2-ricky-panel">
           <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
           <h2 className="font-pixel text-sw-cyan text-sm">The Network: Just Jokes</h2>
           <p>
-            Two weeks in, Cadet. We are moving from scam inboxes to social
-            platforms. Unit Zero was tipped off after a teenager named Emma
-            filed a minor complaint. GlowLoop's moderation system flagged a
-            wider activity queue around her account.
+            GlowLoop sent over a quiet report from a student named Emma. It
+            does not look like much at first: comments, group chats, a few
+            deleted replies.
           </p>
           <p className="text-sw-text3">
-            Review each thread and decide what crosses the line. Look for
-            patterns, not just loud messages. Some posts are normal conflict;
-            some are cyberbullying hiding behind soft jokes and exclusion.
+            Open the files. Read them like a person, not a machine. Some of it
+            is nothing. Some of it stays with someone all day.
           </p>
           <button type="button" className="ss-btn ss-btn-cyan self-start" onClick={onNext}>
             Open Review Queue <IconArrowRight size={16} />
@@ -1824,7 +1837,7 @@ function Case2ThreadFile({
           <p>{thread.source} - {thread.reportId}</p>
         </div>
         <div className="case2-confidence">
-          <span>Auto confidence</span>
+          <span>Platform read</span>
           <strong>{thread.confidence}%</strong>
           <em>unverified</em>
         </div>
@@ -1833,8 +1846,8 @@ function Case2ThreadFile({
       <div className="case2-file-grid">
         <section className="case2-social-window">
           <div className="case2-social-window-bar">
-            <span>GlowLoop activity</span>
-            <span className="case2-notification-pulse">activity detected</span>
+            <span>GlowLoop thread</span>
+            <span className="case2-notification-pulse">live copy</span>
           </div>
           <div className="case2-message-list case2-message-focus">
             {visibleMessages.map((message, messageIndex) => (
@@ -1848,6 +1861,7 @@ function Case2ThreadFile({
                 <div>
                   <strong>{message.author}</strong>
                   <p>{message.text}</p>
+                  {message.time && <em>{message.time}</em>}
                 </div>
               </div>
             ))}
@@ -1855,7 +1869,7 @@ function Case2ThreadFile({
         </section>
 
         <aside className="case2-evidence-panel">
-          <span className="font-pixel text-sw-yellow text-xs">UNIT ZERO TOOLS</span>
+          <span className="font-pixel text-sw-yellow text-xs">FILE DRAWER</span>
           <p>{thread.queueNote}</p>
           <div className="case2-profile-card">
             <strong>{thread.profile.handle}</strong>
@@ -1873,7 +1887,7 @@ function Case2ThreadFile({
           </button>
           {evidenceOpen && (
             <div className="case2-timeline" aria-label="Expanded evidence">
-              <strong>Evidence trace</strong>
+              <strong>Archive</strong>
               {(thread.timeline || ['Original post', 'Reply context', 'Reporter note']).map(
                 (item) => (
                   <span key={item}>{item}</span>
@@ -1962,9 +1976,8 @@ function Case2ReviewBoard({
       </div>
 
       <div className="case2-briefing-strip">
-        <strong>Agent Ricky:</strong> The platform scanner is noisy. Open each
-        file, inspect the activity, and decide whether it crosses the line. Do
-        not trust the machine to understand context for you.
+        <strong>Agent Ricky:</strong> Eight files. Some are ugly. Some are just
+        awkward. Take your time before you decide.
       </div>
 
       <div className="case2-investigation-layout">
@@ -2214,7 +2227,7 @@ function Case2Rookie() {
 
   function revealEvidence(threadId) {
     setOpenEvidence((current) => ({ ...current, [threadId]: true }))
-    setDecisionFeedback('New evidence found')
+      setDecisionFeedback('Drawer opened')
     playSfx('click')
   }
 

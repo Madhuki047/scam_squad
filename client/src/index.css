@@ -2016,6 +2016,46 @@ html.ss-high-contrast {
   border-color: rgba(93, 213, 232, 0.35);
 }
 
+.case2-floating-comment {
+  position: relative;
+  animation: case2-float-comment 3.2s ease-in-out infinite;
+}
+
+.case2-floating-comment strong {
+  color: var(--pink);
+  font-weight: 400;
+}
+
+.case2-floating-comment p {
+  margin: 0;
+  color: var(--text2);
+}
+
+.case2-feed-fragment {
+  position: absolute;
+  left: 0.8rem;
+  right: 0.8rem;
+  border: 1px solid rgba(255, 217, 61, 0.35);
+  border-radius: 0.3rem;
+  padding: 0.35rem 0.45rem;
+  color: var(--yellow);
+  background: rgba(8, 7, 22, 0.78);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  animation: case2-feed-flicker 2.4s steps(2) infinite;
+}
+
+.case2-feed-fragment.fragment-one {
+  bottom: 3.2rem;
+}
+
+.case2-feed-fragment.fragment-two {
+  bottom: 1rem;
+  color: var(--text3);
+  border-color: rgba(93, 213, 232, 0.3);
+  animation-delay: 0.6s;
+}
+
 .case2-ricky-panel {
   display: flex;
   flex-direction: column;
@@ -2593,6 +2633,14 @@ html.ss-high-contrast {
   margin-bottom: 0.15rem;
 }
 
+.case2-message em {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text3);
+  font-size: 0.72rem;
+  font-style: normal;
+}
+
 .case2-message p,
 .case2-thread-hint {
   margin: 0;
@@ -2683,6 +2731,27 @@ html.ss-high-contrast {
     opacity: 0.7;
   }
   50% {
+    opacity: 1;
+  }
+}
+
+@keyframes case2-float-comment {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.35rem);
+  }
+}
+
+@keyframes case2-feed-flicker {
+  0%,
+  74% {
+    opacity: 0.45;
+  }
+  75%,
+  100% {
     opacity: 1;
   }
 }
