@@ -1757,15 +1757,25 @@ function Case2Intro({ internName, onNext }) {
       </div>
       <div className="case2-intro-grid">
         <div className="case2-social-stack" aria-hidden="true">
+          <div className="case2-ambient-comment ambient-one">@nina: oh nvm</div>
+          <div className="case2-ambient-comment ambient-two">seen by 5</div>
+          <div className="case2-ambient-comment ambient-three">@mika: inside joke</div>
           <div className="case2-phone-frame">
             <span className="case2-phone-notch" />
             <div className="case2-post-card case2-floating-comment">
               <strong>@emma.draws</strong>
               <p>did everyone leave the old chat?</p>
+              <span className="case2-post-meta">sent 18:42</span>
             </div>
             <div className="case2-post-card muted case2-floating-comment">
               <strong>@johnhaha67</strong>
               <p>lol</p>
+              <span className="case2-post-meta">1 reply</span>
+            </div>
+            <div className="case2-typing-row">
+              <span />
+              <span />
+              <span />
             </div>
             <div className="case2-feed-fragment fragment-one">seen by 5</div>
             <div className="case2-feed-fragment fragment-two">reply deleted</div>
@@ -1774,7 +1784,7 @@ function Case2Intro({ internName, onNext }) {
         <div className="case2-ricky-panel">
           <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
           <h2 className="font-pixel text-sw-cyan text-sm">The Network: Just Jokes</h2>
-          <p>
+          <p className="case2-briefing-type">
             Emma sent over a quiet note after a week on GlowLoop. It does not
             look dramatic: comments, group chats, a few deleted replies.
           </p>
