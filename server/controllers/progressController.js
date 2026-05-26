@@ -13,7 +13,12 @@ const CASE_REWARDS = {
   veteran: 500,
 }
 
-const VALID_BADGES = new Set(['sharp-eyes', 'hooked-once', 'burned-twice'])
+const VALID_BADGES = new Set([
+  'sharp-eyes',
+  'hooked-once',
+  'burned-twice',
+  'pattern-recognition-beginner',
+])
 
 function fullCaseCount(completedCases = []) {
   const byCase = new Map()

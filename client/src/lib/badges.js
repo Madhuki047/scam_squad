@@ -17,6 +17,12 @@ export const BADGES = {
     message: 'You spotted the professional double bluff and verified out-of-band.',
     icon: 'flame',
   },
+  patternBeginner: {
+    id: 'pattern-recognition-beginner',
+    name: 'Pattern Recognition - Beginner',
+    message: 'You spotted cyberbullying patterns beyond the obvious insults.',
+    icon: 'eye',
+  },
 }
 
 export const BADGE_CATALOG = [
@@ -29,6 +35,7 @@ export const BADGE_CATALOG = [
   BADGES.sharpEyes,
   BADGES.hookedOnce,
   BADGES.burnedTwice,
+  BADGES.patternBeginner,
   { id: 'night-owl', name: 'Night Owl' },
   { id: 'perfect-run', name: 'Perfect Run' },
   { id: 'mentor', name: 'Mentor' },

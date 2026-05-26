@@ -225,6 +225,117 @@ const VETERAN_QUIZ = [
   },
 ]
 
+const CASE2_THREADS = [
+  {
+    id: 'direct-insults',
+    title: "Thread 01 - Comment chain on Emma's profile",
+    source: 'GlowLoop social feed',
+    difficulty: 'Obvious',
+    correctAction: 'flag',
+    hint: 'Direct name-calling aimed at one person.',
+    messages: [
+      { author: '@maxbyte', text: 'Emma is such a loser. Nobody wants her here.' },
+      { author: '@maxbyte', text: 'Can someone tell her to stop posting?' },
+      { author: '@emma.draws', text: 'Please leave me alone.' },
+    ],
+    explanation:
+      'Direct insults targeting Emma are abusive comments, not normal disagreement.',
+  },
+  {
+    id: 'appearance-mockery',
+    title: 'Thread 02 - Photo reply pile-on',
+    source: 'Photo post replies',
+    difficulty: 'Obvious',
+    correctAction: 'flag',
+    hint: 'Mocking someone for how they look is personal abuse.',
+    messages: [
+      { author: '@mirrorfail', text: 'That haircut is tragic.' },
+      { author: '@mirrorfail', text: 'Emma looks like she got dressed in the dark.' },
+      { author: '@tess88', text: 'Stop. That is mean.' },
+    ],
+    explanation:
+      'Appearance mockery is targeted humiliation. Platforms should treat that as bullying.',
+  },
+  {
+    id: 'repeated-targeting',
+    title: 'Thread 03 - Repeated replies across one afternoon',
+    source: 'Moderation queue',
+    difficulty: 'Pattern',
+    correctAction: 'flag',
+    hint: 'The same target is being hit again and again.',
+    timeline: ['Mon 15:12', 'Mon 15:19', 'Mon 15:27', 'Mon 15:40'],
+    messages: [
+      { author: '@crashpost', text: 'Emma ruins every group.' },
+      { author: '@crashpost', text: 'Still talking? Embarrassing.' },
+      { author: '@crashpost', text: 'Nobody asked you, Emma.' },
+      { author: '@crashpost', text: 'Go away already.' },
+    ],
+    explanation:
+      'Repetition is a key bullying signal. One comment might be conflict; a repeated stream becomes targeting.',
+  },
+  {
+    id: 'group-exclusion',
+    title: 'Thread 04 - Group chat planning timeline',
+    source: 'Private group report',
+    difficulty: 'Subtle',
+    correctAction: 'flag',
+    hint: 'No single message is explosive. The exclusion pattern is the evidence.',
+    timeline: ['Tue - film night', 'Thu - lunch table', 'Sat - gaming lobby', 'Next Mon - project chat'],
+    messages: [
+      { author: '@nina', text: 'Movie tonight. Everyone except Emma in the lobby?' },
+      { author: '@kai', text: 'New lunch table tomorrow. Do not add Emma.' },
+      { author: '@mika', text: 'Start the game before she gets online.' },
+      { author: '@nina', text: 'Project chat moved. Keep the old one for Emma.' },
+    ],
+    explanation:
+      'Passive exclusion can be cyberbullying when it is repeated and coordinated to isolate someone.',
+  },
+  {
+    id: 'plausible-deniability',
+    title: 'Thread 05 - @johnhaha67 repeated replies',
+    source: 'Cross-post activity log',
+    difficulty: 'Subtle',
+    correctAction: 'flag',
+    hint: 'Small comments can become harassment when they follow the same person everywhere.',
+    timeline: ['Post 1', 'Post 2', 'Post 3', 'Post 4', 'Post 5'],
+    messages: [
+      { author: '@johnhaha67', text: 'lol' },
+      { author: '@johnhaha67', text: 'imagine' },
+      { author: '@johnhaha67', text: 'sure Emma' },
+      { author: '@johnhaha67', text: 'lol again' },
+      { author: '@johnhaha67', text: 'this is so Emma' },
+    ],
+    explanation:
+      '"Just joking" comments can be plausible deniability. The pattern shows repeated targeting.',
+  },
+]
+
+const CASE2_TEACHING_POINTS = [
+  {
+    title: 'Conflict vs bullying',
+    text: 'Bullying often involves repetition, intent, and a power imbalance.',
+  },
+  {
+    title: 'Passive exclusion counts',
+    text: 'Repeatedly cutting someone out of chats, plans, and events can cause real harm.',
+  },
+  {
+    title: 'Plausible deniability',
+    text: '"Just joking", "lol", and vague comments can hide targeted harassment.',
+  },
+  {
+    title: 'Cumulative harm',
+    text: 'Cyberbullying can build through many small hits instead of one obvious attack.',
+  },
+  {
+    title: 'Witness responsibility',
+    text: 'Platforms and bystanders can enable bullying by ignoring soft behaviour patterns.',
+  },
+]
+
+const CASE2_PASS_THRESHOLD = 4
+const CASE2_DECISION_REWARD = 10
+
 function PixelPerson({ role, label, position = '' }) {
   return (
     <div className={`pixel-person pixel-${role} ${position}`}>
@@ -1537,6 +1648,462 @@ function VeteranCase() {
   )
 }
 
+function Case2Intro({ internName, onNext }) {
+  return (
+    <section className="case-terminal ss-card scene-transition">
+      <div className="case-terminal-header">
+        <span>UNIT ZERO SOCIAL MONITOR</span>
+        <span>DAY 14 - 09:18</span>
+      </div>
+      <div className="case-os-bar">
+        <span>MODERATION DESK - ROOKIE REVIEW</span>
+        <span>{internName.toLowerCase()}@unitzero.gov - ACTIVE</span>
+      </div>
+      <div className="case2-intro-grid">
+        <div className="case2-social-stack" aria-hidden="true">
+          <div className="case2-phone-frame">
+            <span className="case2-phone-notch" />
+            <div className="case2-post-card">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="case2-post-card muted">
+              <span />
+              <span />
+            </div>
+          </div>
+        </div>
+        <div className="case2-ricky-panel">
+          <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+          <h2 className="font-pixel text-sw-cyan text-sm">The Network: Just Jokes</h2>
+          <p>
+            Two weeks in, Cadet. We are moving from scam inboxes to social
+            platforms. A student named Emma filed a report about comments and
+            exclusion. Review the five flagged threads and decide what needs
+            action.
+          </p>
+          <p className="text-sw-text3">
+            Look for patterns, not just loud messages. Cyberbullying often hides
+            behind soft jokes and repeated exclusion.
+          </p>
+          <button type="button" className="ss-btn ss-btn-cyan self-start" onClick={onNext}>
+            Open Review Queue <IconArrowRight size={16} />
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Case2ThreadCard({ thread, decision, onDecision }) {
+  return (
+    <article
+      className={`case2-thread-card ${
+        thread.difficulty === 'Subtle' ? 'case2-thread-subtle' : ''
+      }`}
+    >
+      <div className="case2-thread-header">
+        <div>
+          <span>{thread.source}</span>
+          <h3>{thread.title}</h3>
+        </div>
+        <span className="case2-difficulty-chip">{thread.difficulty}</span>
+      </div>
+
+      {thread.timeline && (
+        <div className="case2-timeline" aria-label="Timeline evidence">
+          {thread.timeline.map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
+      )}
+
+      <div className="case2-message-list">
+        {thread.messages.map((message, index) => (
+          <div key={`${thread.id}-${index}`} className="case2-message">
+            <strong>{message.author}</strong>
+            <p>{message.text}</p>
+          </div>
+        ))}
+      </div>
+
+      <p className="case2-thread-hint">{thread.hint}</p>
+
+      <div className="case2-decision-row" role="group" aria-label={`${thread.title} decision`}>
+        <button
+          type="button"
+          className={`case2-decision-btn case2-flag-btn ${
+            decision === 'flag' ? 'selected' : ''
+          }`}
+          onClick={() => onDecision(thread.id, 'flag')}
+        >
+          FLAG
+        </button>
+        <button
+          type="button"
+          className={`case2-decision-btn case2-dismiss-btn ${
+            decision === 'dismiss' ? 'selected' : ''
+          }`}
+          onClick={() => onDecision(thread.id, 'dismiss')}
+        >
+          DISMISS
+        </button>
+        <span className={`case2-status-chip ${decision ? 'active' : ''}`}>
+          {decision ? decision.toUpperCase() : 'PENDING'}
+        </span>
+      </div>
+    </article>
+  )
+}
+
+function Case2ReviewBoard({ decisions, onDecision, onSubmit }) {
+  const answeredCount = CASE2_THREADS.filter((thread) => decisions[thread.id]).length
+  const ready = answeredCount === CASE2_THREADS.length
+
+  return (
+    <section className="case2-board scene-transition">
+      <div className="case2-board-header">
+        <div>
+          <span className="font-pixel text-sw-pink text-xs">GLOWLOOP MOD QUEUE</span>
+          <h2 className="font-pixel text-sw-cyan text-sm">Review Emma's Report</h2>
+        </div>
+        <div className="case2-progress-chip">
+          {answeredCount} / {CASE2_THREADS.length} reviewed
+        </div>
+      </div>
+
+      <div className="case2-briefing-strip">
+        <strong>Agent Ricky:</strong> Decide whether each thread should be
+        flagged for cyberbullying or dismissed as normal conflict. The last two
+        need timeline thinking.
+      </div>
+
+      <div className="case2-thread-grid">
+        {CASE2_THREADS.map((thread) => (
+          <Case2ThreadCard
+            key={thread.id}
+            thread={thread}
+            decision={decisions[thread.id]}
+            onDecision={onDecision}
+          />
+        ))}
+      </div>
+
+      <button
+        type="button"
+        className="ss-btn ss-btn-cyan self-end"
+        disabled={!ready}
+        onClick={onSubmit}
+      >
+        Submit Moderator Report <IconArrowRight size={16} />
+      </button>
+    </section>
+  )
+}
+
+function Case2Debrief({
+  correctCount,
+  missedSubtle,
+  passed,
+  decisions,
+  onReplay,
+  onContinue,
+  busy,
+}) {
+  const wrongThreads = CASE2_THREADS.filter(
+    (thread) => decisions[thread.id] !== thread.correctAction,
+  )
+
+  return (
+    <section className="case-debrief scene-transition">
+      <div className={passed ? 'success-banner' : 'breach-banner'}>
+        {passed ? 'REPORT ACCEPTED - DEBRIEF MODE' : 'REPORT INCOMPLETE - DEBRIEF MODE'}
+      </div>
+      <div className="ss-card p-5 flex flex-col gap-4">
+        <div className="case2-ricky-panel">
+          <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+          <h2 className="font-pixel text-sw-cyan text-sm">Case 02 Rookie Debrief</h2>
+          <p>
+            Your report scored {correctCount} / {CASE2_THREADS.length}.{' '}
+            {passed
+              ? 'You tracked the behaviour pattern and protected Emma from a campaign hiding in plain sight.'
+              : 'This file needs another pass before we can act on it.'}
+          </p>
+          {missedSubtle && (
+            <blockquote className="zoey-quote">
+              "You caught the easy ones. You missed the ones that broke her.
+              Look at the timeline, Cadet. This group chat? Emma stopped coming
+              to school three weeks after it started. She did not lose friends in
+              one big fight. They just... quietly stopped including her. Every
+              single day. That is not banter - that is a campaign."
+            </blockquote>
+          )}
+        </div>
+
+        <div className="case2-score-grid">
+          {CASE2_THREADS.map((thread) => {
+            const correct = decisions[thread.id] === thread.correctAction
+            return (
+              <article
+                key={thread.id}
+                className={`red-flag-card ${correct ? 'case2-correct' : 'case2-wrong'}`}
+              >
+                <IconFlag size={18} />
+                <div>
+                  <h3>{correct ? 'Correct flag' : 'Missed pattern'}</h3>
+                  <p>{thread.explanation}</p>
+                </div>
+              </article>
+            )
+          })}
+        </div>
+
+        {wrongThreads.length > 0 && (
+          <p className="text-sw-text3 text-sm">
+            Recheck: {wrongThreads.map((thread) => thread.title).join(', ')}.
+          </p>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {CASE2_TEACHING_POINTS.map((point) => (
+            <article key={point.title} className="red-flag-card">
+              <IconFlag size={18} />
+              <div>
+                <h3>{point.title}</h3>
+                <p>{point.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {passed && (
+          <div className="badge-card">
+            <span>Badge unlocked</span>
+            <strong>PATTERN RECOGNITION - BEGINNER</strong>
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            type="button"
+            className="ss-btn ss-btn-pink"
+            onClick={onReplay}
+            disabled={busy}
+          >
+            Replay Scene
+          </button>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan"
+            onClick={onContinue}
+            disabled={busy}
+          >
+            {passed ? 'Continue' : 'Return to Case Files'}
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Case2EndScreen({ badge, pointsAwarded, correctCount, onReturn, onVeteran }) {
+  const quizCoins = correctCount * CASE2_DECISION_REWARD
+  return (
+    <section className="ss-card p-6 flex flex-col gap-4">
+      <h2 className="font-pixel text-sw-cyan text-sm">Case 02 Rookie Complete</h2>
+      <p className="text-sw-text2">
+        Moderator report filed. Rookie reward secured with {quizCoins} pattern
+        review points included.
+      </p>
+      <PixelBadgeCard badge={badge} pointsAwarded={pointsAwarded} />
+      <div className="flex flex-col sm:flex-row gap-3">
+        <button type="button" className="ss-btn ss-btn-cyan" onClick={onReturn}>
+          Return to Case Files
+        </button>
+        <button type="button" className="ss-btn ss-btn-pink" onClick={onVeteran}>
+          Continue to Veteran Mode
+        </button>
+      </div>
+    </section>
+  )
+}
+
+function Case2Rookie() {
+  const navigate = useNavigate()
+  const { user, token, setUser } = useAuth()
+  const [phase, setPhase] = useState('intro')
+  const [decisions, setDecisions] = useState({})
+  const [badge, setBadge] = useState(null)
+  const [pointsAwarded, setPointsAwarded] = useState(0)
+  const [progressError, setProgressError] = useState('')
+  const [resolvingDebrief, setResolvingDebrief] = useState(false)
+  const resolvingRef = useRef(false)
+  const internName = user?.username || 'Nova'
+  const correctCount = CASE2_THREADS.reduce(
+    (count, thread) =>
+      count + (decisions[thread.id] === thread.correctAction ? 1 : 0),
+    0,
+  )
+  const passed = correctCount >= CASE2_PASS_THRESHOLD
+  const missedSubtle = ['group-exclusion', 'plausible-deniability'].some(
+    (id) =>
+      decisions[id] &&
+      decisions[id] !== CASE2_THREADS.find((thread) => thread.id === id)?.correctAction,
+  )
+
+  function restart() {
+    setPhase('intro')
+    setDecisions({})
+    setBadge(null)
+    setPointsAwarded(0)
+    setProgressError('')
+    setResolvingDebrief(false)
+    resolvingRef.current = false
+  }
+
+  function setDecision(threadId, action) {
+    setDecisions((current) => ({ ...current, [threadId]: action }))
+    playSfx('click')
+  }
+
+  function submitReport() {
+    if (Object.keys(decisions).length !== CASE2_THREADS.length) return
+    playSfx(passed ? 'correct' : 'wrong')
+    setPhase('debrief')
+  }
+
+  async function spendFailureLife(nextAction) {
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const data = await api.failAttempt(token, {
+        caseId: 2,
+        difficulty: 'rookie',
+      })
+      setUser(data.user)
+      playSfx('lifeLost')
+      playSfx('caseFailed')
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      navigate('/play')
+    } catch (error) {
+      console.error('[progress] Case 2 failed attempt update failed', {
+        endpoint: '/progress/fail-attempt',
+        caseId: 2,
+        difficulty: 'rookie',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update lives.')
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  async function finishRookie(nextAction = 'end') {
+    if (!passed) {
+      spendFailureLife(nextAction === 'replay' ? 'replay' : 'continue')
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const unlockedBadge = BADGES.patternBeginner
+      const data = await api.completeCase(token, {
+        caseId: 2,
+        difficulty: 'rookie',
+        result: 'success',
+        badge: unlockedBadge,
+        bonusPoints: correctCount * CASE2_DECISION_REWARD,
+      })
+      setUser(data.user)
+      setBadge(unlockedBadge)
+      setPointsAwarded(data.pointsAwarded)
+      if (data.pointsAwarded > 0) {
+        playSfx('coins')
+        playSfx('badge')
+      }
+      playSfx('caseComplete')
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      if (nextAction === 'caseFiles') {
+        navigate('/play')
+        return
+      }
+      setPhase('end')
+    } catch (error) {
+      console.error('[progress] Case 2 completion update failed', {
+        endpoint: '/progress/complete-case',
+        caseId: 2,
+        difficulty: 'rookie',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update case progress.')
+    } finally {
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  return (
+    <div className="case-shell max-w-5xl mx-auto">
+      <div className="case-title-row">
+        <div>
+          <span className="font-pixel text-sw-pink text-xs">CASE 02 ROOKIE</span>
+          <h2 className="font-pixel text-sw-cyan text-sm md:text-base">
+            The Network: Just Jokes
+          </h2>
+        </div>
+      </div>
+      {progressError && (
+        <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
+      )}
+
+      {phase === 'intro' && (
+        <Case2Intro
+          internName={internName}
+          onNext={() => setPhase('review')}
+        />
+      )}
+      {phase === 'review' && (
+        <Case2ReviewBoard
+          decisions={decisions}
+          onDecision={setDecision}
+          onSubmit={submitReport}
+        />
+      )}
+      {phase === 'debrief' && (
+        <Case2Debrief
+          correctCount={correctCount}
+          missedSubtle={missedSubtle}
+          passed={passed}
+          decisions={decisions}
+          onReplay={passed ? () => finishRookie('replay') : () => spendFailureLife('replay')}
+          onContinue={passed ? () => finishRookie('end') : () => spendFailureLife('continue')}
+          busy={resolvingDebrief}
+        />
+      )}
+      {phase === 'end' && (
+        <Case2EndScreen
+          badge={badge}
+          pointsAwarded={pointsAwarded}
+          correctCount={correctCount}
+          onReturn={() => navigate('/play')}
+          onVeteran={() => navigate('/case/2/veteran')}
+        />
+      )}
+    </div>
+  )
+}
+
 function LockedCase() {
   const navigate = useNavigate()
   return (
@@ -1620,6 +2187,8 @@ export default function Case() {
 
   if (!hasLives) return <NoLivesCase />
   if (!isCaseModeUnlocked(user, numericCaseId, difficulty)) return <LockedCase />
+  if (numericCaseId === 2 && difficulty === 'rookie') return <Case2Rookie />
+  if (numericCaseId === 2) return <FutureCase caseId={numericCaseId} />
   if (numericCaseId !== 1) return <FutureCase caseId={numericCaseId} />
   if (difficulty === 'veteran') return <VeteranCase />
 
