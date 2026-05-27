@@ -1953,8 +1953,10 @@ function Case2ThreadPreview({ thread }) {
       <div className="case2-preview-body">
         <div className="case2-preview-avatar">{previewInitials}</div>
         <div className="case2-preview-main">
-          <strong>{copy.title}</strong>
-          <p>{copy.caption}</p>
+          <div className="case2-preview-post-header">
+            <strong>{copy.title}</strong>
+            <span>{copy.label}</span>
+          </div>
           <div className="case2-preview-art">
             <div className="visual visual-profile">
               <span className="profile-ring" />
@@ -2005,6 +2007,7 @@ function Case2ThreadPreview({ thread }) {
               <span className="canvas-palette" />
             </div>
           </div>
+          <p className="case2-preview-caption">{copy.caption}</p>
           <div className="case2-preview-reactions">
             <span className="reaction-icon">like</span>
             <span className="reaction-icon">reply</span>
@@ -2050,6 +2053,7 @@ function Case2ThreadFile({
             <span>{thread.place}</span>
           </div>
           <Case2ThreadPreview thread={thread} />
+          <div className="case2-comments-label">comments</div>
           <div className="case2-message-list case2-message-focus">
             {thread.messages.map((message, messageIndex) => (
               <div
