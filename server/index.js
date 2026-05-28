@@ -44,6 +44,7 @@ app.use("/api/progress", progressRoutes);
 app.use("/api/lives", livesRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/activity", activityRoutes);
+app.use("/api/shop", shopRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/friends", friendsRoutes);
 app.use("/api/chat", chatRoutes);

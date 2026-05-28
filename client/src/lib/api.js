@@ -100,6 +100,10 @@ export const api = {
   getActivity: (token, limit) =>
     request(`/activity${limit ? `?limit=${limit}` : ''}`, { token }),
 
+  // --- shop ---
+  getShop: (token) => request('/shop', { token }),
+  buyItem: (token, itemId) =>
+    request(`/shop/buy/${itemId}`, { method: 'POST', token }),
   // --- leaderboard ---
   getLeaderboard: (token, { limit = 20, offset = 0 } = {}) =>
     request(`/leaderboard?limit=${limit}&offset=${offset}`, { token }),
