@@ -1476,12 +1476,6 @@ function VeteranCase() {
     (count, answer, index) => count + (answer === VETERAN_QUIZ[index].answer ? 1 : 0),
     0,
   )
-  const selectedTraceSet = new Set(traceSelected)
-  const tracePassed =
-    traceSubmitted &&
-    TRACE_INDICATORS.every(
-      (item) => selectedTraceSet.has(item.id) === item.suspicious,
-    )
   const failedOutcome =
     route === 'captured' || route === 'fieldFailed' || route === 'quizFailed'
   const passedVeteran = !failedOutcome && quizSubmitted && quizCorrect >= 5
@@ -1590,11 +1584,6 @@ function VeteranCase() {
   function submitTrace() {
     if (!traceSubmitted) {
       setTraceSubmitted(true)
-      return
-    }
-    if (!tracePassed) {
-      setRoute('fieldFailed')
-      setPhase('debrief')
       return
     }
     setPhase('quiz')
