@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
+import { playSfx } from '../lib/sound.js'
 
 // Adaptive MCQ quiz: 5 questions, server tracks streak + difficulty.
 // 4/5 correct earns +1 life.
@@ -13,7 +14,7 @@ import { api } from '../lib/api.js'
 //   completing   -> /complete in flight after the 5th answer
 //   summary      -> final score + life-award screen
 export default function Quiz() {
-  const { token, refreshUser } = useAuth()
+  const { token, refreshUser, setUser } = useAuth()
 
   const [question, setQuestion] = useState(null)
   const [level, setLevel] = useState('easy')
@@ -55,9 +56,22 @@ export default function Quiz() {
     setSubmitting(true)
     try {
       const data = await api.quizAnswer(token, idx)
+      playSfx(data.correct ? 'correct' : 'wrong')
       setResult({ correct: data.correct, correctIndex: data.correctIndex })
       setLevel(data.nextLevel)
       setProgress(data.progress)
+      if (!data.correct && Number.isInteger(data.livesRemaining)) {
+        playSfx('lifeLost')
+        setUser((current) =>
+          current
+            ? {
+                ...current,
+                livesRemaining: data.livesRemaining,
+                lastLifeRegen: data.lastLifeRegen,
+              }
+            : current,
+        )
+      }
       if (data.finished) setFinishedSession(true)
     } catch (err) {
       setError(err.message)

@@ -6,7 +6,7 @@ import {
   saveSession,
   clearSession,
 } from '../services/quizSessionStore.js'
-import { applyRegen, grantLife } from '../services/livesService.js'
+import { applyRegen, grantLife, useLife } from '../services/livesService.js'
 import { logActivity } from '../services/activityService.js'
 
 // --- session shape ---------------------------------------------------
@@ -128,6 +128,7 @@ export async function answerQuestion(req, res, next) {
 
     const correctIndex = session.current.correctIndex
     const isCorrect = answerIndex === correctIndex
+    let lifeUpdate = null
 
     // Streak + adaptive difficulty: 2 correct in a row -> level up;
     // 2 wrong in a row -> level down. Streak resets on a level change.
@@ -142,6 +143,16 @@ export async function answerQuestion(req, res, next) {
         }
       }
     } else {
+      const user = await User.findById(req.userId)
+      if (!user) return res.status(404).json({ message: 'Account not found.' })
+      useLife(user)
+      await user.save()
+      await logActivity(req.userId, 'life', 'Lost a life on a quiz miss', 0)
+      lifeUpdate = {
+        livesRemaining: user.livesRemaining,
+        lastLifeRegen: user.lastLifeRegen,
+      }
+
       session.streak = session.streak <= 0 ? session.streak - 1 : -1
       if (session.streak <= -2) {
         const nextLevel = levelDown(session.level)
@@ -160,6 +171,7 @@ export async function answerQuestion(req, res, next) {
       correct: isCorrect,
       correctIndex,
       nextLevel: session.level,
+      ...lifeUpdate,
       progress: {
         answered: session.answered,
         correct: session.correctCount,

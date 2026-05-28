@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
+import { applyRegen } from '../services/livesService.js'
 import { saveOtp, checkOtp } from '../services/otpStore.js'
 import { sendOtpEmail } from '../services/mailService.js'
 
@@ -104,6 +105,7 @@ export async function login(req, res, next) {
         .json({ message: 'Invalid code name or password.' })
     }
 
+    applyRegen(user)
     user.lastLogin = new Date()
     await user.save()
 
@@ -164,6 +166,7 @@ export async function verifyOtp(req, res, next) {
     if (!user) {
       return res.status(404).json({ message: 'Account not found.' })
     }
+    if (applyRegen(user)) await user.save()
     res.json(sessionResponse(user))
   } catch (error) {
     next(error)

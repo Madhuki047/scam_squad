@@ -43,17 +43,31 @@ const userSchema = new mongoose.Schema(
 
     // --- Lives system (cooldown timestamp tracked in Redis, mirrored
     //     here so the value survives a Redis flush) ----------------------
-    livesRemaining: { type: Number, default: 5, min: 0, max: 5 },
+    livesRemaining: { type: Number, default: 3, min: 0, max: 3 },
     lastLifeRegen: { type: Date, default: Date.now },
 
     // --- Progression stats -------------------------------------------
     totalScore: { type: Number, default: 0, min: 0 },
     casesSolved: { type: Number, default: 0, min: 0 },
+    completedCases: [
+      {
+        _id: false,
+        caseId: { type: Number, required: true, min: 1 },
+        difficulty: {
+          type: String,
+          required: true,
+          enum: ['rookie', 'veteran'],
+        },
+        completedAt: { type: Date, default: Date.now },
+        pointsAwarded: { type: Number, default: 0, min: 0 },
+      },
+    ],
     accuracy: { type: Number, default: 0, min: 0, max: 100 },
     dayStreak: { type: Number, default: 0, min: 0 },
     rank: { type: Number, default: 0 },
     level: { type: Number, default: 1, min: 1 },
     xp: { type: Number, default: 0, min: 0 },
+    introCompleted: { type: Boolean, default: false },
 
     // --- Badges -------------------------------------------------------
     badges: [
@@ -103,6 +117,14 @@ userSchema.pre('save', async function hashPassword(next) {
   if (!this.isModified('password')) return next()
   const salt = await bcrypt.genSalt(10)
   this.password = await bcrypt.hash(this.password, salt)
+  next()
+})
+
+// Accounts created before the lives cap was reduced may still have
+// livesRemaining > 3 in Mongo. Clamp before validation so those legacy
+// records can still be saved during login/profile hydration.
+userSchema.pre('validate', function clampLegacyLives(next) {
+  if (this.livesRemaining > 3) this.livesRemaining = 3
   next()
 })
 
