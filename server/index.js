@@ -1,13 +1,12 @@
 import "dotenv/config";
 import http from "http";
-import express from "express";
-import cors from "cors";
 import { Server as SocketIOServer } from "socket.io";
 
 import { createCorsOptions } from "./config/cors.js";
 import connectDB from "./config/db.js";
 import { connectRedis } from "./services/redisService.js";
 import { attachChatSocket } from "./services/chatSocket.js";
+import createApp from "./app.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
@@ -60,6 +59,7 @@ app.use("/api", (req, res) => {
 // Central error handler (must be registered last).
 app.use(errorHandler);
 
+const app = createApp();
 const PORT = process.env.PORT || 3001;
 
 // Socket.io shares the same HTTP server as Express, so realtime traffic
@@ -68,7 +68,7 @@ const PORT = process.env.PORT || 3001;
 // services/chatSocket.js.
 const httpServer = http.createServer(app);
 const io = new SocketIOServer(httpServer, {
-  cors: corsOptions,
+  cors: createCorsOptions(),
 });
 attachChatSocket(io);
 
