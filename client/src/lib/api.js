@@ -125,6 +125,11 @@ export const api = {
   getChatUnreadSummary: (token) => request('/chat/unread/summary', { token }),
   markChatRead: (token, peerId) =>
     request(`/chat/${peerId}/read`, { method: 'POST', token }),
+
+  // --- shop ---
+  getShop: (token) => request('/shop', { token }),
+  buyItem: (token, itemId) =>
+    request(`/shop/buy/${itemId}`, { method: 'POST', token }),
 }
 
 export { request, API_URL }
