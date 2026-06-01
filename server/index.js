@@ -17,6 +17,7 @@ import activityRoutes from "./routes/activityRoutes.js";
 import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import friendsRoutes from "./routes/friendsRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
+import shopRoutes from "./routes/shopRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
@@ -47,6 +48,7 @@ app.use("/api/activity", activityRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/friends", friendsRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/shop", shopRoutes);
 
 app.use("/api", (req, res) => {
   console.warn(`[api] 404 ${req.method} ${req.originalUrl}`);

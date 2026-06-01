@@ -13,15 +13,10 @@ import Play from './pages/Play.jsx'
 import Quiz from './pages/Quiz.jsx'
 import Leaderboard from './pages/Leaderboard.jsx'
 import Squad from './pages/Squad.jsx'
-import ComingSoon from './pages/ComingSoon.jsx'
+import Shop from './pages/Shop.jsx'
 import Case from './pages/Case.jsx'
 
 // Route table for the whole app.
-//
-// Phase 2 adds the Title screen, the signed-in AppLayout frame, and the
-// Home / Profile / Settings screens. Play, Quiz, Leaderboard, Friends and
-// Shop are placeholders (ComingSoon) until their phases; the case team
-// owns /case/:id.
 export default function App() {
   return (
     <Routes>
@@ -48,12 +43,7 @@ export default function App() {
 
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/friends" element={<Squad />} />
-
-          {/* Built in later phases. */}
-          <Route
-            path="/shop"
-            element={<ComingSoon title="Power-up Shop" phase="Phase 5" />}
-          />
+          <Route path="/shop" element={<Shop />} />
         </Route>
       </Route>
 
