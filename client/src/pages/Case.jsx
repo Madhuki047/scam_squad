@@ -2689,7 +2689,6 @@ function Case2VeteranJudgment({
   const judgment = CASE2_VETERAN_JUDGMENTS[currentIndex]
   const selectedAnswer = answers[judgment.id] || null
   const answered = Boolean(selectedAnswer)
-  const selectedCorrect = selectedAnswer === judgment.answer
   const isLast = currentIndex === CASE2_VETERAN_JUDGMENTS.length - 1
 
   return (
@@ -2706,21 +2705,18 @@ function Case2VeteranJudgment({
       <article
         className={`veteran-quiz-card veteran-quiz-focus ${
           judgment.critical ? 'case2-veteran-critical' : ''
-        } ${answered && !selectedCorrect ? 'veteran-quiz-shake' : ''}`}
+        }`}
       >
         <h3>{judgment.question}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {judgment.options.map((option) => {
             const selected = selectedAnswer === option.value
-            const isCorrect = judgment.answer === option.value
             return (
               <button
                 key={option.value}
                 type="button"
                 className={`veteran-answer-btn ${
                   selected ? 'veteran-answer-selected' : ''
-                } ${answered && isCorrect ? 'veteran-answer-correct' : ''} ${
-                  answered && selected && !isCorrect ? 'veteran-answer-wrong' : ''
                 }`}
                 onClick={() => onAnswer(judgment.id, option.value)}
                 disabled={answered}
@@ -2731,9 +2727,9 @@ function Case2VeteranJudgment({
           })}
         </div>
         {answered && (
-          <div className={selectedCorrect ? 'success-banner' : 'breach-banner'}>
-            {selectedCorrect ? 'Correct judgment.' : 'Not this time.'}{' '}
-            {judgment.explanation}
+          <div className="case2-briefing-strip">
+            <strong>Answer logged.</strong> Continue through the full judgment
+            set. Unit Zero will evaluate the complete report after submission.
           </div>
         )}
         {answered && (
@@ -3155,17 +3151,10 @@ function Case2Veteran() {
     setPhase('judgment')
   }
 
-  async function answerJudgment(judgmentId, value) {
+  function answerJudgment(judgmentId, value) {
     if (judgmentAnswers[judgmentId]) return
-    const judgment = CASE2_VETERAN_JUDGMENTS.find((item) => item.id === judgmentId)
     setJudgmentAnswers((current) => ({ ...current, [judgmentId]: value }))
-    const correct = value === judgment?.answer
-    playSfx(correct ? 'correct' : 'wrong')
-    if (!correct) {
-      setRoute('fieldFailed')
-      setPhase('debrief')
-      await spendFailureLife('debrief')
-    }
+    playSfx('click')
   }
 
   function nextJudgment() {
@@ -3174,10 +3163,15 @@ function Case2Veteran() {
     )
   }
 
-  function submitJudgments() {
+  async function submitJudgments() {
     playSfx(fieldPassed ? 'correct' : 'wrong')
-    if (!fieldPassed) setRoute('fieldFailed')
-    setPhase(fieldPassed ? 'quiz' : 'debrief')
+    if (!fieldPassed) {
+      setRoute('fieldFailed')
+      setPhase('debrief')
+      await spendFailureLife('debrief')
+      return
+    }
+    setPhase('quiz')
   }
 
   function answerQuiz(questionIndex, optionIndex) {
