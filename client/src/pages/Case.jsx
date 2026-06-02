@@ -789,6 +789,10 @@ const CASE3_KNOWLEDGE_CHECK = [
       'Someone says: "I am from IT. Your boss said you would help me. I just need your login for a minute." What is this?',
     options: ['Normal teamwork', 'Social engineering', 'A software bug'],
     answer: 1,
+    feedback:
+      'Correct - they are using authority and pressure to manipulate you into giving access.',
+    wrongFeedback:
+      'Wrong - an unknown person using IT, your boss, and a rushed login request is social engineering.',
   },
   {
     question: 'Which is the clearest red flag?',
@@ -798,6 +802,10 @@ const CASE3_KNOWLEDGE_CHECK = [
       'A scheduled supervisor meeting',
     ],
     answer: 0,
+    feedback:
+      'Correct - urgency plus an unknown person is a classic pressure tactic.',
+    wrongFeedback:
+      'Wrong - the danger sign is the urgent request from someone you have not verified.',
   },
   {
     question: 'What should you do if you are unsure?',
@@ -807,6 +815,10 @@ const CASE3_KNOWLEDGE_CHECK = [
       'Give temporary access and report later',
     ],
     answer: 1,
+    feedback:
+      'Correct - trusted channels let you help without handing access to an attacker.',
+    wrongFeedback:
+      'Wrong - when access is involved, verify through a trusted channel before helping.',
   },
 ]
 
@@ -3634,12 +3646,16 @@ function Case3Rookie() {
   const [resolvingDebrief, setResolvingDebrief] = useState(false)
   const resolvingRef = useRef(false)
   const internName = user?.username || 'Nova'
-  const passed = scenarioChoice === 'verify'
+  const scenarioPassed = scenarioChoice === 'verify'
   const checkCorrect = checkAnswers.reduce(
     (count, answer, index) =>
       count + (answer === CASE3_KNOWLEDGE_CHECK[index].answer ? 1 : 0),
     0,
   )
+  const checkComplete = checkAnswers.every((answer) => answer !== null)
+  const checkPassed =
+    checkComplete && checkCorrect === CASE3_KNOWLEDGE_CHECK.length
+  const passed = scenarioPassed && checkPassed
 
   function restart() {
     setPhase('intro')
@@ -3873,8 +3889,14 @@ function Case3Rookie() {
               </div>
             )}
             {scenarioChoice && (
-              <div className={passed ? 'success-banner case3-choice-banner' : 'breach-banner case3-choice-banner'}>
-                {passed
+              <div
+                className={
+                  scenarioPassed
+                    ? 'success-banner case3-choice-banner'
+                    : 'breach-banner case3-choice-banner'
+                }
+              >
+                {scenarioPassed
                   ? 'Access refused - supervisor contacted'
                   : 'Door access granted'}
               </div>
@@ -3924,16 +3946,16 @@ function Case3Rookie() {
 
       {phase === 'consequence' && (
         <section className="case-debrief scene-transition">
-          <div className={passed ? 'success-banner' : 'breach-banner'}>
-            {passed ? 'VERIFICATION WORKED' : 'ARCHIVE BREACH'}
+          <div className={scenarioPassed ? 'success-banner' : 'breach-banner'}>
+            {scenarioPassed ? 'VERIFICATION WORKED' : 'ARCHIVE BREACH'}
           </div>
           <div className="ss-card p-5 flex flex-col gap-4">
             <div className="case2-ricky-panel">
               <span className="font-pixel text-sw-yellow text-xs">AGENT ZOEY</span>
               <h2 className="font-pixel text-sw-cyan text-sm">
-                {passed ? 'That was not IT' : 'You let an attacker in'}
+                {scenarioPassed ? 'That was not IT' : 'You let an attacker in'}
               </h2>
-              {passed ? (
+              {scenarioPassed ? (
                 <p>
                   The intern refuses. Agent Zoey arrives, asks for ID, and the
                   man becomes nervous. Security intercepts him before he reaches
@@ -3946,7 +3968,7 @@ function Case3Rookie() {
                 </p>
               )}
               <blockquote className="zoey-quote">
-                {passed
+                {scenarioPassed
                   ? '"That was not IT. That was a social engineer testing our doors - and our people."'
                   : '"Cadet. You did not let IT in. You let an attacker in."'}
               </blockquote>
@@ -4088,8 +4110,8 @@ function Case3Rookie() {
                 }
               >
                 {selectedCheckAnswer === activeQuestion.answer
-                  ? 'Correct.'
-                  : `Correct answer: ${activeQuestion.options[activeQuestion.answer]}`}
+                  ? activeQuestion.feedback
+                  : activeQuestion.wrongFeedback}
               </div>
             )}
             {checkAnswered && (
@@ -4114,7 +4136,7 @@ function Case3Rookie() {
       {phase === 'debrief' && (
         <section className="case-debrief scene-transition">
           <div className={passed ? 'success-banner' : 'breach-banner'}>
-            {passed ? 'SOCIAL ENGINEERING BLOCKED' : 'SOCIAL ENGINEERING BREACH'}
+            {passed ? 'SOCIAL ENGINEERING BLOCKED' : 'ROOKIE ATTEMPT FAILED'}
           </div>
           <div className="ss-card p-5 flex flex-col gap-4">
             <div className="case2-ricky-panel">
@@ -4128,8 +4150,20 @@ function Case3Rookie() {
               </p>
               <p className="text-sw-text2">
                 Knowledge check score: {checkCorrect} / {CASE3_KNOWLEDGE_CHECK.length}.
-                The scenario choice determines this Rookie outcome.
+                Rookie completion requires the correct corridor decision and a
+                perfect knowledge check.
               </p>
+              {!scenarioPassed && (
+                <p className="text-sw-red">
+                  Scenario failed: access was granted without verification.
+                </p>
+              )}
+              {scenarioPassed && !checkPassed && (
+                <p className="text-sw-red">
+                  Knowledge check failed: Unit Zero requires 3 / 3 correct for
+                  this Rookie certification.
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {CASE3_SOCIAL_ENGINEERING_SIGNS.map((point) => (
