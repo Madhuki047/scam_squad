@@ -2692,6 +2692,15 @@ html.ss-high-contrast {
     rgba(13, 0, 30, 0.72);
 }
 
+.case2-preview-image {
+  display: block;
+  width: 100%;
+  height: 7.6rem;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: rgba(8, 7, 22, 0.42);
+}
+
 .case2-preview-art .visual {
   display: none;
   position: absolute;

@@ -6,6 +6,14 @@ import { isCaseModeUnlocked } from '../lib/caseProgress.js'
 import { api } from '../lib/api.js'
 import { BADGES } from '../lib/badges.js'
 import { playSfx } from '../lib/sound.js'
+import threadImage1 from '../assets/case2/thread1.jpeg'
+import threadImage2 from '../assets/case2/thread2.jpeg'
+import threadImage3 from '../assets/case2/thread3.jpeg'
+import threadImage4 from '../assets/case2/thread4.jpeg'
+import threadImage5 from '../assets/case2/thread5.jpeg'
+import threadImage6 from '../assets/case2/thread6.jpeg'
+import threadImage7 from '../assets/case2/thread7.jpeg'
+import threadImage8 from '../assets/case2/thread8.jpeg'
 
 const INTRO_STEPS = [
   {
@@ -405,6 +413,17 @@ const CASE2_THREADS = [
       'Constructive comments focus on the work and do not target, shame, or repeat harm.',
   },
 ]
+
+const CASE2_THREAD_IMAGES = {
+  'direct-insults': threadImage1,
+  'appearance-mockery': threadImage2,
+  'repeated-targeting': threadImage3,
+  'group-exclusion': threadImage4,
+  'plausible-deniability': threadImage5,
+  'one-off-disagreement': threadImage6,
+  'consensual-banter': threadImage7,
+  'constructive-comment': threadImage8,
+}
 
 const CASE2_TEACHING_POINTS = [
   {
@@ -1925,6 +1944,7 @@ function Case2ThreadPreview({ thread }) {
     },
   }
   const copy = previewCopy[thread.id] || previewCopy['direct-insults']
+  const threadImage = CASE2_THREAD_IMAGES[thread.id]
   const previewInitials = copy.title
     .replace('@', '')
     .split(/\s|-/)
@@ -1947,54 +1967,9 @@ function Case2ThreadPreview({ thread }) {
             <span>{copy.label}</span>
           </div>
           <div className="case2-preview-art">
-            <div className="visual visual-profile">
-              <span className="profile-ring" />
-              <span className="profile-photo" />
-              <span className="profile-caption" />
-              <span className="profile-reply" />
-            </div>
-            <div className="visual visual-photo">
-              <span className="photo-sky" />
-              <span className="photo-person" />
-              <span className="photo-flash" />
-              <span className="photo-comment" />
-            </div>
-            <div className="visual visual-class">
-              <span className="class-header" />
-              <span className="class-post" />
-              <span className="class-avatar a" />
-              <span className="class-avatar b" />
-              <span className="class-avatar c" />
-            </div>
-            <div className="visual visual-chat">
-              <span className="chat-bubble left" />
-              <span className="chat-bubble right" />
-              <span className="chat-bubble left short" />
-              <span className="chat-seen" />
-            </div>
-            <div className="visual visual-snippets">
-              <span className="snippet-card one" />
-              <span className="snippet-card two" />
-              <span className="snippet-card three" />
-            </div>
-            <div className="visual visual-project">
-              <span className="poster-page" />
-              <span className="poster-title" />
-              <span className="poster-chart" />
-              <span className="poster-note" />
-            </div>
-            <div className="visual visual-game">
-              <span className="game-screen" />
-              <span className="game-reticle" />
-              <span className="game-score" />
-              <span className="game-chat" />
-            </div>
-            <div className="visual visual-art">
-              <span className="canvas-frame" />
-              <span className="canvas-stroke one" />
-              <span className="canvas-stroke two" />
-              <span className="canvas-palette" />
-            </div>
+            {threadImage && (
+              <img className="case2-preview-image" src={threadImage} alt="" />
+            )}
           </div>
           <p className="case2-preview-caption">{copy.caption}</p>
           <div className="case2-preview-reactions">
