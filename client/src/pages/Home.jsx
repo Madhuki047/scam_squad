@@ -110,6 +110,16 @@ function getHomeAssignment(user) {
       variant: 'network',
     }
   }
+  if (!isCaseModeComplete(user, 3, 'rookie')) {
+    return {
+      to: '/case/3/rookie',
+      caseLabel: 'CASE 03',
+      title: 'START CASE 03',
+      monitorTitle: 'THE INSIDER',
+      subtitle: 'The Insider - social engineering and trust checks',
+      variant: 'network',
+    }
+  }
   return {
     to: '/play',
     caseLabel: 'CASE FILES',

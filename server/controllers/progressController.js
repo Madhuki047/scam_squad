@@ -19,6 +19,7 @@ const VALID_BADGES = new Set([
   'burned-twice',
   'pattern-recognition-beginner',
   'digital-defender-level-2',
+  'human-firewall-beginner',
 ])
 
 function fullCaseCount(completedCases = []) {

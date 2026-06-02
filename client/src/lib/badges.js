@@ -29,6 +29,12 @@ export const BADGES = {
     message: 'You traced accountability through a viral pile-on.',
     icon: 'shield',
   },
+  humanFirewallBeginner: {
+    id: 'human-firewall-beginner',
+    name: 'Human Firewall - Beginner',
+    message: 'You verified a friendly face before opening a secure door.',
+    icon: 'shield',
+  },
 }
 
 export const BADGE_CATALOG = [
@@ -43,6 +49,7 @@ export const BADGE_CATALOG = [
   BADGES.burnedTwice,
   BADGES.patternBeginner,
   BADGES.digitalDefenderLevel2,
+  BADGES.humanFirewallBeginner,
   { id: 'night-owl', name: 'Night Owl' },
   { id: 'perfect-run', name: 'Perfect Run' },
   { id: 'mentor', name: 'Mentor' },
