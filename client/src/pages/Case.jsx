@@ -533,6 +533,10 @@ const CASE2_VETERAN_JUDGMENTS = [
     ],
     explanation:
       'The original video is not bullying. Aaron expresses an opinion without targeting anyone.',
+    correctFeedback:
+      'Correct - Aaron posted a harmless opinion about a school policy without targeting anyone.',
+    wrongFeedback:
+      'Wrong - the pile-on came later. Aaron\'s original video was normal criticism, not bullying.',
   },
   {
     id: 'first-resharer',
@@ -544,6 +548,10 @@ const CASE2_VETERAN_JUDGMENTS = [
     ],
     explanation:
       'The first reshare helps turn a normal post into a target for mockery.',
+    correctFeedback:
+      'Correct - the first reshare helped frame Aaron as a joke and escalated the pile-on.',
+    wrongFeedback:
+      'Wrong - later commenters matter, but the first reshare still helped start the escalation.',
   },
   {
     id: 'strangers',
@@ -555,6 +563,10 @@ const CASE2_VETERAN_JUDGMENTS = [
     ],
     explanation:
       'Strangers can still cause real harm. Anonymous distance does not make the impact disappear.',
+    correctFeedback:
+      'Correct - strangers still add pressure when they join the public mockery.',
+    wrongFeedback:
+      'Wrong - not knowing Aaron does not remove responsibility for contributing to the pile-on.',
   },
   {
     id: 'meme-creators',
@@ -566,6 +578,10 @@ const CASE2_VETERAN_JUDGMENTS = [
     ],
     explanation:
       'A meme is not harmless just because it is framed as a joke. It can extend the pile-on.',
+    correctFeedback:
+      'Correct - meme creators can keep humiliation spreading, even when they call it a joke.',
+    wrongFeedback:
+      'Wrong - "just a meme" is not an excuse when the meme amplifies bullying.',
   },
   {
     id: 'private-plea',
@@ -577,6 +593,10 @@ const CASE2_VETERAN_JUDGMENTS = [
     ],
     explanation:
       'The private screenshot is the worst moment. Aaron reached out for help and someone turned that fear into entertainment.',
+    correctFeedback:
+      'Correct - sharing Aaron\'s private plea is the cruellest act in the file.',
+    wrongFeedback:
+      'Wrong - Aaron asked privately for help, and posting that vulnerable moment publicly is the most serious violation.',
     critical: true,
   },
   {
@@ -590,6 +610,10 @@ const CASE2_VETERAN_JUDGMENTS = [
     ],
     explanation:
       'Bystanders can pile on, share, stay silent, defend, report, or ask people to stop.',
+    correctFeedback:
+      'Correct - bystanders can escalate with shares or de-escalate by defending, reporting, or refusing to join.',
+    wrongFeedback:
+      'Wrong - bystanders are not fixed in one role. Their choices can either escalate or reduce the harm.',
   },
 ]
 
@@ -2689,6 +2713,7 @@ function Case2VeteranJudgment({
   const judgment = CASE2_VETERAN_JUDGMENTS[currentIndex]
   const selectedAnswer = answers[judgment.id] || null
   const answered = Boolean(selectedAnswer)
+  const selectedCorrect = selectedAnswer === judgment.answer
   const isLast = currentIndex === CASE2_VETERAN_JUDGMENTS.length - 1
 
   return (
@@ -2705,18 +2730,21 @@ function Case2VeteranJudgment({
       <article
         className={`veteran-quiz-card veteran-quiz-focus ${
           judgment.critical ? 'case2-veteran-critical' : ''
-        }`}
+        } ${answered && !selectedCorrect ? 'veteran-quiz-shake' : ''}`}
       >
         <h3>{judgment.question}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {judgment.options.map((option) => {
             const selected = selectedAnswer === option.value
+            const isCorrect = judgment.answer === option.value
             return (
               <button
                 key={option.value}
                 type="button"
                 className={`veteran-answer-btn ${
                   selected ? 'veteran-answer-selected' : ''
+                } ${answered && isCorrect ? 'veteran-answer-correct' : ''} ${
+                  answered && selected && !isCorrect ? 'veteran-answer-wrong' : ''
                 }`}
                 onClick={() => onAnswer(judgment.id, option.value)}
                 disabled={answered}
@@ -2727,9 +2755,8 @@ function Case2VeteranJudgment({
           })}
         </div>
         {answered && (
-          <div className="case2-briefing-strip">
-            <strong>Answer logged.</strong> Continue through the full judgment
-            set. Unit Zero will evaluate the complete report after submission.
+          <div className={selectedCorrect ? 'success-banner' : 'breach-banner'}>
+            {selectedCorrect ? judgment.correctFeedback : judgment.wrongFeedback}
           </div>
         )}
         {answered && (
@@ -3015,6 +3042,7 @@ function Case2Veteran() {
   const [progressError, setProgressError] = useState('')
   const [resolvingDebrief, setResolvingDebrief] = useState(false)
   const resolvingRef = useRef(false)
+  const failureLifeSpentRef = useRef(false)
   const internName = user?.username || 'Nova'
   const judgmentCorrect = CASE2_VETERAN_JUDGMENTS.reduce(
     (count, judgment) =>
@@ -3048,10 +3076,11 @@ function Case2Veteran() {
     setProgressError('')
     setResolvingDebrief(false)
     resolvingRef.current = false
+    failureLifeSpentRef.current = false
   }
 
   async function spendFailureLife(nextAction) {
-    if (failureLifeSpent) {
+    if (failureLifeSpentRef.current || failureLifeSpent) {
       if (nextAction === 'replay') {
         restart()
         return
@@ -3063,6 +3092,7 @@ function Case2Veteran() {
     }
     if (resolvingRef.current) return
     resolvingRef.current = true
+    failureLifeSpentRef.current = true
     setResolvingDebrief(true)
     setProgressError('')
     try {
@@ -3085,6 +3115,8 @@ function Case2Veteran() {
       }
       navigate('/play')
     } catch (error) {
+      failureLifeSpentRef.current = false
+      setFailureLifeSpent(false)
       console.error('[progress] Case 2 Veteran failed attempt update failed', {
         endpoint: '/progress/fail-attempt',
         caseId: 2,
