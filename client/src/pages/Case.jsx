@@ -4827,9 +4827,7 @@ function Case3Veteran() {
               </div>
               <div className="case2-message-list mt-3">
                 <div className="case2-message case2-post-message">
-                  <div className="case2-avatar" aria-hidden="true">
-                    <img src={fillerImage} alt="" />
-                  </div>
+                  <div className="case2-avatar" aria-hidden="true">AH</div>
                   <div>
                     <strong>Agent Harper</strong>
                     <p>
@@ -4857,7 +4855,7 @@ function Case3Veteran() {
                 className="case2-decision-btn case2-dismiss-btn"
                 onClick={() => selectIncident('check-first')}
               >
-                Check Something First
+                Verify Request First
               </button>
             </div>
           </article>

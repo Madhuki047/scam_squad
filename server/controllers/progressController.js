@@ -20,6 +20,7 @@ const VALID_BADGES = new Set([
   'pattern-recognition-beginner',
   'digital-defender-level-2',
   'human-firewall-beginner',
+  'human-firewall',
 ])
 
 function fullCaseCount(completedCases = []) {
