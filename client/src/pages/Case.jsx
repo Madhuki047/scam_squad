@@ -2943,8 +2943,9 @@ function Case2VeteranDebrief({
         )}
         {!fieldPassed && (
           <p className="text-sw-text3 text-sm">
-            Replay the evidence review. The private DM screenshot must be
-            treated as the most serious act in the case.
+            Replay the full Veteran file. Every judgment call must be correct
+            before the final certification unlocks, including the private DM
+            screenshot as the most serious act in the case.
           </p>
         )}
         {route === 'quizFailed' && (
@@ -3014,6 +3015,7 @@ function Case2Veteran() {
   const [quizSubmitted, setQuizSubmitted] = useState(false)
   const [badge, setBadge] = useState(null)
   const [pointsAwarded, setPointsAwarded] = useState(0)
+  const [failureLifeSpent, setFailureLifeSpent] = useState(false)
   const [progressError, setProgressError] = useState('')
   const [resolvingDebrief, setResolvingDebrief] = useState(false)
   const resolvingRef = useRef(false)
@@ -3026,7 +3028,7 @@ function Case2Veteran() {
   const privatePleaCorrect =
     judgmentAnswers['private-plea'] ===
     CASE2_VETERAN_JUDGMENTS.find((item) => item.id === 'private-plea')?.answer
-  const fieldPassed = judgmentCorrect >= 5 && privatePleaCorrect
+  const fieldPassed = judgmentCorrect === CASE2_VETERAN_JUDGMENTS.length
   const quizCorrect = quizAnswers.reduce(
     (count, answer, index) =>
       count + (answer === CASE2_VETERAN_QUIZ[index].answer ? 1 : 0),
@@ -3046,12 +3048,23 @@ function Case2Veteran() {
     setQuizSubmitted(false)
     setBadge(null)
     setPointsAwarded(0)
+    setFailureLifeSpent(false)
     setProgressError('')
     setResolvingDebrief(false)
     resolvingRef.current = false
   }
 
   async function spendFailureLife(nextAction) {
+    if (failureLifeSpent) {
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      if (nextAction === 'continue') {
+        navigate('/play')
+      }
+      return
+    }
     if (resolvingRef.current) return
     resolvingRef.current = true
     setResolvingDebrief(true)
@@ -3062,10 +3075,16 @@ function Case2Veteran() {
         difficulty: 'veteran',
       })
       setUser(data.user)
+      setFailureLifeSpent(true)
       playSfx('lifeLost')
       playSfx('caseFailed')
       if (nextAction === 'replay') {
         restart()
+        return
+      }
+      if (nextAction === 'debrief') {
+        resolvingRef.current = false
+        setResolvingDebrief(false)
         return
       }
       navigate('/play')
@@ -3136,11 +3155,17 @@ function Case2Veteran() {
     setPhase('judgment')
   }
 
-  function answerJudgment(judgmentId, value) {
+  async function answerJudgment(judgmentId, value) {
     if (judgmentAnswers[judgmentId]) return
     const judgment = CASE2_VETERAN_JUDGMENTS.find((item) => item.id === judgmentId)
     setJudgmentAnswers((current) => ({ ...current, [judgmentId]: value }))
-    playSfx(value === judgment?.answer ? 'correct' : 'wrong')
+    const correct = value === judgment?.answer
+    playSfx(correct ? 'correct' : 'wrong')
+    if (!correct) {
+      setRoute('fieldFailed')
+      setPhase('debrief')
+      await spendFailureLife('debrief')
+    }
   }
 
   function nextJudgment() {
@@ -3173,12 +3198,17 @@ function Case2Veteran() {
     )
   }
 
-  function submitQuiz() {
+  async function submitQuiz() {
     if (!quizSubmitted) {
       setQuizSubmitted(true)
       return
     }
-    if (quizCorrect <= CASE2_VETERAN_PASS_THRESHOLD) setRoute('quizFailed')
+    if (quizCorrect <= CASE2_VETERAN_PASS_THRESHOLD) {
+      setRoute('quizFailed')
+      setPhase('debrief')
+      await spendFailureLife('debrief')
+      return
+    }
     setPhase('debrief')
   }
 
@@ -3239,12 +3269,16 @@ function Case2Veteran() {
           onReplay={
             passedVeteran
               ? restart
-              : () => spendFailureLife('replay')
+              : failureLifeSpent
+                ? restart
+                : () => spendFailureLife('replay')
           }
           onContinue={
             passedVeteran
               ? () => finishVeteran('caseFiles')
-              : () => spendFailureLife('continue')
+              : failureLifeSpent
+                ? () => navigate('/play')
+                : () => spendFailureLife('continue')
           }
           busy={resolvingDebrief}
         />
