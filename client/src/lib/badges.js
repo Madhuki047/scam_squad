@@ -35,6 +35,12 @@ export const BADGES = {
     message: 'You verified a friendly face before opening a secure door.',
     icon: 'shield',
   },
+  humanFirewall: {
+    id: 'human-firewall',
+    name: 'Human Firewall',
+    message: 'You stopped an internal impersonation attempt by verifying first.',
+    icon: 'shield',
+  },
 }
 
 export const BADGE_CATALOG = [
@@ -50,6 +56,7 @@ export const BADGE_CATALOG = [
   BADGES.patternBeginner,
   BADGES.digitalDefenderLevel2,
   BADGES.humanFirewallBeginner,
+  BADGES.humanFirewall,
   { id: 'night-owl', name: 'Night Owl' },
   { id: 'perfect-run', name: 'Perfect Run' },
   { id: 'mentor', name: 'Mentor' },

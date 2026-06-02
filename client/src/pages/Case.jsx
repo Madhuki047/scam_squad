@@ -838,6 +838,266 @@ const CASE3_MARK_DIALOGUE = [
   'I need to fix a server issue before the morning shift.',
 ]
 
+const CASE3_VETERAN_PASS_SCORE = 5
+
+const CASE3_VETERAN_INTRO = [
+  "Cadet, attackers don't always pretend to be strangers.",
+  'Sometimes they pretend to be the people you trust most.',
+  "Today you're about to learn why verification matters.",
+]
+
+const CASE3_VETERAN_VERIFICATION = [
+  "I'm not in a briefing.",
+  'Harper has been on leave.',
+  'Do NOT send anything.',
+  'Come to my office.',
+]
+
+const CASE3_VETERAN_BREACH = [
+  'Harper has been on leave for two weeks.',
+  "That wasn't her.",
+  "You didn't get hacked.",
+  'You got played.',
+]
+
+const CASE3_VETERAN_PROFILE_FINDINGS = [
+  {
+    title: 'Account created yesterday',
+    text: 'A real internal staff account should not appear brand new for an established agent.',
+  },
+  {
+    title: 'Job title slightly misspelled',
+    text: 'Small profile errors can reveal a fake or hastily created pretext.',
+  },
+  {
+    title: 'No internal contact number',
+    text: 'Missing trusted contact details make it harder to verify the request safely.',
+  },
+]
+
+const CASE3_VETERAN_JUDGMENTS = [
+  {
+    id: 'strongest-clue',
+    question: 'Which clue was the strongest warning sign?',
+    options: [
+      { value: 'profile', label: 'The profile had a typo.' },
+      { value: 'verified-away', label: 'Verification with Zoey revealed Harper was unavailable.' },
+      { value: 'professional-tone', label: 'The chat sounded professional.' },
+      { value: 'archive-project', label: 'The request mentioned the archive project.' },
+    ],
+    answer: 'verified-away',
+    correctFeedback:
+      'Correct - trusted verification proved the request could not really be Harper.',
+    wrongFeedback:
+      'Wrong - profile clues matter, but Zoey confirming Harper was unavailable is the strongest warning.',
+  },
+  {
+    id: 'tactic',
+    question: 'What social engineering tactic was used?',
+    options: [
+      { value: 'malware', label: 'Malware injection' },
+      { value: 'pretexting', label: 'Pretexting' },
+      { value: 'brute-force', label: 'Brute forcing' },
+      { value: 'encryption', label: 'Encryption' },
+    ],
+    answer: 'pretexting',
+    correctFeedback:
+      'Correct - the attacker built a believable story to make the request feel legitimate.',
+    wrongFeedback:
+      'Wrong - this is pretexting: a false story used to win trust and access.',
+  },
+  {
+    id: 'authority',
+    question: 'Why was "Zoey said..." effective?',
+    options: [
+      { value: 'authority', label: 'It exploited authority.' },
+      { value: 'technical', label: 'It proved the request was technical.' },
+      { value: 'public', label: 'It made the code public.' },
+      { value: 'harmless', label: 'It removed all risk.' },
+    ],
+    answer: 'authority',
+    correctFeedback:
+      'Correct - invoking Zoey pressures the intern to obey a trusted authority.',
+    wrongFeedback:
+      'Wrong - "Zoey said" works because authority can be weaponised.',
+  },
+  {
+    id: 'urgency',
+    question: 'Why was "ASAP" included?',
+    options: [
+      { value: 'formatting', label: 'To match Unit Zero formatting' },
+      { value: 'urgency', label: 'To create urgency pressure' },
+      { value: 'kindness', label: 'To sound polite' },
+      { value: 'backup', label: 'To start a backup process' },
+    ],
+    answer: 'urgency',
+    correctFeedback:
+      'Correct - urgency is designed to rush decisions before verification happens.',
+    wrongFeedback:
+      'Wrong - ASAP is pressure. It tries to make speed feel more important than verification.',
+  },
+  {
+    id: 'access-codes',
+    question: 'Why is sharing access codes dangerous?',
+    options: [
+      { value: 'least-privilege', label: 'It violates least privilege and bypasses controls.' },
+      { value: 'slow', label: 'It makes the archive slower.' },
+      { value: 'friendly', label: 'It proves you are helpful.' },
+      { value: 'temporary', label: 'It is safe if temporary.' },
+    ],
+    answer: 'least-privilege',
+    correctFeedback:
+      'Correct - access codes bypass controls and give power to someone who may not be authorised.',
+    wrongFeedback:
+      'Wrong - sharing access codes breaks least privilege and bypasses security controls.',
+  },
+  {
+    id: 'before-sharing',
+    question: 'What should happen before sharing sensitive access information?',
+    options: [
+      { value: 'trusted-channel', label: 'Verify through a trusted channel.' },
+      { value: 'reply-chat', label: 'Reply in the same chat.' },
+      { value: 'send-first', label: 'Send first, report later.' },
+      { value: 'ask-attacker', label: 'Ask the requester if they are real.' },
+    ],
+    answer: 'trusted-channel',
+    correctFeedback:
+      'Correct - use a trusted channel before sharing anything sensitive.',
+    wrongFeedback:
+      'Wrong - sensitive access information should only move after trusted-channel verification.',
+  },
+]
+
+const CASE3_VETERAN_TEACHING_POINTS = [
+  {
+    title: 'Pretexting uses believable stories',
+    text: 'The archive project, Harper name, and Zoey reference made the lie feel routine.',
+  },
+  {
+    title: 'Authority can be weaponised',
+    text: 'Attackers borrow trusted names to pressure people into compliance.',
+  },
+  {
+    title: 'Urgency pressures bad decisions',
+    text: 'ASAP was included to make verification feel like a delay.',
+  },
+  {
+    title: 'Verification defeats social engineering',
+    text: 'Calling or messaging Zoey through a trusted channel exposed the pretext.',
+  },
+  {
+    title: 'Never share access codes',
+    text: 'Codes are security controls, not chat attachments.',
+  },
+  {
+    title: 'Trust should be verified',
+    text: 'Internal names, profile pictures, and professional tone are not proof.',
+  },
+]
+
+const CASE3_VETERAN_QUIZ = [
+  {
+    question: 'What is pretexting?',
+    options: [
+      'Encrypting files for storage',
+      'Using a believable false story to gain trust or access',
+      'Scanning a network for open ports',
+      'Deleting old accounts',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'Why is an internal-looking message still risky?',
+    options: [
+      'Internal tools never show names',
+      'Attackers can impersonate trusted staff or compromise accounts',
+      'Professional tone always means fraud',
+      'Only external email can be dangerous',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'What tactic is used by saying "Zoey said you would help"?',
+    options: [
+      'Authority exploitation',
+      'File compression',
+      'Password rotation',
+      'Network segmentation',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'Why do attackers add urgency like "ASAP"?',
+    options: [
+      'To give the victim time to verify',
+      'To pressure fast action before careful checking',
+      'To make the message shorter',
+      'To prove the request is approved',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'What is the safest response to a surprise access-code request?',
+    options: [
+      'Send the code if the profile picture looks right',
+      'Verify through a trusted channel before sharing anything',
+      'Ask the requester to promise they are staff',
+      'Post the code in a group chat',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'What does least privilege mean here?',
+    options: [
+      'Give access only to people who are authorised and need it',
+      'Give everyone temporary access',
+      'Use the shortest access code',
+      'Trust anyone from the same department',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'Which profile clue is suspicious?',
+    options: [
+      'A verified internal phone number',
+      'Account created yesterday',
+      'A normal department name',
+      'A long employment history',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'Why is replying in the same suspicious chat not enough?',
+    options: [
+      'The same channel may be controlled by the attacker',
+      'Chats cannot contain text',
+      'It always alerts security automatically',
+      'It deletes the evidence',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'What should you report after receiving a suspicious access request?',
+    options: [
+      'Only the profile picture',
+      'The request, account details, and any suspicious clues',
+      'Nothing if you did not send the code',
+      'Your own password',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'What is the main lesson of this case?',
+    options: [
+      'Trust familiar names without question',
+      'Verification matters even when the request appears internal',
+      'Access codes are safe in private chats',
+      'Urgent requests skip normal controls',
+    ],
+    answer: 1,
+  },
+]
+
 function PixelPerson({ role, label, position = '' }) {
   return (
     <div className={`pixel-person pixel-${role} ${position}`}>
@@ -4229,6 +4489,828 @@ function Case3Rookie() {
   )
 }
 
+function Case3Veteran() {
+  const navigate = useNavigate()
+  const { user, token, setUser } = useAuth()
+  const [phase, setPhase] = useState('intro')
+  const [introStep, setIntroStep] = useState(0)
+  const [verificationStep, setVerificationStep] = useState(0)
+  const [breachStep, setBreachStep] = useState(0)
+  const [incidentChoice, setIncidentChoice] = useState(null)
+  const [viewedProfile, setViewedProfile] = useState(false)
+  const [judgmentAnswers, setJudgmentAnswers] = useState({})
+  const [currentJudgmentIndex, setCurrentJudgmentIndex] = useState(0)
+  const [route, setRoute] = useState(null)
+  const [quizAnswers, setQuizAnswers] = useState(
+    () => CASE3_VETERAN_QUIZ.map(() => null),
+  )
+  const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0)
+  const [quizSubmitted, setQuizSubmitted] = useState(false)
+  const [badge, setBadge] = useState(null)
+  const [pointsAwarded, setPointsAwarded] = useState(0)
+  const [failureLifeSpent, setFailureLifeSpent] = useState(false)
+  const [progressError, setProgressError] = useState('')
+  const [resolvingDebrief, setResolvingDebrief] = useState(false)
+  const resolvingRef = useRef(false)
+  const failureLifeSpentRef = useRef(false)
+  const internName = user?.username || 'Nova'
+  const incidentPassed = incidentChoice === 'verified'
+  const judgmentCorrect = CASE3_VETERAN_JUDGMENTS.reduce(
+    (count, judgment) =>
+      count + (judgmentAnswers[judgment.id] === judgment.answer ? 1 : 0),
+    0,
+  )
+  const fieldPassed =
+    incidentPassed && judgmentCorrect === CASE3_VETERAN_JUDGMENTS.length
+  const quizCorrect = quizAnswers.reduce(
+    (count, answer, index) =>
+      count + (answer === CASE3_VETERAN_QUIZ[index].answer ? 1 : 0),
+    0,
+  )
+  const quizPassed = quizSubmitted && quizCorrect >= CASE3_VETERAN_PASS_SCORE
+  const passedVeteran = fieldPassed && quizPassed && route !== 'quizFailed'
+
+  function restart() {
+    setPhase('intro')
+    setIntroStep(0)
+    setVerificationStep(0)
+    setBreachStep(0)
+    setIncidentChoice(null)
+    setViewedProfile(false)
+    setJudgmentAnswers({})
+    setCurrentJudgmentIndex(0)
+    setRoute(null)
+    setQuizAnswers(CASE3_VETERAN_QUIZ.map(() => null))
+    setCurrentQuizQuestion(0)
+    setQuizSubmitted(false)
+    setBadge(null)
+    setPointsAwarded(0)
+    setFailureLifeSpent(false)
+    setProgressError('')
+    setResolvingDebrief(false)
+    resolvingRef.current = false
+    failureLifeSpentRef.current = false
+  }
+
+  async function spendFailureLife(nextAction) {
+    if (failureLifeSpentRef.current || failureLifeSpent) {
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      if (nextAction === 'continue') navigate('/play')
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    failureLifeSpentRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const data = await api.failAttempt(token, {
+        caseId: 3,
+        difficulty: 'veteran',
+      })
+      setUser(data.user)
+      setFailureLifeSpent(true)
+      playSfx('lifeLost')
+      playSfx('caseFailed')
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      if (nextAction === 'debrief') {
+        resolvingRef.current = false
+        setResolvingDebrief(false)
+        return
+      }
+      navigate('/play')
+    } catch (error) {
+      failureLifeSpentRef.current = false
+      setFailureLifeSpent(false)
+      console.error('[progress] Case 3 Veteran failed attempt update failed', {
+        endpoint: '/progress/fail-attempt',
+        caseId: 3,
+        difficulty: 'veteran',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update lives.')
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  async function finishVeteran(nextAction = 'end') {
+    if (!passedVeteran) {
+      spendFailureLife(nextAction === 'replay' ? 'replay' : 'continue')
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const unlockedBadge = BADGES.humanFirewall
+      const data = await api.completeCase(token, {
+        caseId: 3,
+        difficulty: 'veteran',
+        result: 'success',
+        badge: unlockedBadge,
+        bonusPoints: quizCorrect * 10,
+      })
+      setUser(data.user)
+      setBadge(unlockedBadge)
+      setPointsAwarded(data.pointsAwarded)
+      if (data.pointsAwarded > 0) {
+        playSfx('coins')
+        playSfx('badge')
+      }
+      playSfx('caseComplete')
+      if (nextAction === 'caseFiles') {
+        navigate('/play')
+        return
+      }
+      setPhase('end')
+    } catch (error) {
+      console.error('[progress] Case 3 Veteran completion update failed', {
+        endpoint: '/progress/complete-case',
+        caseId: 3,
+        difficulty: 'veteran',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update case progress.')
+    } finally {
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  function selectIncident(action) {
+    if (action === 'send-code') {
+      setIncidentChoice('sent-code')
+      setPhase('breach')
+      playSfx('wrong')
+      return
+    }
+    setPhase('investigate')
+    playSfx('click')
+  }
+
+  function verifyWithZoey() {
+    setIncidentChoice('verified')
+    setVerificationStep(0)
+    setPhase('verification')
+    playSfx('correct')
+  }
+
+  function answerJudgment(judgmentId, value) {
+    if (judgmentAnswers[judgmentId]) return
+    setJudgmentAnswers((current) => ({ ...current, [judgmentId]: value }))
+    playSfx('click')
+  }
+
+  function nextJudgment() {
+    setCurrentJudgmentIndex((value) =>
+      Math.min(value + 1, CASE3_VETERAN_JUDGMENTS.length - 1),
+    )
+  }
+
+  async function submitJudgments() {
+    playSfx(fieldPassed ? 'correct' : 'wrong')
+    if (!fieldPassed) {
+      setRoute(incidentPassed ? 'fieldFailed' : 'incidentFailed')
+      setPhase('debrief')
+      await spendFailureLife('debrief')
+      return
+    }
+    setPhase('quiz')
+  }
+
+  function answerQuiz(questionIndex, optionIndex) {
+    if (quizAnswers[questionIndex] !== null) return
+    setQuizAnswers((current) =>
+      current.map((answer, index) =>
+        index === questionIndex ? optionIndex : answer,
+      ),
+    )
+    playSfx(
+      optionIndex === CASE3_VETERAN_QUIZ[questionIndex].answer
+        ? 'correct'
+        : 'wrong',
+    )
+  }
+
+  function nextQuizQuestion() {
+    setCurrentQuizQuestion((value) =>
+      Math.min(value + 1, CASE3_VETERAN_QUIZ.length - 1),
+    )
+  }
+
+  async function submitQuiz() {
+    if (!quizSubmitted) {
+      setQuizSubmitted(true)
+      return
+    }
+    if (quizCorrect < CASE3_VETERAN_PASS_SCORE) {
+      setRoute('quizFailed')
+      setPhase('debrief')
+      await spendFailureLife('debrief')
+      return
+    }
+    setPhase('debrief')
+  }
+
+  const activeJudgment = CASE3_VETERAN_JUDGMENTS[currentJudgmentIndex]
+  const selectedJudgment = judgmentAnswers[activeJudgment.id] || null
+  const judgmentAnswered = Boolean(selectedJudgment)
+  const judgmentSelectedCorrect = selectedJudgment === activeJudgment.answer
+  const lastJudgment =
+    currentJudgmentIndex === CASE3_VETERAN_JUDGMENTS.length - 1
+  const activeQuizQuestion = CASE3_VETERAN_QUIZ[currentQuizQuestion]
+  const selectedQuizAnswer = quizAnswers[currentQuizQuestion]
+  const quizAnswered = selectedQuizAnswer !== null
+  const quizSelectedCorrect = selectedQuizAnswer === activeQuizQuestion.answer
+  const lastQuizQuestion =
+    currentQuizQuestion === CASE3_VETERAN_QUIZ.length - 1
+
+  return (
+    <div className="case-shell max-w-5xl mx-auto">
+      <div className="case-title-row">
+        <div>
+          <span className="font-pixel text-sw-pink text-xs">CASE 03 VETERAN</span>
+          <h2 className="font-pixel text-sw-cyan text-sm md:text-base">
+            The Insider
+          </h2>
+        </div>
+      </div>
+      {progressError && (
+        <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
+      )}
+
+      {phase === 'intro' && (
+        <section className="case-scene scene-transition">
+          <div className="case-scene-top">
+            <span>UNIT ZERO</span>
+            <span>VETERAN BRIEFING</span>
+          </div>
+          <div className="case-office case3-briefing-office">
+            <div className="case-window case-window-left">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="case-window case-window-right">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="unit-poster unit-poster-left">
+              CASE 03
+              <br />
+              VETERAN
+            </div>
+            <div className="case3-zoey-station">
+              <PixelPerson role="zoey" label="AGENT ZOEY" />
+            </div>
+            <PixelPerson
+              role="intern"
+              label={`${internName} - YOU`}
+              position="pixel-intern-left"
+            />
+            <div className="case3-monitor-wall" aria-hidden="true">
+              <span>ARCHIVE DIGITISATION</span>
+              <strong>INTERNAL CHAT ACTIVE</strong>
+            </div>
+            <div className="case-bubble case-bubble-jane case3-dialogue-bubble">
+              <span className="text-sw-yellow">Agent Zoey</span>
+              <p>{CASE3_VETERAN_INTRO[introStep]}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan self-end"
+            onClick={() => {
+              if (introStep < CASE3_VETERAN_INTRO.length - 1) {
+                setIntroStep((value) => value + 1)
+                playSfx('click')
+                return
+              }
+              setPhase('incident')
+            }}
+          >
+            {introStep === CASE3_VETERAN_INTRO.length - 1
+              ? 'Open Workstation'
+              : 'Continue'}{' '}
+            <IconArrowRight size={16} />
+          </button>
+        </section>
+      )}
+
+      {phase === 'incident' && (
+        <section className="case2-board scene-transition">
+          <div className="case2-board-header">
+            <div>
+              <span className="font-pixel text-sw-pink text-xs">ARCHIVE WORKSTATION</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                Internal Chat Request
+              </h2>
+            </div>
+            <div className="case2-progress-chip">SECURE FOLDER</div>
+          </div>
+          <article className="case2-file">
+            <section className="case2-social-window">
+              <div className="case2-social-window-bar">
+                <span>Unit Zero Chat</span>
+                <span>Agent Harper</span>
+              </div>
+              <div className="case2-message-list mt-3">
+                <div className="case2-message case2-post-message">
+                  <div className="case2-avatar" aria-hidden="true">
+                    <img src={fillerImage} alt="" />
+                  </div>
+                  <div>
+                    <strong>Agent Harper</strong>
+                    <p>
+                      Hey, Zoey said you're handling the archive project. I need
+                      the access code for the secure folder. She's in a briefing
+                      and I need it ASAP.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <p className="text-sw-text2 mt-3">
+              The tone is professional. The name is familiar. The project is real.
+            </p>
+            <div className="case2-decision-row mt-4">
+              <button
+                type="button"
+                className="case2-decision-btn case2-flag-btn"
+                onClick={() => selectIncident('send-code')}
+              >
+                Send Access Code
+              </button>
+              <button
+                type="button"
+                className="case2-decision-btn case2-dismiss-btn"
+                onClick={() => selectIncident('check-first')}
+              >
+                Check Something First
+              </button>
+            </div>
+          </article>
+        </section>
+      )}
+
+      {phase === 'investigate' && (
+        <section className="case2-board scene-transition">
+          <div className="case2-board-header">
+            <div>
+              <span className="font-pixel text-sw-pink text-xs">VERIFICATION DESK</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                Choose a trusted check
+              </h2>
+            </div>
+            <div className="case2-progress-chip">
+              {viewedProfile ? 'PROFILE REVIEWED' : 'OPEN'}
+            </div>
+          </div>
+          <article className="case2-file">
+            <div className="case2-decision-row">
+              <button
+                type="button"
+                className="case2-decision-btn"
+                onClick={() => {
+                  setViewedProfile(true)
+                  playSfx('click')
+                }}
+              >
+                View Harper Profile
+              </button>
+              <button
+                type="button"
+                className="case2-decision-btn case2-dismiss-btn"
+                onClick={verifyWithZoey}
+              >
+                Call Zoey
+              </button>
+              <button
+                type="button"
+                className="case2-decision-btn case2-dismiss-btn"
+                onClick={verifyWithZoey}
+              >
+                Message Zoey
+              </button>
+            </div>
+            {viewedProfile && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+                {CASE3_VETERAN_PROFILE_FINDINGS.map((finding) => (
+                  <article key={finding.title} className="red-flag-card">
+                    <IconFlag size={18} />
+                    <div>
+                      <h3>{finding.title}</h3>
+                      <p>{finding.text}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </article>
+        </section>
+      )}
+
+      {phase === 'verification' && (
+        <section className="case-scene scene-transition">
+          <div className="case-scene-top">
+            <span>TRUSTED CHANNEL</span>
+            <span>ZO.EY/DIRECT</span>
+          </div>
+          <div className="case-office case3-briefing-office">
+            <div className="case3-zoey-station">
+              <PixelPerson role="zoey" label="AGENT ZOEY" />
+            </div>
+            <PixelPerson
+              role="intern"
+              label={`${internName} - YOU`}
+              position="pixel-intern-left"
+            />
+            <div className="case-bubble case-bubble-jane case3-dialogue-bubble">
+              <span className="text-sw-yellow">Agent Zoey</span>
+              <p>{CASE3_VETERAN_VERIFICATION[verificationStep]}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan self-end"
+            onClick={() => {
+              if (verificationStep < CASE3_VETERAN_VERIFICATION.length - 1) {
+                setVerificationStep((value) => value + 1)
+                playSfx('click')
+                return
+              }
+              setPhase('judgment')
+            }}
+          >
+            {verificationStep === CASE3_VETERAN_VERIFICATION.length - 1
+              ? 'Open Investigation Notes'
+              : 'Continue'}{' '}
+            <IconArrowRight size={16} />
+          </button>
+        </section>
+      )}
+
+      {phase === 'breach' && (
+        <section className="case-glitch ss-card scene-transition">
+          <div className="breach-banner">UNAUTHORISED ACCESS - ARCHIVE BREACH</div>
+          <div className="case2-veteran-post-frame">
+            <img src={fillerImage} alt="" />
+            <div className="case2-veteran-post-copy">
+              <strong>Secure folder opened from unknown session</strong>
+              <span>Access code accepted. Archive copy operation started.</span>
+            </div>
+          </div>
+          <div className="case2-ricky-panel">
+            <span className="font-pixel text-sw-yellow text-xs">AGENT ZOEY</span>
+            <p>{CASE3_VETERAN_BREACH[breachStep]}</p>
+          </div>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan self-start"
+            onClick={() => {
+              if (breachStep < CASE3_VETERAN_BREACH.length - 1) {
+                setBreachStep((value) => value + 1)
+                playSfx('click')
+                return
+              }
+              setPhase('judgment')
+            }}
+          >
+            {breachStep === CASE3_VETERAN_BREACH.length - 1
+              ? 'Open Investigation Notes'
+              : 'Continue'}{' '}
+            <IconArrowRight size={16} />
+          </button>
+        </section>
+      )}
+
+      {phase === 'judgment' && (
+        <section className="case2-board scene-transition">
+          <div className="case2-board-header">
+            <div>
+              <span className="font-pixel text-sw-pink text-xs">INSIDER REVIEW</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                Veteran Judgment Calls
+              </h2>
+            </div>
+            <div className="case2-progress-chip">
+              {currentJudgmentIndex + 1} / {CASE3_VETERAN_JUDGMENTS.length}
+            </div>
+          </div>
+          <article
+            className={`veteran-quiz-card veteran-quiz-focus ${
+              judgmentAnswered && !judgmentSelectedCorrect
+                ? 'veteran-quiz-shake'
+                : ''
+            }`}
+          >
+            <h3>{activeJudgment.question}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {activeJudgment.options.map((option) => {
+                const selected = selectedJudgment === option.value
+                const isCorrect = activeJudgment.answer === option.value
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`veteran-answer-btn ${
+                      selected ? 'veteran-answer-selected' : ''
+                    } ${
+                      judgmentAnswered && isCorrect
+                        ? 'veteran-answer-correct'
+                        : ''
+                    } ${
+                      judgmentAnswered && selected && !isCorrect
+                        ? 'veteran-answer-wrong'
+                        : ''
+                    }`}
+                    onClick={() => answerJudgment(activeJudgment.id, option.value)}
+                    disabled={judgmentAnswered}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
+            {judgmentAnswered && (
+              <div
+                className={
+                  judgmentSelectedCorrect ? 'success-banner' : 'breach-banner'
+                }
+              >
+                {judgmentSelectedCorrect
+                  ? activeJudgment.correctFeedback
+                  : activeJudgment.wrongFeedback}
+              </div>
+            )}
+            {judgmentAnswered && (
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan self-start"
+                onClick={lastJudgment ? submitJudgments : nextJudgment}
+              >
+                {lastJudgment ? 'Submit Investigation' : 'Next Judgment'}{' '}
+                <IconArrowRight size={16} />
+              </button>
+            )}
+          </article>
+        </section>
+      )}
+
+      {phase === 'quiz' && (
+        <section className="case-debrief scene-transition">
+          <div className="success-banner">FINAL CERTIFICATION - HUMAN FIREWALL</div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <h2 className="font-pixel text-sw-cyan text-sm">
+              Case 03 final certification
+            </h2>
+            <p className="text-sw-text2">
+              Each correct answer is worth 10 coins. Passing requires at least
+              50%, so 5 or more answers closes the Veteran file.
+            </p>
+            {!quizSubmitted ? (
+              <>
+                <div className="veteran-quiz-progress">
+                  Question {currentQuizQuestion + 1} / {CASE3_VETERAN_QUIZ.length}
+                </div>
+                <article
+                  className={`veteran-quiz-card veteran-quiz-focus ${
+                    quizAnswered && !quizSelectedCorrect
+                      ? 'veteran-quiz-shake'
+                      : ''
+                  }`}
+                >
+                  <h3>{activeQuizQuestion.question}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {activeQuizQuestion.options.map((option, optionIndex) => {
+                      const selected = selectedQuizAnswer === optionIndex
+                      const isCorrect = activeQuizQuestion.answer === optionIndex
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          className={`veteran-answer-btn ${
+                            selected ? 'veteran-answer-selected' : ''
+                          } ${
+                            quizAnswered && isCorrect
+                              ? 'veteran-answer-correct'
+                              : ''
+                          } ${
+                            quizAnswered && selected && !isCorrect
+                              ? 'veteran-answer-wrong'
+                              : ''
+                          }`}
+                          onClick={() => answerQuiz(currentQuizQuestion, optionIndex)}
+                          disabled={quizAnswered}
+                        >
+                          {option}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </article>
+                {quizAnswered && (
+                  <div
+                    className={
+                      quizSelectedCorrect ? 'success-banner' : 'breach-banner'
+                    }
+                  >
+                    {quizSelectedCorrect
+                      ? 'Correct. +10 quiz coins secured.'
+                      : `Correct answer: ${
+                          activeQuizQuestion.options[activeQuizQuestion.answer]
+                        }`}
+                  </div>
+                )}
+                {quizAnswered && (
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-cyan self-start"
+                    onClick={lastQuizQuestion ? submitQuiz : nextQuizQuestion}
+                  >
+                    {lastQuizQuestion ? 'View results' : 'Next Question'}
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <div className={quizPassed ? 'success-banner' : 'breach-banner'}>
+                  {quizPassed ? 'Certification passed' : 'Certification failed'}
+                </div>
+                <div className="veteran-results-grid">
+                  <div>
+                    <span>Correct</span>
+                    <strong>{quizCorrect} / 10</strong>
+                  </div>
+                  <div>
+                    <span>Quiz coins</span>
+                    <strong>{quizCorrect * 10}</strong>
+                  </div>
+                  <div>
+                    <span>Status</span>
+                    <strong>{quizPassed ? 'Case can close' : 'Replay required'}</strong>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="ss-btn ss-btn-cyan self-start"
+                  onClick={submitQuiz}
+                >
+                  Continue debrief
+                </button>
+              </>
+            )}
+          </div>
+        </section>
+      )}
+
+      {phase === 'debrief' && (
+        <section className="case-debrief scene-transition">
+          <div className={passedVeteran ? 'success-banner' : 'breach-banner'}>
+            {passedVeteran ? 'CASE 03 VETERAN SECURED' : 'INSIDER REVIEW FAILED'}
+          </div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT ZOEY</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                Trust is a control point
+              </h2>
+              <p>
+                The attacker did not need to break the archive system. They used
+                a believable internal story, a trusted name, and urgency to make
+                you lower the control yourself.
+              </p>
+              <blockquote className="zoey-quote">
+                "Verification is not suspicion. It is how we protect the people
+                we trust from being impersonated."
+              </blockquote>
+            </div>
+            <div className="veteran-results-grid">
+              <div>
+                <span>Incident</span>
+                <strong>{incidentPassed ? 'Verified' : 'Code sent'}</strong>
+              </div>
+              <div>
+                <span>Judgments</span>
+                <strong>
+                  {judgmentCorrect} / {CASE3_VETERAN_JUDGMENTS.length}
+                </strong>
+              </div>
+              <div>
+                <span>Quiz</span>
+                <strong>{quizCorrect} / 10</strong>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {CASE3_VETERAN_TEACHING_POINTS.map((point) => (
+                <article key={point.title} className="red-flag-card">
+                  <IconFlag size={18} />
+                  <div>
+                    <h3>{point.title}</h3>
+                    <p>{point.text}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            {passedVeteran && (
+              <div className="badge-card">
+                <span>Badge unlocked</span>
+                <strong>HUMAN FIREWALL</strong>
+              </div>
+            )}
+            {route === 'incidentFailed' && (
+              <p className="text-sw-text3 text-sm">
+                Replay required. Sending the access code caused an archive
+                breach, so the final certification stays locked.
+              </p>
+            )}
+            {route === 'fieldFailed' && (
+              <p className="text-sw-text3 text-sm">
+                Replay required. Every Veteran judgment call must be correct
+                before the final certification unlocks.
+              </p>
+            )}
+            {route === 'quizFailed' && (
+              <p className="text-sw-text3 text-sm">
+                The final certification score was below the required 5 / 10.
+              </p>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                className="ss-btn ss-btn-pink"
+                onClick={
+                  passedVeteran
+                    ? restart
+                    : failureLifeSpent
+                      ? restart
+                      : () => spendFailureLife('replay')
+                }
+                disabled={resolvingDebrief}
+              >
+                Replay Veteran
+              </button>
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan"
+                onClick={
+                  passedVeteran
+                    ? () => finishVeteran('caseFiles')
+                    : failureLifeSpent
+                      ? () => navigate('/play')
+                      : () => spendFailureLife('continue')
+                }
+                disabled={resolvingDebrief}
+              >
+                Continue to Case Files
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {phase === 'end' && (
+        <section className="ss-card p-6 flex flex-col gap-4">
+          <h2 className="font-pixel text-sw-cyan text-sm">
+            Case 03 Veteran Complete
+          </h2>
+          <p className="text-sw-text2">
+            The Insider closed. Quiz score: {quizCorrect}/10.
+          </p>
+          <PixelBadgeCard badge={badge} pointsAwarded={pointsAwarded} />
+          <div className="badge-card">
+            <span>Field guide unlocked</span>
+            <strong>HUMAN FIREWALL</strong>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan"
+              onClick={() => navigate('/play')}
+            >
+              Return to Case Files
+            </button>
+            <button type="button" className="ss-btn ss-btn-pink" onClick={restart}>
+              Replay Veteran
+            </button>
+          </div>
+        </section>
+      )}
+    </div>
+  )
+}
+
 function LockedCase() {
   const navigate = useNavigate()
   return (
@@ -4316,6 +5398,7 @@ export default function Case() {
   if (numericCaseId === 2 && difficulty === 'veteran') return <Case2Veteran />
   if (numericCaseId === 2) return <FutureCase caseId={numericCaseId} />
   if (numericCaseId === 3 && difficulty === 'rookie') return <Case3Rookie />
+  if (numericCaseId === 3 && difficulty === 'veteran') return <Case3Veteran />
   if (numericCaseId !== 1) return <FutureCase caseId={numericCaseId} />
   if (difficulty === 'veteran') return <VeteranCase />
 
