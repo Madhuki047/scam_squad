@@ -747,6 +747,69 @@ const CASE2_VETERAN_QUIZ = [
   },
 ]
 
+const CASE3_SOCIAL_ENGINEERING_SIGNS = [
+  {
+    title: 'Authority impersonation',
+    text: '"I am from IT" asks you to trust a role before verifying the person.',
+  },
+  {
+    title: 'Urgency',
+    text: '"Before the morning shift" pressures you to act before checking.',
+  },
+  {
+    title: 'Familiarity',
+    text: '"You are the new intern, right?" makes the request feel personal and normal.',
+  },
+  {
+    title: 'Helplessness',
+    text: '"My badge is not scanning" makes you want to solve the problem for him.',
+  },
+  {
+    title: 'Social pressure',
+    text: 'Not wanting to seem rude or unhelpful can push you into skipping verification.',
+  },
+  {
+    title: 'Trusted channels',
+    text: 'A supervisor, security desk, or official staff directory is safer than a stranger at the door.',
+  },
+]
+
+const CASE3_TRAINING_EXAMPLES = [
+  'Pretending to be staff',
+  'Using authority',
+  'Creating urgency',
+  'Acting friendly',
+  'Making you feel guilty',
+  'Applying pressure',
+]
+
+const CASE3_KNOWLEDGE_CHECK = [
+  {
+    question:
+      'Someone says: "I am from IT. Your boss said you would help me. I just need your login for a minute." What is this?',
+    options: ['Normal teamwork', 'Social engineering', 'A software bug'],
+    answer: 1,
+  },
+  {
+    question: 'Which is the clearest red flag?',
+    options: [
+      'Urgent request plus unknown person',
+      'A calm coworker using their own badge',
+      'A scheduled supervisor meeting',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'What should you do if you are unsure?',
+    options: [
+      'Help quickly so you do not seem rude',
+      'Verify through a trusted channel',
+      'Give temporary access and report later',
+    ],
+    answer: 1,
+  },
+]
+
 function PixelPerson({ role, label, position = '' }) {
   return (
     <div className={`pixel-person pixel-${role} ${position}`}>
@@ -3538,6 +3601,553 @@ function Case2Rookie() {
   )
 }
 
+function Case3Rookie() {
+  const navigate = useNavigate()
+  const { user, token, setUser } = useAuth()
+  const [phase, setPhase] = useState('intro')
+  const [scenarioChoice, setScenarioChoice] = useState(null)
+  const [checkAnswers, setCheckAnswers] = useState(
+    () => CASE3_KNOWLEDGE_CHECK.map(() => null),
+  )
+  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [badge, setBadge] = useState(null)
+  const [pointsAwarded, setPointsAwarded] = useState(0)
+  const [progressError, setProgressError] = useState('')
+  const [resolvingDebrief, setResolvingDebrief] = useState(false)
+  const resolvingRef = useRef(false)
+  const internName = user?.username || 'Nova'
+  const passed = scenarioChoice === 'verify'
+  const checkCorrect = checkAnswers.reduce(
+    (count, answer, index) =>
+      count + (answer === CASE3_KNOWLEDGE_CHECK[index].answer ? 1 : 0),
+    0,
+  )
+
+  function restart() {
+    setPhase('intro')
+    setScenarioChoice(null)
+    setCheckAnswers(CASE3_KNOWLEDGE_CHECK.map(() => null))
+    setCurrentQuestion(0)
+    setBadge(null)
+    setPointsAwarded(0)
+    setProgressError('')
+    setResolvingDebrief(false)
+    resolvingRef.current = false
+  }
+
+  function chooseScenario(choice) {
+    if (scenarioChoice) return
+    setScenarioChoice(choice)
+    playSfx(choice === 'verify' ? 'correct' : 'wrong')
+  }
+
+  function answerCheck(questionIndex, optionIndex) {
+    if (checkAnswers[questionIndex] !== null) return
+    setCheckAnswers((current) =>
+      current.map((answer, index) =>
+        index === questionIndex ? optionIndex : answer,
+      ),
+    )
+    playSfx(
+      optionIndex === CASE3_KNOWLEDGE_CHECK[questionIndex].answer
+        ? 'correct'
+        : 'wrong',
+    )
+  }
+
+  async function spendFailureLife(nextAction) {
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const data = await api.failAttempt(token, {
+        caseId: 3,
+        difficulty: 'rookie',
+      })
+      setUser(data.user)
+      playSfx('lifeLost')
+      playSfx('caseFailed')
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      navigate('/play')
+    } catch (error) {
+      console.error('[progress] Case 3 failed attempt update failed', {
+        endpoint: '/progress/fail-attempt',
+        caseId: 3,
+        difficulty: 'rookie',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update lives.')
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  async function finishRookie(nextAction = 'end') {
+    if (!passed) {
+      spendFailureLife(nextAction === 'replay' ? 'replay' : 'continue')
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const unlockedBadge = BADGES.humanFirewallBeginner
+      const data = await api.completeCase(token, {
+        caseId: 3,
+        difficulty: 'rookie',
+        result: 'success',
+        badge: unlockedBadge,
+      })
+      setUser(data.user)
+      setBadge(unlockedBadge)
+      setPointsAwarded(data.pointsAwarded)
+      if (data.pointsAwarded > 0) {
+        playSfx('coins')
+        playSfx('badge')
+      }
+      playSfx('caseComplete')
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      setPhase('end')
+    } catch (error) {
+      console.error('[progress] Case 3 completion update failed', {
+        endpoint: '/progress/complete-case',
+        caseId: 3,
+        difficulty: 'rookie',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update case progress.')
+    } finally {
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  const activeQuestion = CASE3_KNOWLEDGE_CHECK[currentQuestion]
+  const selectedCheckAnswer = checkAnswers[currentQuestion]
+  const checkAnswered = selectedCheckAnswer !== null
+
+  return (
+    <div className="case-shell max-w-5xl mx-auto">
+      <div className="case-title-row">
+        <div>
+          <span className="font-pixel text-sw-pink text-xs">CASE 03 ROOKIE</span>
+          <h2 className="font-pixel text-sw-cyan text-sm md:text-base">
+            Friendly Faces
+          </h2>
+        </div>
+      </div>
+      {progressError && (
+        <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
+      )}
+
+      {phase === 'intro' && (
+        <section className="case-terminal ss-card scene-transition">
+          <div className="case-terminal-header">
+            <span>UNIT ZERO</span>
+            <span>WEEK 4 - 07:36</span>
+          </div>
+          <div className="case-os-bar">
+            <span>ROOKIE CASE - SOCIAL ENGINEERING</span>
+            <span>{internName.toLowerCase()}@unitzero.gov - ACTIVE</span>
+          </div>
+          <div className="case2-intro-grid">
+            <div className="case2-veteran-hero-post">
+              <div className="case2-social-window-bar">
+                <span>Secure Archive Corridor</span>
+                <span>Early arrival</span>
+              </div>
+              <img src={fillerImage} alt="" />
+              <div className="case2-veteran-post-copy">
+                <strong>Room A-13 access point</strong>
+                <span>Visitor badge detected near secure archive door</span>
+              </div>
+            </div>
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT ZOEY</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">Friendly Faces</h2>
+              <p>
+                Cadet, hacking is not always about code. Sometimes the easiest
+                way into a system is through a person.
+              </p>
+              <p className="text-sw-text3">
+                Today, you are the person. You know the office now. You know the
+                staff. That comfort is useful, and it can be dangerous.
+              </p>
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan self-start"
+                onClick={() => setPhase('scenario')}
+              >
+                Enter Corridor <IconArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {phase === 'scenario' && (
+        <section className="case2-board scene-transition">
+          <div className="case2-board-header">
+            <div>
+              <span className="font-pixel text-sw-pink text-xs">ARCHIVE DOOR A-13</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">Early Shift Encounter</h2>
+            </div>
+            <div className="case2-progress-chip">SECURE AREA</div>
+          </div>
+          <article className="case2-file">
+            <section className="case2-social-window">
+              <div className="case2-social-window-bar">
+                <span>Corridor camera</span>
+                <span>07:39</span>
+              </div>
+              <div className="case2-veteran-post-frame">
+                <img src={fillerImage} alt="" />
+                <div className="case2-veteran-post-copy">
+                  <strong>Mark waits outside the archive door.</strong>
+                  <span>He smiles like he belongs here.</span>
+                </div>
+              </div>
+            </section>
+            <div className="case2-message-list mt-3">
+              <div className="case2-message case2-post-message">
+                <div className="case2-avatar" aria-hidden="true">MK</div>
+                <div>
+                  <strong>Mark</strong>
+                  <p>
+                    Hey - you are the new intern, right? I am Mark. IT support.
+                    My badge is not scanning for some reason.
+                  </p>
+                </div>
+              </div>
+              <div className="case2-message case2-post-message">
+                <div className="case2-avatar" aria-hidden="true">MK</div>
+                <div>
+                  <strong>Mark</strong>
+                  <p>
+                    Could you just tap yours so I can get in? I need to fix a
+                    server issue before the morning shift.
+                  </p>
+                </div>
+              </div>
+            </div>
+            {!scenarioChoice ? (
+              <div className="case2-decision-row mt-4">
+                <button
+                  type="button"
+                  className="case2-decision-btn case2-flag-btn"
+                  onClick={() => chooseScenario('let-in')}
+                >
+                  Let Mark In
+                </button>
+                <button
+                  type="button"
+                  className="case2-decision-btn case2-dismiss-btn"
+                  onClick={() => chooseScenario('verify')}
+                >
+                  Refuse and Contact Supervisor
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className={passed ? 'success-banner' : 'breach-banner'}>
+                  {passed
+                    ? 'Access refused - supervisor contacted'
+                    : 'Door access granted'}
+                </div>
+                <button
+                  type="button"
+                  className="ss-btn ss-btn-cyan self-start"
+                  onClick={() => setPhase('consequence')}
+                >
+                  See Consequence <IconArrowRight size={16} />
+                </button>
+              </>
+            )}
+          </article>
+        </section>
+      )}
+
+      {phase === 'consequence' && (
+        <section className="case-debrief scene-transition">
+          <div className={passed ? 'success-banner' : 'breach-banner'}>
+            {passed ? 'VERIFICATION WORKED' : 'ARCHIVE BREACH'}
+          </div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT ZOEY</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                {passed ? 'That was not IT' : 'You let an attacker in'}
+              </h2>
+              {passed ? (
+                <p>
+                  The intern refuses. Agent Zoey arrives, asks for ID, and the
+                  man becomes nervous. Security intercepts him before he reaches
+                  the archive.
+                </p>
+              ) : (
+                <p>
+                  The archive door opens. Mark enters immediately, plugs a USB
+                  device into a workstation, and files begin copying.
+                </p>
+              )}
+              <blockquote className="zoey-quote">
+                {passed
+                  ? '"That was not IT. That was a social engineer testing our doors - and our people."'
+                  : '"Cadet. You did not let IT in. You let an attacker in."'}
+              </blockquote>
+              <blockquote className="zoey-quote">
+                "Social engineers do not force doors open. They get people to
+                open them for them."
+              </blockquote>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {CASE3_SOCIAL_ENGINEERING_SIGNS.slice(0, 5).map((point) => (
+                <article key={point.title} className="red-flag-card">
+                  <IconFlag size={18} />
+                  <div>
+                    <h3>{point.title}</h3>
+                    <p>{point.text}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start"
+              onClick={() => setPhase('training')}
+            >
+              Open Training <IconArrowRight size={16} />
+            </button>
+          </div>
+        </section>
+      )}
+
+      {phase === 'training' && (
+        <section className="case2-board scene-transition">
+          <div className="case2-board-header">
+            <div>
+              <span className="font-pixel text-sw-pink text-xs">UNIT ZERO TRAINING</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                What Is Social Engineering?
+              </h2>
+            </div>
+            <div className="case2-progress-chip">TRAINING</div>
+          </div>
+          <article className="case2-file">
+            <section className="case2-social-window">
+              <div className="case2-social-window-bar">
+                <span>Training visual</span>
+                <span>Human firewall</span>
+              </div>
+              <div className="case2-veteran-post-frame">
+                <img src={fillerImage} alt="" />
+                <div className="case2-veteran-post-copy">
+                  <strong>Attackers can hack people instead of systems.</strong>
+                  <span>Trust must be verified, not assumed.</span>
+                </div>
+              </div>
+            </section>
+            <div className="case2-ricky-panel mt-3">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT ZOEY</span>
+              <p>Social engineering is when attackers hack people instead of systems.</p>
+              <p className="text-sw-text2">
+                Social engineering is the use of manipulation, lies, pressure,
+                trust, authority, urgency, or psychological tricks to gain
+                access, information, or control.
+              </p>
+              <blockquote className="zoey-quote">
+                "They do not need to break the lock if they can convince someone
+                to open the door."
+              </blockquote>
+            </div>
+            <div className="case2-score-grid mt-3">
+              {CASE3_TRAINING_EXAMPLES.map((example) => (
+                <article key={example} className="red-flag-card">
+                  <IconFlag size={18} />
+                  <div>
+                    <h3>{example}</h3>
+                    <p>
+                      A small pressure point can make a helpful person skip a
+                      normal security check.
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start mt-3"
+              onClick={() => setPhase('check')}
+            >
+              Start Knowledge Check <IconArrowRight size={16} />
+            </button>
+          </article>
+        </section>
+      )}
+
+      {phase === 'check' && (
+        <section className="case-debrief scene-transition">
+          <div className="success-banner">SOCIAL ENGINEERING CHECK</div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="veteran-quiz-progress">
+              Question {currentQuestion + 1} / {CASE3_KNOWLEDGE_CHECK.length}
+            </div>
+            <article
+              className={`veteran-quiz-card ${
+                checkAnswered && selectedCheckAnswer !== activeQuestion.answer
+                  ? 'veteran-quiz-shake'
+                  : ''
+              }`}
+            >
+              <h3>{activeQuestion.question}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {activeQuestion.options.map((option, optionIndex) => {
+                  const selected = selectedCheckAnswer === optionIndex
+                  const isCorrect = activeQuestion.answer === optionIndex
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      className={`veteran-answer-btn ${
+                        selected ? 'veteran-answer-selected' : ''
+                      } ${checkAnswered && isCorrect ? 'veteran-answer-correct' : ''} ${
+                        checkAnswered && selected && !isCorrect
+                          ? 'veteran-answer-wrong'
+                          : ''
+                      }`}
+                      onClick={() => answerCheck(currentQuestion, optionIndex)}
+                      disabled={checkAnswered}
+                    >
+                      {option}
+                    </button>
+                  )
+                })}
+              </div>
+            </article>
+            {checkAnswered && (
+              <div
+                className={
+                  selectedCheckAnswer === activeQuestion.answer
+                    ? 'success-banner'
+                    : 'breach-banner'
+                }
+              >
+                {selectedCheckAnswer === activeQuestion.answer
+                  ? 'Correct.'
+                  : `Correct answer: ${activeQuestion.options[activeQuestion.answer]}`}
+              </div>
+            )}
+            {checkAnswered && (
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan self-start"
+                onClick={
+                  currentQuestion === CASE3_KNOWLEDGE_CHECK.length - 1
+                    ? () => setPhase('debrief')
+                    : () => setCurrentQuestion((value) => value + 1)
+                }
+              >
+                {currentQuestion === CASE3_KNOWLEDGE_CHECK.length - 1
+                  ? 'Finish Case Notes'
+                  : 'Next Question'}
+              </button>
+            )}
+          </div>
+        </section>
+      )}
+
+      {phase === 'debrief' && (
+        <section className="case-debrief scene-transition">
+          <div className={passed ? 'success-banner' : 'breach-banner'}>
+            {passed ? 'SOCIAL ENGINEERING BLOCKED' : 'SOCIAL ENGINEERING BREACH'}
+          </div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT ZOEY</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                Friendly Faces Debrief
+              </h2>
+              <p>
+                Being helpful is part of the job. Being helpful without
+                verification is how an attacker turns your kindness into access.
+              </p>
+              <p className="text-sw-text2">
+                Knowledge check score: {checkCorrect} / {CASE3_KNOWLEDGE_CHECK.length}.
+                The scenario choice determines this Rookie outcome.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {CASE3_SOCIAL_ENGINEERING_SIGNS.map((point) => (
+                <article key={point.title} className="red-flag-card">
+                  <IconFlag size={18} />
+                  <div>
+                    <h3>{point.title}</h3>
+                    <p>{point.text}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            {passed && (
+              <div className="badge-card">
+                <span>Badge unlocked</span>
+                <strong>HUMAN FIREWALL - BEGINNER</strong>
+              </div>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                className="ss-btn ss-btn-pink"
+                onClick={passed ? () => finishRookie('replay') : () => spendFailureLife('replay')}
+                disabled={resolvingDebrief}
+              >
+                Replay Scene
+              </button>
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan"
+                onClick={passed ? () => finishRookie('end') : () => spendFailureLife('continue')}
+                disabled={resolvingDebrief}
+              >
+                {passed ? 'Complete Rookie' : 'Return to Case Files'}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {phase === 'end' && (
+        <section className="ss-card p-6 flex flex-col gap-4">
+          <h2 className="font-pixel text-sw-cyan text-sm">Case 03 Rookie Complete</h2>
+          <p className="text-sw-text2">
+            Friendly Faces closed. Rookie reward secured.
+          </p>
+          <PixelBadgeCard badge={badge} pointsAwarded={pointsAwarded} />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button type="button" className="ss-btn ss-btn-cyan" onClick={() => navigate('/play')}>
+              Return to Case Files
+            </button>
+            <button
+              type="button"
+              className="ss-btn ss-btn-pink"
+              onClick={() => navigate('/case/3/veteran')}
+            >
+              Continue to Veteran Mode
+            </button>
+          </div>
+        </section>
+      )}
+    </div>
+  )
+}
+
 function LockedCase() {
   const navigate = useNavigate()
   return (
@@ -3624,6 +4234,7 @@ export default function Case() {
   if (numericCaseId === 2 && difficulty === 'rookie') return <Case2Rookie />
   if (numericCaseId === 2 && difficulty === 'veteran') return <Case2Veteran />
   if (numericCaseId === 2) return <FutureCase caseId={numericCaseId} />
+  if (numericCaseId === 3 && difficulty === 'rookie') return <Case3Rookie />
   if (numericCaseId !== 1) return <FutureCase caseId={numericCaseId} />
   if (difficulty === 'veteran') return <VeteranCase />
 
