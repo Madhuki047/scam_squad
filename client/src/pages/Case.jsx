@@ -810,6 +810,22 @@ const CASE3_KNOWLEDGE_CHECK = [
   },
 ]
 
+const CASE3_INTRO_DIALOGUE = [
+  "Cadet, hacking isn't always about code.",
+  'Sometimes the easiest way into a system is through a person.',
+  'You have been here for weeks now. You know the office. You know the staff.',
+  'And that is exactly when people become vulnerable.',
+  'Today, you are the person.',
+]
+
+const CASE3_MARK_DIALOGUE = [
+  'Hey - you are the new intern, right?',
+  'I am Mark. IT support.',
+  'My badge is not scanning.',
+  'Could you tap yours so I can get in?',
+  'I need to fix a server issue before the morning shift.',
+]
+
 function PixelPerson({ role, label, position = '' }) {
   return (
     <div className={`pixel-person pixel-${role} ${position}`}>
@@ -3605,6 +3621,8 @@ function Case3Rookie() {
   const navigate = useNavigate()
   const { user, token, setUser } = useAuth()
   const [phase, setPhase] = useState('intro')
+  const [introStep, setIntroStep] = useState(0)
+  const [markStep, setMarkStep] = useState(0)
   const [scenarioChoice, setScenarioChoice] = useState(null)
   const [checkAnswers, setCheckAnswers] = useState(
     () => CASE3_KNOWLEDGE_CHECK.map(() => null),
@@ -3625,6 +3643,8 @@ function Case3Rookie() {
 
   function restart() {
     setPhase('intro')
+    setIntroStep(0)
+    setMarkStep(0)
     setScenarioChoice(null)
     setCheckAnswers(CASE3_KNOWLEDGE_CHECK.map(() => null))
     setCurrentQuestion(0)
@@ -3749,129 +3769,156 @@ function Case3Rookie() {
       )}
 
       {phase === 'intro' && (
-        <section className="case-terminal ss-card scene-transition">
-          <div className="case-terminal-header">
+        <section className="case-scene scene-transition">
+          <div className="case-scene-top">
             <span>UNIT ZERO</span>
             <span>WEEK 4 - 07:36</span>
           </div>
-          <div className="case-os-bar">
-            <span>ROOKIE CASE - SOCIAL ENGINEERING</span>
-            <span>{internName.toLowerCase()}@unitzero.gov - ACTIVE</span>
-          </div>
-          <div className="case2-intro-grid">
-            <div className="case2-veteran-hero-post">
-              <div className="case2-social-window-bar">
-                <span>Secure Archive Corridor</span>
-                <span>Early arrival</span>
-              </div>
-              <img src={fillerImage} alt="" />
-              <div className="case2-veteran-post-copy">
-                <strong>Room A-13 access point</strong>
-                <span>Visitor badge detected near secure archive door</span>
-              </div>
+          <div className="case-office case3-briefing-office">
+            <div className="case-window case-window-left">
+              <span />
+              <span />
+              <span />
+              <span />
             </div>
-            <div className="case2-ricky-panel">
-              <span className="font-pixel text-sw-yellow text-xs">AGENT ZOEY</span>
-              <h2 className="font-pixel text-sw-cyan text-sm">Friendly Faces</h2>
-              <p>
-                Cadet, hacking is not always about code. Sometimes the easiest
-                way into a system is through a person.
-              </p>
-              <p className="text-sw-text3">
-                Today, you are the person. You know the office now. You know the
-                staff. That comfort is useful, and it can be dangerous.
-              </p>
-              <button
-                type="button"
-                className="ss-btn ss-btn-cyan self-start"
-                onClick={() => setPhase('scenario')}
-              >
-                Enter Corridor <IconArrowRight size={16} />
-              </button>
+            <div className="case-window case-window-right">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="unit-poster unit-poster-left">
+              CASE 03
+              <br />
+              THE INSIDER
+            </div>
+            <div className="unit-poster unit-poster-right">
+              SOCIAL
+              <br />
+              ENGINEERING
+            </div>
+            <div className="case3-zoey-station">
+              <PixelPerson role="zoey" label="AGENT ZOEY" />
+            </div>
+            <PixelPerson
+              role="intern"
+              label={`${internName} - YOU`}
+              position="pixel-intern-left"
+            />
+            <div className="case3-monitor-wall" aria-hidden="true">
+              <span>ARCHIVE A-13</span>
+              <strong>VISITOR WAITING</strong>
+            </div>
+            <div className="case-bubble case-bubble-jane case3-dialogue-bubble">
+              <span className="text-sw-yellow">Agent Zoey</span>
+              <p>{CASE3_INTRO_DIALOGUE[introStep]}</p>
             </div>
           </div>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan self-end"
+            onClick={() => {
+              if (introStep < CASE3_INTRO_DIALOGUE.length - 1) {
+                setIntroStep((value) => value + 1)
+                playSfx('click')
+                return
+              }
+              setPhase('scenario')
+            }}
+          >
+            {introStep === CASE3_INTRO_DIALOGUE.length - 1
+              ? 'Enter Corridor'
+              : 'Continue'}{' '}
+            <IconArrowRight size={16} />
+          </button>
         </section>
       )}
 
       {phase === 'scenario' && (
-        <section className="case2-board scene-transition">
-          <div className="case2-board-header">
-            <div>
-              <span className="font-pixel text-sw-pink text-xs">ARCHIVE DOOR A-13</span>
-              <h2 className="font-pixel text-sw-cyan text-sm">Early Shift Encounter</h2>
-            </div>
-            <div className="case2-progress-chip">SECURE AREA</div>
+        <section className="case-scene scene-transition">
+          <div className="case-scene-top">
+            <span>SECURE ARCHIVE CORRIDOR</span>
+            <span>07:39</span>
           </div>
-          <article className="case2-file">
-            <section className="case2-social-window">
-              <div className="case2-social-window-bar">
-                <span>Corridor camera</span>
-                <span>07:39</span>
-              </div>
-              <div className="case2-veteran-post-frame">
-                <img src={fillerImage} alt="" />
-                <div className="case2-veteran-post-copy">
-                  <strong>Mark waits outside the archive door.</strong>
-                  <span>He smiles like he belongs here.</span>
-                </div>
-              </div>
-            </section>
-            <div className="case2-message-list mt-3">
-              <div className="case2-message case2-post-message">
-                <div className="case2-avatar" aria-hidden="true">MK</div>
-                <div>
-                  <strong>Mark</strong>
-                  <p>
-                    Hey - you are the new intern, right? I am Mark. IT support.
-                    My badge is not scanning for some reason.
-                  </p>
-                </div>
-              </div>
-              <div className="case2-message case2-post-message">
-                <div className="case2-avatar" aria-hidden="true">MK</div>
-                <div>
-                  <strong>Mark</strong>
-                  <p>
-                    Could you just tap yours so I can get in? I need to fix a
-                    server issue before the morning shift.
-                  </p>
-                </div>
-              </div>
+          <div className="case-office case3-corridor-office">
+            <div className="case-window case-window-left case3-door-panel">
+              <span />
+              <span />
+              <span />
+              <span />
             </div>
-            {!scenarioChoice ? (
-              <div className="case2-decision-row mt-4">
-                <button
-                  type="button"
-                  className="case2-decision-btn case2-flag-btn"
-                  onClick={() => chooseScenario('let-in')}
-                >
-                  Let Mark In
-                </button>
-                <button
-                  type="button"
-                  className="case2-decision-btn case2-dismiss-btn"
-                  onClick={() => chooseScenario('verify')}
-                >
-                  Refuse and Contact Supervisor
-                </button>
+            <div className="unit-poster unit-poster-right">
+              ARCHIVE
+              <br />
+              A-13
+            </div>
+            <div className="case3-filler-frame" aria-hidden="true">
+              <img src={fillerImage} alt="" />
+              <span>secure archive preview</span>
+            </div>
+            <PixelPerson
+              role="intern"
+              label={`${internName} - YOU`}
+              position="pixel-intern-left"
+            />
+            <PixelPerson
+              role="jane"
+              label="MARK - VISITOR BADGE"
+              position="case3-mark-person"
+            />
+            {!scenarioChoice && (
+              <div className="case-bubble case-bubble-jane case3-mark-bubble">
+                <span className="text-sw-yellow">Mark</span>
+                <p>{CASE3_MARK_DIALOGUE[markStep]}</p>
               </div>
-            ) : (
-              <>
-                <div className={passed ? 'success-banner' : 'breach-banner'}>
-                  {passed
-                    ? 'Access refused - supervisor contacted'
-                    : 'Door access granted'}
-                </div>
-                <button
-                  type="button"
-                  className="ss-btn ss-btn-cyan self-start"
-                  onClick={() => setPhase('consequence')}
-                >
-                  See Consequence <IconArrowRight size={16} />
-                </button>
-              </>
             )}
-          </article>
+            {scenarioChoice && (
+              <div className={passed ? 'success-banner case3-choice-banner' : 'breach-banner case3-choice-banner'}>
+                {passed
+                  ? 'Access refused - supervisor contacted'
+                  : 'Door access granted'}
+              </div>
+            )}
+          </div>
+          {!scenarioChoice && markStep < CASE3_MARK_DIALOGUE.length - 1 && (
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-end"
+              onClick={() => {
+                setMarkStep((value) => value + 1)
+                playSfx('click')
+              }}
+            >
+              Continue <IconArrowRight size={16} />
+            </button>
+          )}
+          {!scenarioChoice && markStep === CASE3_MARK_DIALOGUE.length - 1 && (
+            <div className="case2-decision-row">
+              <button
+                type="button"
+                className="case2-decision-btn case2-flag-btn"
+                onClick={() => chooseScenario('let-in')}
+              >
+                Let Mark In
+              </button>
+              <button
+                type="button"
+                className="case2-decision-btn case2-dismiss-btn"
+                onClick={() => chooseScenario('verify')}
+              >
+                Refuse Entry And Call Supervisor
+              </button>
+            </div>
+          )}
+          {scenarioChoice && (
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-end"
+              onClick={() => setPhase('consequence')}
+            >
+              See Consequence <IconArrowRight size={16} />
+            </button>
+          )}
         </section>
       )}
 
