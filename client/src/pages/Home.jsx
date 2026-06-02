@@ -100,6 +100,16 @@ function getHomeAssignment(user) {
       variant: 'network',
     }
   }
+  if (!isCaseModeComplete(user, 2, 'veteran')) {
+    return {
+      to: '/case/2/veteran',
+      caseLabel: 'CASE 02',
+      title: 'CONTINUE CASE 02',
+      monitorTitle: 'THE PILE-ON',
+      subtitle: 'The Network - veteran pile-on investigation',
+      variant: 'network',
+    }
+  }
   return {
     to: '/play',
     caseLabel: 'CASE FILES',

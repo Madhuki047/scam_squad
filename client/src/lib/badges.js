@@ -23,6 +23,12 @@ export const BADGES = {
     message: 'You spotted cyberbullying patterns beyond the obvious insults.',
     icon: 'eye',
   },
+  digitalDefenderLevel2: {
+    id: 'digital-defender-level-2',
+    name: 'Digital Defender — Level 2',
+    message: 'You traced accountability through a viral pile-on.',
+    icon: 'shield',
+  },
 }
 
 export const BADGE_CATALOG = [
@@ -36,6 +42,7 @@ export const BADGE_CATALOG = [
   BADGES.hookedOnce,
   BADGES.burnedTwice,
   BADGES.patternBeginner,
+  BADGES.digitalDefenderLevel2,
   { id: 'night-owl', name: 'Night Owl' },
   { id: 'perfect-run', name: 'Perfect Run' },
   { id: 'mentor', name: 'Mentor' },

@@ -14,6 +14,7 @@ import threadImage5 from '../assets/case2/thread5.jpeg'
 import threadImage6 from '../assets/case2/thread6.jpeg'
 import threadImage7 from '../assets/case2/thread7.jpeg'
 import threadImage8 from '../assets/case2/thread8.jpeg'
+import fillerImage from '../assets/filler.jpg'
 
 const INTRO_STEPS = [
   {
@@ -450,6 +451,277 @@ const CASE2_TEACHING_POINTS = [
 
 const CASE2_PASS_THRESHOLD = 6
 const CASE2_DECISION_REWARD = 10
+const CASE2_VETERAN_PASS_THRESHOLD = 5
+
+const CASE2_VETERAN_EVIDENCE = [
+  {
+    id: 'original-video',
+    label: 'Evidence 01',
+    title: 'Original video',
+    source: 'GlowLoop video post',
+    time: 'Day 1 - 16:12',
+    handle: '@aaron.codes',
+    caption: 'I think the phone policy should give students a say.',
+    stat: '32 views - 4 comments',
+    body:
+      'Aaron gives a calm opinion about a school policy. No target, no insult, no pile-on.',
+    severity: 'Normal post',
+  },
+  {
+    id: 'first-reshare',
+    label: 'Evidence 02',
+    title: 'First reshare',
+    source: 'Classmate repost',
+    time: 'Day 1 - 18:40',
+    handle: '@jayloop',
+    caption: 'this kid 💀',
+    stat: '214 shares - comments accelerating',
+    body:
+      'The repost turns Aaron into the joke and gives other people a target.',
+    severity: 'Escalation start',
+  },
+  {
+    id: 'viral-spread',
+    label: 'Evidence 03',
+    title: 'Viral spread',
+    source: 'Public trend feed',
+    time: 'Day 2 - 09:05',
+    handle: '#policykid',
+    caption: 'Most replies mock Aaron. A few users tell people to stop.',
+    stat: '1.8k comments - 620 reshares',
+    body:
+      'People who do not know Aaron still add pressure when they join the mockery.',
+    severity: 'Scale harm',
+  },
+  {
+    id: 'private-dm',
+    label: 'Evidence 04',
+    title: 'Private DM screenshot',
+    source: 'Screenshot posted publicly',
+    time: 'Day 2 - 20:17',
+    handle: '@jayloop',
+    caption: 'Aaron: "Please make it stop."',
+    stat: 'Reposted with laughing emojis',
+    body:
+      'Aaron asks privately for help. The message is screenshotted and turned into entertainment.',
+    severity: 'Worst act',
+    critical: true,
+  },
+  {
+    id: 'meme-threads',
+    label: 'Evidence 05',
+    title: 'Meme threads',
+    source: 'Edit and caption posts',
+    time: 'Day 3 - 11:32',
+    handle: '#policykid edits',
+    caption: 'Jokes, captions, edits, and reaction clips keep spreading.',
+    stat: 'Hundreds of anonymous contributors',
+    body:
+      'Meme creators may feel distant from Aaron, but their posts keep the harm alive.',
+    severity: 'Distributed harm',
+  },
+]
+
+const CASE2_VETERAN_JUDGMENTS = [
+  {
+    id: 'original-video',
+    question: 'Is Aaron\'s original video harmful?',
+    answer: 'no',
+    options: [
+      { value: 'yes', label: 'Yes, posting an opinion caused the problem.' },
+      { value: 'no', label: 'No, it is harmless criticism of a policy.' },
+    ],
+    explanation:
+      'The original video is not bullying. Aaron expresses an opinion without targeting anyone.',
+  },
+  {
+    id: 'first-resharer',
+    question: 'Is the first resharer responsible for escalation?',
+    answer: 'yes',
+    options: [
+      { value: 'yes', label: 'Yes, the repost frames Aaron as a joke.' },
+      { value: 'no', label: 'No, only later commenters are responsible.' },
+    ],
+    explanation:
+      'The first reshare helps turn a normal post into a target for mockery.',
+  },
+  {
+    id: 'strangers',
+    question: 'Are strangers responsible when they join the pile-on?',
+    answer: 'yes',
+    options: [
+      { value: 'yes', label: 'Yes, distance does not remove accountability.' },
+      { value: 'no', label: 'No, they do not personally know Aaron.' },
+    ],
+    explanation:
+      'Strangers can still cause real harm. Anonymous distance does not make the impact disappear.',
+  },
+  {
+    id: 'meme-creators',
+    question: 'Are meme creators responsible for keeping the harm going?',
+    answer: 'yes',
+    options: [
+      { value: 'yes', label: 'Yes, memes can amplify bullying.' },
+      { value: 'no', label: 'No, memes are automatically harmless.' },
+    ],
+    explanation:
+      'A meme is not harmless just because it is framed as a joke. It can extend the pile-on.',
+  },
+  {
+    id: 'private-plea',
+    question: 'Is sharing Aaron\'s private plea a serious violation?',
+    answer: 'yes',
+    options: [
+      { value: 'yes', label: 'Yes, and it is the cruellest act in the file.' },
+      { value: 'no', label: 'No, public jokes are worse than private screenshots.' },
+    ],
+    explanation:
+      'The private screenshot is the worst moment. Aaron reached out for help and someone turned that fear into entertainment.',
+    critical: true,
+  },
+  {
+    id: 'bystanders',
+    question: 'Did bystanders escalate or de-escalate the situation?',
+    answer: 'both',
+    options: [
+      { value: 'escalate', label: 'They only escalated it.' },
+      { value: 'de-escalate', label: 'They only de-escalated it.' },
+      { value: 'both', label: 'They could do either, depending on their actions.' },
+    ],
+    explanation:
+      'Bystanders can pile on, share, stay silent, defend, report, or ask people to stop.',
+  },
+]
+
+const CASE2_VETERAN_TEACHING_POINTS = [
+  {
+    title: 'Viral pile-ons cause harm',
+    text: 'Scale changes impact. Hundreds of small jokes can feel like a single attack that never ends.',
+  },
+  {
+    title: 'Strangers are accountable',
+    text: 'Not knowing Aaron does not erase responsibility for joining public humiliation.',
+  },
+  {
+    title: 'Private messages stay private',
+    text: 'Sharing Aaron\'s plea after he asked for help is a severe violation.',
+  },
+  {
+    title: 'Anonymity is not immunity',
+    text: 'Online distance can hide a person from consequences, but it does not remove the harm.',
+  },
+  {
+    title: 'Bystanders change outcomes',
+    text: 'A bystander can escalate with a share or de-escalate by defending, reporting, or refusing to join.',
+  },
+  {
+    title: 'Intent does not erase impact',
+    text: 'A thousand small actions can crush someone just as much as one big one.',
+  },
+]
+
+const CASE2_VETERAN_QUIZ = [
+  {
+    question: 'What makes a viral pile-on harmful?',
+    options: [
+      'Only one person is involved.',
+      'Many people repeatedly target or mock the same person.',
+      'The original post always deserves punishment.',
+      'It only happens in private chats.',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'Why can strangers be responsible for Aaron\'s harm?',
+    options: [
+      'They helped amplify the mockery even without knowing him.',
+      'They are responsible only if they go to his school.',
+      'They cannot be responsible because they are strangers.',
+      'They are responsible only if Aaron replies to them.',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'Why is sharing Aaron\'s private DM severe?',
+    options: [
+      'It proves Aaron started the pile-on.',
+      'It exposes a vulnerable plea and turns it into entertainment.',
+      'It is harmless if the screenshot is funny.',
+      'It matters less than public comments.',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'Why is "just a meme" not always harmless?',
+    options: [
+      'Memes can extend humiliation and invite more people to join.',
+      'All memes are cyberbullying.',
+      'Memes only matter if they include a real name.',
+      'Memes disappear immediately online.',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'How can bystanders escalate harm?',
+    options: [
+      'By reporting the abuse.',
+      'By asking others to stop.',
+      'By sharing, liking, or adding jokes to the pile-on.',
+      'By checking on Aaron privately.',
+    ],
+    answer: 2,
+  },
+  {
+    question: 'What does impact vs intent mean here?',
+    options: [
+      'Good intent always cancels harm.',
+      'Only the first poster\'s intent matters.',
+      'A joke can still hurt when it contributes to a pile-on.',
+      'Impact is irrelevant online.',
+    ],
+    answer: 2,
+  },
+  {
+    question: 'What does online anonymity change?',
+    options: [
+      'It removes accountability.',
+      'It can hide identity, but it does not remove responsibility.',
+      'It makes every post harmless.',
+      'It means only classmates can bully.',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'Why does Aaron\'s private plea matter most?',
+    options: [
+      'It was the moment he needed someone to step in.',
+      'It made the original video offensive.',
+      'It proved the memes were correct.',
+      'It was less important because it was private.',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'What is the difference between criticism and cyberbullying?',
+    options: [
+      'Criticism targets an idea; cyberbullying targets and harms a person.',
+      'Criticism is always illegal.',
+      'Cyberbullying only happens between friends.',
+      'There is no difference online.',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'What is a good way to de-escalate a viral bullying situation?',
+    options: [
+      'Make a new caption so everyone sees it.',
+      'Screenshot private messages for proof of drama.',
+      'Refuse to share, report abuse, support the target, and ask others to stop.',
+      'Tell the target to ignore everyone.',
+    ],
+    answer: 2,
+  },
+]
 
 function PixelPerson({ role, label, position = '' }) {
   return (
@@ -2277,6 +2549,719 @@ function Case2EndScreen({ badge, pointsAwarded, correctCount, onReturn, onVetera
   )
 }
 
+function Case2VeteranIntro({ internName, onNext }) {
+  return (
+    <section className="case-terminal ss-card scene-transition">
+      <div className="case-terminal-header">
+        <span>UNIT ZERO</span>
+        <span>DAY 16 - 08:44</span>
+      </div>
+      <div className="case-os-bar">
+        <span>VETERAN CASE - VIRAL PILE-ON</span>
+        <span>{internName.toLowerCase()}@unitzero.gov - ACTIVE</span>
+      </div>
+      <div className="case2-intro-grid">
+        <div className="case2-veteran-hero-post">
+          <div className="case2-social-window-bar">
+            <span>GlowLoop Video</span>
+            <span>@aaron.codes</span>
+          </div>
+          <img src={fillerImage} alt="" />
+          <div className="case2-veteran-post-copy">
+            <strong>I think the phone policy should give students a say.</strong>
+            <span>32 views - normal school policy opinion</span>
+          </div>
+        </div>
+        <div className="case2-ricky-panel">
+          <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+          <h2 className="font-pixel text-sw-cyan text-sm">The Pile-On</h2>
+          <p>
+            Aaron is sixteen. He posted a harmless video about a school policy.
+            Within forty-eight hours, strangers had turned him into a meme.
+          </p>
+          <p className="text-sw-text3">
+            Review the evidence, then decide who escalated the harm. Watch for
+            the moment most people walk past.
+          </p>
+          <button type="button" className="ss-btn ss-btn-cyan self-start" onClick={onNext}>
+            Open Evidence <IconArrowRight size={16} />
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Case2VeteranEvidence({ activeIndex, onSelect, onNext }) {
+  const activeEvidence = CASE2_VETERAN_EVIDENCE[activeIndex]
+
+  return (
+    <section className="case2-board scene-transition">
+      <div className="case2-board-header">
+        <div>
+          <span className="font-pixel text-sw-pink text-xs">GLOWLOOP INCIDENT FILE</span>
+          <h2 className="font-pixel text-sw-cyan text-sm">Evidence Review</h2>
+        </div>
+        <div className="case2-progress-chip">
+          {activeIndex + 1} / {CASE2_VETERAN_EVIDENCE.length}
+        </div>
+      </div>
+      <div className="case2-briefing-strip">
+        <strong>Agent Ricky:</strong> The question is not just who started it.
+        It is who kept it moving.
+      </div>
+
+      <div className="case2-thread-layout">
+        <aside className="case2-queue-panel">
+          <div className="case2-queue-title">
+            <span>EVIDENCE</span>
+            <strong>{CASE2_VETERAN_EVIDENCE.length}</strong>
+          </div>
+          {CASE2_VETERAN_EVIDENCE.map((item, index) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`case2-queue-item ${index === activeIndex ? 'active' : ''} ${
+                item.critical ? 'case2-veteran-critical-link' : ''
+              }`}
+              onClick={() => onSelect(index)}
+            >
+              <span>{item.label}</span>
+              <strong>{item.title}</strong>
+              <em>{item.severity}</em>
+            </button>
+          ))}
+        </aside>
+
+        <article
+          className={`case2-file case2-veteran-evidence-card ${
+            activeEvidence.critical ? 'case2-veteran-critical' : ''
+          }`}
+        >
+          <div className="case2-file-top">
+            <div>
+              <span className="font-pixel text-sw-pink text-xs">
+                {activeEvidence.source}
+              </span>
+              <h3>{activeEvidence.title}</h3>
+              <p>{activeEvidence.time} - {activeEvidence.severity}</p>
+            </div>
+          </div>
+          <section className="case2-social-window">
+            <div className="case2-social-window-bar">
+              <span>GlowLoop</span>
+              <span>{activeEvidence.handle}</span>
+            </div>
+            <div className="case2-veteran-post-frame">
+              <img src={fillerImage} alt="" />
+              <div className="case2-veteran-post-copy">
+                <strong>{activeEvidence.caption}</strong>
+                <span>{activeEvidence.stat}</span>
+              </div>
+            </div>
+          </section>
+          <p className="case2-thread-hint">{activeEvidence.body}</p>
+          {activeEvidence.critical && (
+            <blockquote className="zoey-quote case2-veteran-dm-callout">
+              This is the key evidence. Aaron reached out privately, and that
+              vulnerable moment was posted for laughs.
+            </blockquote>
+          )}
+          <button type="button" className="ss-btn ss-btn-cyan self-start" onClick={onNext}>
+            {activeIndex === CASE2_VETERAN_EVIDENCE.length - 1
+              ? 'Begin Judgment Calls'
+              : 'Next Evidence'}{' '}
+            <IconArrowRight size={16} />
+          </button>
+        </article>
+      </div>
+    </section>
+  )
+}
+
+function Case2VeteranJudgment({
+  answers,
+  currentIndex,
+  onAnswer,
+  onNext,
+  onSubmit,
+}) {
+  const judgment = CASE2_VETERAN_JUDGMENTS[currentIndex]
+  const selectedAnswer = answers[judgment.id] || null
+  const answered = Boolean(selectedAnswer)
+  const selectedCorrect = selectedAnswer === judgment.answer
+  const isLast = currentIndex === CASE2_VETERAN_JUDGMENTS.length - 1
+
+  return (
+    <section className="case2-board scene-transition">
+      <div className="case2-board-header">
+        <div>
+          <span className="font-pixel text-sw-pink text-xs">RESPONSIBILITY MATRIX</span>
+          <h2 className="font-pixel text-sw-cyan text-sm">Judgment Calls</h2>
+        </div>
+        <div className="case2-progress-chip">
+          {currentIndex + 1} / {CASE2_VETERAN_JUDGMENTS.length}
+        </div>
+      </div>
+      <article
+        className={`veteran-quiz-card veteran-quiz-focus ${
+          judgment.critical ? 'case2-veteran-critical' : ''
+        } ${answered && !selectedCorrect ? 'veteran-quiz-shake' : ''}`}
+      >
+        <h3>{judgment.question}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {judgment.options.map((option) => {
+            const selected = selectedAnswer === option.value
+            const isCorrect = judgment.answer === option.value
+            return (
+              <button
+                key={option.value}
+                type="button"
+                className={`veteran-answer-btn ${
+                  selected ? 'veteran-answer-selected' : ''
+                } ${answered && isCorrect ? 'veteran-answer-correct' : ''} ${
+                  answered && selected && !isCorrect ? 'veteran-answer-wrong' : ''
+                }`}
+                onClick={() => onAnswer(judgment.id, option.value)}
+                disabled={answered}
+              >
+                {option.label}
+              </button>
+            )
+          })}
+        </div>
+        {answered && (
+          <div className={selectedCorrect ? 'success-banner' : 'breach-banner'}>
+            {selectedCorrect ? 'Correct judgment.' : 'Not this time.'}{' '}
+            {judgment.explanation}
+          </div>
+        )}
+        {answered && (
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan self-start"
+            onClick={isLast ? onSubmit : onNext}
+          >
+            {isLast ? 'Submit Case Judgment' : 'Next Judgment'}{' '}
+            <IconArrowRight size={16} />
+          </button>
+        )}
+      </article>
+    </section>
+  )
+}
+
+function Case2VeteranQuiz({
+  answers,
+  currentQuestionIndex,
+  onAnswer,
+  onNextQuestion,
+  onSubmit,
+  submitted,
+}) {
+  const correct = answers.reduce(
+    (count, answer, index) =>
+      count + (answer === CASE2_VETERAN_QUIZ[index].answer ? 1 : 0),
+    0,
+  )
+  const currentQuestion = CASE2_VETERAN_QUIZ[currentQuestionIndex]
+  const selectedAnswer = answers[currentQuestionIndex]
+  const answered = selectedAnswer !== null
+  const selectedCorrect = selectedAnswer === currentQuestion.answer
+  const isLastQuestion = currentQuestionIndex === CASE2_VETERAN_QUIZ.length - 1
+  const passed = correct > CASE2_VETERAN_PASS_THRESHOLD
+
+  return (
+    <section className="case-debrief scene-transition">
+      <div className="success-banner">FINAL CERTIFICATION - DIGITAL DEFENDER</div>
+      <div className="ss-card p-5 flex flex-col gap-4">
+        <h2 className="font-pixel text-sw-cyan text-sm">
+          Case 02 final certification
+        </h2>
+        <p className="text-sw-text2">
+          Each correct answer is worth 10 coins. Passing requires more than 50%
+          correct, so 6 or more answers closes the Veteran file.
+        </p>
+        {!submitted ? (
+          <>
+            <div className="veteran-quiz-progress">
+              Question {currentQuestionIndex + 1} / {CASE2_VETERAN_QUIZ.length}
+            </div>
+            <article
+              className={`veteran-quiz-card veteran-quiz-focus ${
+                answered && !selectedCorrect ? 'veteran-quiz-shake' : ''
+              }`}
+            >
+              <h3>{currentQuestion.question}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {currentQuestion.options.map((option, optionIndex) => {
+                  const selected = selectedAnswer === optionIndex
+                  const isCorrect = currentQuestion.answer === optionIndex
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      className={`veteran-answer-btn ${
+                        selected ? 'veteran-answer-selected' : ''
+                      } ${
+                        answered && isCorrect ? 'veteran-answer-correct' : ''
+                      } ${
+                        answered && selected && !isCorrect
+                          ? 'veteran-answer-wrong'
+                          : ''
+                      }`}
+                      onClick={() => onAnswer(currentQuestionIndex, optionIndex)}
+                      disabled={answered}
+                    >
+                      {option}
+                    </button>
+                  )
+                })}
+              </div>
+            </article>
+            {answered && (
+              <div className={selectedCorrect ? 'success-banner' : 'breach-banner'}>
+                {selectedCorrect
+                  ? 'Correct. +10 quiz coins secured.'
+                  : `Correct answer: ${
+                      currentQuestion.options[currentQuestion.answer]
+                    }`}
+              </div>
+            )}
+            {answered && (
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan self-start"
+                onClick={isLastQuestion ? onSubmit : onNextQuestion}
+              >
+                {isLastQuestion ? 'View results' : 'Next Question'}
+              </button>
+            )}
+          </>
+        ) : (
+          <>
+            <div className={passed ? 'success-banner' : 'breach-banner'}>
+              {passed ? 'Certification passed' : 'Certification failed'}
+            </div>
+            <div className="veteran-results-grid">
+              <div>
+                <span>Correct</span>
+                <strong>{correct} / 10</strong>
+              </div>
+              <div>
+                <span>Quiz coins</span>
+                <strong>{correct * 10}</strong>
+              </div>
+              <div>
+                <span>Status</span>
+                <strong>{passed ? 'Case can close' : 'Replay required'}</strong>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start"
+              onClick={onSubmit}
+            >
+              Continue debrief
+            </button>
+          </>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function Case2VeteranDebrief({
+  judgmentCorrect,
+  privatePleaCorrect,
+  fieldPassed,
+  quizCorrect,
+  quizSubmitted,
+  route,
+  onReplay,
+  onContinue,
+  busy,
+}) {
+  const quizPassed = quizSubmitted && quizCorrect > CASE2_VETERAN_PASS_THRESHOLD
+  const passed = fieldPassed && quizPassed && route !== 'quizFailed'
+
+  return (
+    <section className="case-debrief scene-transition">
+      <div className={passed ? 'success-banner' : 'breach-banner'}>
+        {passed ? 'CASE 02 VETERAN SECURED' : 'PILE-ON REVIEW FAILED'}
+      </div>
+      <div className="ss-card p-5 flex flex-col gap-4">
+        <div className="case2-ricky-panel">
+          <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+          <h2 className="font-pixel text-sw-cyan text-sm">The part people miss</h2>
+          <p>
+            Intent does not erase impact. A thousand small actions can crush
+            someone just as much as one big one.
+          </p>
+          <blockquote className="zoey-quote case2-veteran-dm-callout">
+            "That screenshot of him asking for help? That is not collateral
+            damage. That is the cruellest thing in this whole file. Remember it.
+            Because in every bullying case you will ever work, there is a moment
+            like that - and it is usually the one people walk past."
+          </blockquote>
+          <blockquote className="zoey-quote">
+            "That moment - when he reached out - that is when he needed someone
+            to step in. Instead, they turned his fear into entertainment. That is
+            the cruelty people overlook."
+          </blockquote>
+        </div>
+        <div className="veteran-results-grid">
+          <div>
+            <span>Judgments</span>
+            <strong>{judgmentCorrect} / {CASE2_VETERAN_JUDGMENTS.length}</strong>
+          </div>
+          <div>
+            <span>Private plea</span>
+            <strong>{privatePleaCorrect ? 'Identified' : 'Missed'}</strong>
+          </div>
+          <div>
+            <span>Quiz</span>
+            <strong>{quizCorrect} / 10</strong>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {CASE2_VETERAN_TEACHING_POINTS.map((point) => (
+            <article key={point.title} className="red-flag-card">
+              <IconFlag size={18} />
+              <div>
+                <h3>{point.title}</h3>
+                <p>{point.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+        {passed && (
+          <div className="badge-card">
+            <span>Badge unlocked</span>
+            <strong>DIGITAL DEFENDER - LEVEL 2</strong>
+          </div>
+        )}
+        {!fieldPassed && (
+          <p className="text-sw-text3 text-sm">
+            Replay the evidence review. The private DM screenshot must be
+            treated as the most serious act in the case.
+          </p>
+        )}
+        {route === 'quizFailed' && (
+          <p className="text-sw-text3 text-sm">
+            The final certification score was below the required 6 / 10.
+          </p>
+        )}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            type="button"
+            className="ss-btn ss-btn-pink"
+            onClick={onReplay}
+            disabled={busy}
+          >
+            Replay Veteran
+          </button>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan"
+            onClick={onContinue}
+            disabled={busy}
+          >
+            Continue to Case Files
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Case2VeteranEndScreen({ badge, pointsAwarded, quizCorrect, onReturn, onReplay }) {
+  return (
+    <section className="ss-card p-6 flex flex-col gap-4">
+      <h2 className="font-pixel text-sw-cyan text-sm">Case 02 Veteran Complete</h2>
+      <p className="text-sw-text2">
+        The Pile-On closed. Quiz score: {quizCorrect}/10.
+      </p>
+      <PixelBadgeCard badge={badge} pointsAwarded={pointsAwarded} />
+      <div className="badge-card">
+        <span>Field guide unlocked</span>
+        <strong>DIGITAL DEFENDER - LEVEL 2</strong>
+      </div>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <button type="button" className="ss-btn ss-btn-cyan" onClick={onReturn}>
+          Return to Case Files
+        </button>
+        <button type="button" className="ss-btn ss-btn-pink" onClick={onReplay}>
+          Replay Veteran
+        </button>
+      </div>
+    </section>
+  )
+}
+
+function Case2Veteran() {
+  const navigate = useNavigate()
+  const { user, token, setUser } = useAuth()
+  const [phase, setPhase] = useState('intro')
+  const [activeEvidenceIndex, setActiveEvidenceIndex] = useState(0)
+  const [judgmentAnswers, setJudgmentAnswers] = useState({})
+  const [currentJudgmentIndex, setCurrentJudgmentIndex] = useState(0)
+  const [route, setRoute] = useState(null)
+  const [quizAnswers, setQuizAnswers] = useState(
+    () => CASE2_VETERAN_QUIZ.map(() => null),
+  )
+  const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0)
+  const [quizSubmitted, setQuizSubmitted] = useState(false)
+  const [badge, setBadge] = useState(null)
+  const [pointsAwarded, setPointsAwarded] = useState(0)
+  const [progressError, setProgressError] = useState('')
+  const [resolvingDebrief, setResolvingDebrief] = useState(false)
+  const resolvingRef = useRef(false)
+  const internName = user?.username || 'Nova'
+  const judgmentCorrect = CASE2_VETERAN_JUDGMENTS.reduce(
+    (count, judgment) =>
+      count + (judgmentAnswers[judgment.id] === judgment.answer ? 1 : 0),
+    0,
+  )
+  const privatePleaCorrect =
+    judgmentAnswers['private-plea'] ===
+    CASE2_VETERAN_JUDGMENTS.find((item) => item.id === 'private-plea')?.answer
+  const fieldPassed = judgmentCorrect >= 5 && privatePleaCorrect
+  const quizCorrect = quizAnswers.reduce(
+    (count, answer, index) =>
+      count + (answer === CASE2_VETERAN_QUIZ[index].answer ? 1 : 0),
+    0,
+  )
+  const quizPassed = quizSubmitted && quizCorrect > CASE2_VETERAN_PASS_THRESHOLD
+  const passedVeteran = fieldPassed && quizPassed && route !== 'quizFailed'
+
+  function restart() {
+    setPhase('intro')
+    setActiveEvidenceIndex(0)
+    setJudgmentAnswers({})
+    setCurrentJudgmentIndex(0)
+    setRoute(null)
+    setQuizAnswers(CASE2_VETERAN_QUIZ.map(() => null))
+    setCurrentQuizQuestion(0)
+    setQuizSubmitted(false)
+    setBadge(null)
+    setPointsAwarded(0)
+    setProgressError('')
+    setResolvingDebrief(false)
+    resolvingRef.current = false
+  }
+
+  async function spendFailureLife(nextAction) {
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const data = await api.failAttempt(token, {
+        caseId: 2,
+        difficulty: 'veteran',
+      })
+      setUser(data.user)
+      playSfx('lifeLost')
+      playSfx('caseFailed')
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      navigate('/play')
+    } catch (error) {
+      console.error('[progress] Case 2 Veteran failed attempt update failed', {
+        endpoint: '/progress/fail-attempt',
+        caseId: 2,
+        difficulty: 'veteran',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update lives.')
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  async function finishVeteran(nextAction = 'end') {
+    if (!passedVeteran) {
+      spendFailureLife(nextAction === 'replay' ? 'replay' : 'continue')
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const unlockedBadge = BADGES.digitalDefenderLevel2
+      const data = await api.completeCase(token, {
+        caseId: 2,
+        difficulty: 'veteran',
+        result: 'success',
+        badge: unlockedBadge,
+        bonusPoints: quizCorrect * 10,
+      })
+      setUser(data.user)
+      setBadge(unlockedBadge)
+      setPointsAwarded(data.pointsAwarded)
+      if (data.pointsAwarded > 0) {
+        playSfx('coins')
+        playSfx('badge')
+      }
+      playSfx('caseComplete')
+      if (nextAction === 'caseFiles') {
+        navigate('/play')
+        return
+      }
+      setPhase('end')
+    } catch (error) {
+      console.error('[progress] Case 2 Veteran completion update failed', {
+        endpoint: '/progress/complete-case',
+        caseId: 2,
+        difficulty: 'veteran',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update case progress.')
+    } finally {
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  function nextEvidence() {
+    if (activeEvidenceIndex < CASE2_VETERAN_EVIDENCE.length - 1) {
+      setActiveEvidenceIndex((value) => value + 1)
+      playSfx('click')
+      return
+    }
+    setPhase('judgment')
+  }
+
+  function answerJudgment(judgmentId, value) {
+    if (judgmentAnswers[judgmentId]) return
+    const judgment = CASE2_VETERAN_JUDGMENTS.find((item) => item.id === judgmentId)
+    setJudgmentAnswers((current) => ({ ...current, [judgmentId]: value }))
+    playSfx(value === judgment?.answer ? 'correct' : 'wrong')
+  }
+
+  function nextJudgment() {
+    setCurrentJudgmentIndex((value) =>
+      Math.min(value + 1, CASE2_VETERAN_JUDGMENTS.length - 1),
+    )
+  }
+
+  function submitJudgments() {
+    playSfx(fieldPassed ? 'correct' : 'wrong')
+    if (!fieldPassed) setRoute('fieldFailed')
+    setPhase(fieldPassed ? 'quiz' : 'debrief')
+  }
+
+  function answerQuiz(questionIndex, optionIndex) {
+    if (quizAnswers[questionIndex] !== null) return
+    setQuizAnswers((current) =>
+      current.map((answer, index) =>
+        index === questionIndex ? optionIndex : answer,
+      ),
+    )
+    playSfx(
+      optionIndex === CASE2_VETERAN_QUIZ[questionIndex].answer ? 'correct' : 'wrong',
+    )
+  }
+
+  function nextQuizQuestion() {
+    setCurrentQuizQuestion((value) =>
+      Math.min(value + 1, CASE2_VETERAN_QUIZ.length - 1),
+    )
+  }
+
+  function submitQuiz() {
+    if (!quizSubmitted) {
+      setQuizSubmitted(true)
+      return
+    }
+    if (quizCorrect <= CASE2_VETERAN_PASS_THRESHOLD) setRoute('quizFailed')
+    setPhase('debrief')
+  }
+
+  return (
+    <div className="case-shell max-w-5xl mx-auto">
+      <div className="case-title-row">
+        <div>
+          <span className="font-pixel text-sw-pink text-xs">CASE 02 VETERAN</span>
+          <h2 className="font-pixel text-sw-cyan text-sm md:text-base">
+            The Pile-On
+          </h2>
+        </div>
+      </div>
+      {progressError && (
+        <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
+      )}
+
+      {phase === 'intro' && (
+        <Case2VeteranIntro
+          internName={internName}
+          onNext={() => setPhase('evidence')}
+        />
+      )}
+      {phase === 'evidence' && (
+        <Case2VeteranEvidence
+          activeIndex={activeEvidenceIndex}
+          onSelect={setActiveEvidenceIndex}
+          onNext={nextEvidence}
+        />
+      )}
+      {phase === 'judgment' && (
+        <Case2VeteranJudgment
+          answers={judgmentAnswers}
+          currentIndex={currentJudgmentIndex}
+          onAnswer={answerJudgment}
+          onNext={nextJudgment}
+          onSubmit={submitJudgments}
+        />
+      )}
+      {phase === 'quiz' && (
+        <Case2VeteranQuiz
+          answers={quizAnswers}
+          currentQuestionIndex={currentQuizQuestion}
+          onAnswer={answerQuiz}
+          onNextQuestion={nextQuizQuestion}
+          onSubmit={submitQuiz}
+          submitted={quizSubmitted}
+        />
+      )}
+      {phase === 'debrief' && (
+        <Case2VeteranDebrief
+          judgmentCorrect={judgmentCorrect}
+          privatePleaCorrect={privatePleaCorrect}
+          fieldPassed={fieldPassed}
+          quizCorrect={quizCorrect}
+          quizSubmitted={quizSubmitted}
+          route={route}
+          onReplay={
+            passedVeteran
+              ? restart
+              : () => spendFailureLife('replay')
+          }
+          onContinue={
+            passedVeteran
+              ? () => finishVeteran('caseFiles')
+              : () => spendFailureLife('continue')
+          }
+          busy={resolvingDebrief}
+        />
+      )}
+      {phase === 'end' && (
+        <Case2VeteranEndScreen
+          badge={badge}
+          pointsAwarded={pointsAwarded}
+          quizCorrect={quizCorrect}
+          onReturn={() => navigate('/play')}
+          onReplay={restart}
+        />
+      )}
+    </div>
+  )
+}
+
 function Case2Rookie() {
   const navigate = useNavigate()
   const { user, token, setUser } = useAuth()
@@ -2577,6 +3562,7 @@ export default function Case() {
   if (!hasLives) return <NoLivesCase />
   if (!isCaseModeUnlocked(user, numericCaseId, difficulty)) return <LockedCase />
   if (numericCaseId === 2 && difficulty === 'rookie') return <Case2Rookie />
+  if (numericCaseId === 2 && difficulty === 'veteran') return <Case2Veteran />
   if (numericCaseId === 2) return <FutureCase caseId={numericCaseId} />
   if (numericCaseId !== 1) return <FutureCase caseId={numericCaseId} />
   if (difficulty === 'veteran') return <VeteranCase />
