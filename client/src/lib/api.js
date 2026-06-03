@@ -130,6 +130,8 @@ export const api = {
   getShop: (token) => request('/shop', { token }),
   buyItem: (token, itemId) =>
     request(`/shop/buy/${itemId}`, { method: 'POST', token }),
+  useItem: (token, itemId) =>
+    request(`/shop/use/${itemId}`, { method: 'POST', token }),
 }
 
 export { request, API_URL }

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
 
@@ -7,10 +8,22 @@ import { api } from '../lib/api.js'
 // what it's given and posts purchase intents.
 export default function Shop() {
   const { token, refreshUser } = useAuth()
+  const navigate = useNavigate()
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(null) // id of the item being bought
   const [notice, setNotice] = useState(null) // { ok, text }
+  const [toast, setToast] = useState(null) // { text, action } - transient
+  const toastTimer = useRef(null)
+
+  // Show a transient toast that clears itself after a few seconds.
+  function showToast(text) {
+    if (toastTimer.current) clearTimeout(toastTimer.current)
+    setToast({ text })
+    toastTimer.current = setTimeout(() => setToast(null), 4000)
+  }
+
+  useEffect(() => () => clearTimeout(toastTimer.current), [])
 
   useEffect(() => {
     let cancelled = false
@@ -34,6 +47,17 @@ export default function Shop() {
       return { owned: Boolean(inventory?.[`${item.id}Owned`]), count: null }
     }
     return { owned: false, count: inventory?.[item.id] || 0 }
+  }
+
+  // Gate the purchase on the click. When the player can't afford the item
+  // we don't disable the button (a disabled button can't explain itself) -
+  // instead we nudge them toward the quiz, where points are earned.
+  function handleBuyClick(item) {
+    if (data.points < item.price) {
+      showToast('Not enough points - play the quiz to earn extra points.')
+      return
+    }
+    buy(item)
   }
 
   async function buy(item) {
@@ -86,7 +110,9 @@ export default function Shop() {
         {data.items.map((item) => {
           const { owned, count } = ownedInfo(item, data.inventory)
           const affordable = data.points >= item.price
-          const disabled = busy === item.id || owned || !affordable
+          // Unaffordable items stay clickable so the tap can surface the
+          // "play the quiz" toast; only owned/in-flight items are disabled.
+          const disabled = busy === item.id || owned
 
           return (
             <div key={item.id} className="ss-card p-5 flex flex-col gap-3">
@@ -112,8 +138,10 @@ export default function Shop() {
                 <button
                   type="button"
                   disabled={disabled}
-                  onClick={() => buy(item)}
-                  className="ss-btn ss-btn-pink text-sm"
+                  onClick={() => handleBuyClick(item)}
+                  className={`ss-btn text-sm ${
+                    affordable ? 'ss-btn-pink' : 'ss-btn-cyan opacity-70'
+                  }`}
                 >
                   {owned
                     ? 'Owned'
@@ -128,6 +156,19 @@ export default function Shop() {
           )
         })}
       </div>
+
+      {toast && (
+        <div className="ss-toast" role="status">
+          <span>{toast.text}</span>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan text-xs"
+            onClick={() => navigate('/quiz')}
+          >
+            Play Quiz
+          </button>
+        </div>
+      )}
     </div>
   )
 }
