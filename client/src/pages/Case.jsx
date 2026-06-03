@@ -3900,12 +3900,21 @@ function Case3Rookie() {
     () => CASE3_KNOWLEDGE_CHECK.map(() => null),
   )
   const [currentQuestion, setCurrentQuestion] = useState(0)
+  // Per-question wrong option revealed by a spent Hint Token (50/50 help).
+  const [hintEliminated, setHintEliminated] = useState(
+    () => CASE3_KNOWLEDGE_CHECK.map(() => null),
+  )
+  const [powerNotice, setPowerNotice] = useState(null) // { ok, text }
+  const [usingHint, setUsingHint] = useState(false)
+  const [lifeSpentInCheck, setLifeSpentInCheck] = useState(false)
+  const [outOfLives, setOutOfLives] = useState(false)
   const [badge, setBadge] = useState(null)
   const [pointsAwarded, setPointsAwarded] = useState(0)
   const [progressError, setProgressError] = useState('')
   const [resolvingDebrief, setResolvingDebrief] = useState(false)
   const resolvingRef = useRef(false)
   const internName = user?.username || 'Nova'
+  const hintsLeft = user?.inventory?.hint ?? 0
   const scenarioPassed = scenarioChoice === 'verify'
   const checkCorrect = checkAnswers.reduce(
     (count, answer, index) =>
@@ -3924,11 +3933,83 @@ function Case3Rookie() {
     setScenarioChoice(null)
     setCheckAnswers(CASE3_KNOWLEDGE_CHECK.map(() => null))
     setCurrentQuestion(0)
+    setHintEliminated(CASE3_KNOWLEDGE_CHECK.map(() => null))
+    setPowerNotice(null)
+    setUsingHint(false)
+    setLifeSpentInCheck(false)
+    setOutOfLives(false)
     setBadge(null)
     setPointsAwarded(0)
     setProgressError('')
     setResolvingDebrief(false)
     resolvingRef.current = false
+  }
+
+  // Spend a Hint Token to grey out one wrong option on the current
+  // question (50/50). The token is consumed server-side first so a player
+  // can never reveal help they have not paid for; the inventory count then
+  // syncs back into auth context so the Shop and TopNav stay accurate.
+  async function useHint() {
+    if (usingHint) return
+    const question = CASE3_KNOWLEDGE_CHECK[currentQuestion]
+    if (checkAnswers[currentQuestion] !== null) return
+    if (hintEliminated[currentQuestion] !== null) {
+      setPowerNotice({ ok: false, text: 'Hint already used on this question.' })
+      return
+    }
+    if (hintsLeft < 1) {
+      setPowerNotice({
+        ok: false,
+        text: 'You ran out of Hint Tokens. Visit the shop to restock.',
+      })
+      return
+    }
+    setUsingHint(true)
+    setPowerNotice(null)
+    try {
+      const res = await api.useItem(token, 'hint')
+      setUser((current) => ({ ...current, inventory: res.inventory }))
+      // Pick one wrong option to eliminate (never the correct answer).
+      const wrongOptions = question.options
+        .map((_, index) => index)
+        .filter((index) => index !== question.answer)
+      const eliminate =
+        wrongOptions[Math.floor(Math.random() * wrongOptions.length)]
+      setHintEliminated((current) =>
+        current.map((value, index) =>
+          index === currentQuestion ? eliminate : value,
+        ),
+      )
+      playSfx('click')
+      setPowerNotice({ ok: true, text: 'Hint used - one wrong answer removed.' })
+    } catch (error) {
+      setPowerNotice({
+        ok: false,
+        text: error.message || 'Could not use the Hint Token.',
+      })
+    } finally {
+      setUsingHint(false)
+    }
+  }
+
+  // A wrong knowledge-check answer costs one life immediately. We spend it
+  // through the existing lives endpoint so the server stays the source of
+  // truth, then mirror the new count into auth context. Running the count
+  // to zero ends the attempt straight away (handled in answerCheck).
+  async function spendLifeForWrongAnswer() {
+    try {
+      const data = await api.useLife(token)
+      setLifeSpentInCheck(true)
+      setUser((current) => ({
+        ...current,
+        livesRemaining: data.livesRemaining,
+      }))
+      playSfx('lifeLost')
+      if (data.livesRemaining <= 0) setOutOfLives(true)
+    } catch (error) {
+      // 409 = already out of lives. Either way, the attempt is over.
+      setOutOfLives(true)
+    }
   }
 
   function chooseScenario(choice) {
@@ -3944,11 +4025,11 @@ function Case3Rookie() {
         index === questionIndex ? optionIndex : answer,
       ),
     )
-    playSfx(
-      optionIndex === CASE3_KNOWLEDGE_CHECK[questionIndex].answer
-        ? 'correct'
-        : 'wrong',
-    )
+    const isWrong = optionIndex !== CASE3_KNOWLEDGE_CHECK[questionIndex].answer
+    playSfx(isWrong ? 'wrong' : 'correct')
+    // A wrong pick burns a life on the spot - this is what the Hint Token
+    // guards against. Lives are spent through the server (source of truth).
+    if (isWrong) spendLifeForWrongAnswer()
   }
 
   async function spendFailureLife(nextAction) {
@@ -3956,6 +4037,21 @@ function Case3Rookie() {
     resolvingRef.current = true
     setResolvingDebrief(true)
     setProgressError('')
+    // A wrong knowledge-check answer already burned a life inline, so the
+    // debrief must not charge a second one - that would double-penalise the
+    // same mistake. The scenario-only failure path (perfect check, wrong
+    // corridor) still spends its life here as before.
+    if (lifeSpentInCheck) {
+      playSfx('caseFailed')
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+      if (nextAction === 'replay') {
+        restart()
+      } else {
+        navigate('/play')
+      }
+      return
+    }
     try {
       const data = await api.failAttempt(token, {
         caseId: 3,
@@ -4029,6 +4125,33 @@ function Case3Rookie() {
   const activeQuestion = CASE3_KNOWLEDGE_CHECK[currentQuestion]
   const selectedCheckAnswer = checkAnswers[currentQuestion]
   const checkAnswered = selectedCheckAnswer !== null
+  const hintUsedHere = hintEliminated[currentQuestion] !== null
+
+  // A wrong answer can drain the last life mid-check. When that happens the
+  // attempt is over - route the player out instead of letting them finish a
+  // run they can no longer pass.
+  if (outOfLives) {
+    return (
+      <div className="case-shell max-w-5xl mx-auto">
+        <section className="ss-card p-6 flex flex-col gap-4 max-w-3xl mx-auto opacity-90">
+          <IconLock size={28} className="text-sw-red" />
+          <h2 className="font-pixel text-sw-cyan text-sm">No lives remaining</h2>
+          <p className="text-sw-text2">
+            A wrong answer cost your last life. Lives regenerate over time, or
+            you can earn points in the quiz to buy Hint Tokens before your next
+            attempt.
+          </p>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan self-start"
+            onClick={() => navigate('/play')}
+          >
+            Return to Case Files
+          </button>
+        </section>
+      </div>
+    )
+  }
 
   return (
     <div className="case-shell max-w-5xl mx-auto">
@@ -4329,6 +4452,28 @@ function Case3Rookie() {
             <div className="veteran-quiz-progress">
               Question {currentQuestion + 1} / {CASE3_KNOWLEDGE_CHECK.length}
             </div>
+            <div className="case-powerup-bar">
+              <span className="case-powerup-lives">
+                Lives: {user?.livesRemaining ?? 0} - a wrong answer costs one
+              </span>
+              <button
+                type="button"
+                className="ss-btn ss-btn-pink text-xs"
+                onClick={useHint}
+                disabled={usingHint || checkAnswered || hintUsedHere}
+              >
+                {hintUsedHere
+                  ? 'Hint used'
+                  : usingHint
+                    ? '…'
+                    : `Use Hint (x${hintsLeft})`}
+              </button>
+            </div>
+            {powerNotice && (
+              <p className={powerNotice.ok ? 'text-sw-green' : 'text-sw-yellow'}>
+                {powerNotice.text}
+              </p>
+            )}
             <article
               className={`veteran-quiz-card ${
                 checkAnswered && selectedCheckAnswer !== activeQuestion.answer
@@ -4341,6 +4486,8 @@ function Case3Rookie() {
                 {activeQuestion.options.map((option, optionIndex) => {
                   const selected = selectedCheckAnswer === optionIndex
                   const isCorrect = activeQuestion.answer === optionIndex
+                  const eliminated =
+                    hintEliminated[currentQuestion] === optionIndex
                   return (
                     <button
                       key={option}
@@ -4351,9 +4498,9 @@ function Case3Rookie() {
                         checkAnswered && selected && !isCorrect
                           ? 'veteran-answer-wrong'
                           : ''
-                      }`}
+                      } ${eliminated ? 'veteran-answer-eliminated' : ''}`}
                       onClick={() => answerCheck(currentQuestion, optionIndex)}
-                      disabled={checkAnswered}
+                      disabled={checkAnswered || eliminated}
                     >
                       {option}
                     </button>
