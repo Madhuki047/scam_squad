@@ -21,6 +21,7 @@ const VALID_BADGES = new Set([
   'digital-defender-level-2',
   'human-firewall-beginner',
   'human-firewall',
+  'network-navigator',
 ])
 
 function fullCaseCount(completedCases = []) {

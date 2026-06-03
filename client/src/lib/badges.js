@@ -41,6 +41,12 @@ export const BADGES = {
     message: 'You stopped an internal impersonation attempt by verifying first.',
     icon: 'shield',
   },
+  networkNavigator: {
+    id: 'network-navigator',
+    name: 'Network Navigator',
+    message: 'You avoided a rogue public Wi-Fi trap.',
+    icon: 'shield',
+  },
 }
 
 export const BADGE_CATALOG = [
@@ -57,6 +63,7 @@ export const BADGE_CATALOG = [
   BADGES.digitalDefenderLevel2,
   BADGES.humanFirewallBeginner,
   BADGES.humanFirewall,
+  BADGES.networkNavigator,
   { id: 'night-owl', name: 'Night Owl' },
   { id: 'perfect-run', name: 'Perfect Run' },
   { id: 'mentor', name: 'Mentor' },

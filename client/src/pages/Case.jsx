@@ -1098,6 +1098,106 @@ const CASE3_VETERAN_QUIZ = [
   },
 ]
 
+const CASE4_ROOKIE_INTRO = [
+  'Cadet, public Wi-Fi is the Wild West.',
+  'No rules. No locks. No guarantees.',
+  "Today's lesson: the most dangerous network is usually the one that looks free.",
+  "We've received reports of suspicious Wi-Fi activity around Oxford Circus Station.",
+  "Head over there and upload the field report. Let's see what catches your eye.",
+]
+
+const CASE4_WIFI_NETWORKS = [
+  'TFL_WiFi_Official',
+  'TFL_WiFi_Free',
+  'FREE_TUBE_WIFI_123',
+  'UnitZero_Guest',
+]
+
+const CASE4_FAILURE_DIALOGUE = [
+  'Cadet. Someone just attempted to access Unit Zero systems using your credentials.',
+  'You connected to a rogue hotspot.',
+  "That wasn't TfL Wi-Fi.",
+  'It was an attacker.',
+]
+
+const CASE4_SUCCESS_DIALOGUE = [
+  'Good instincts, Cadet.',
+  "We've been tracking a rogue hotspot operator on the Central Line.",
+  'You just avoided handing over your entire digital life.',
+]
+
+const CASE4_PUBLIC_WIFI_TOPICS = [
+  {
+    title: 'Rogue Hotspots',
+    text: 'Attackers create fake networks with familiar names so people connect by mistake.',
+  },
+  {
+    title: 'Man-in-the-Middle Attacks',
+    text: 'On unsafe networks, attackers may sit between you and the service you are using.',
+  },
+  {
+    title: 'Session Hijacking',
+    text: 'Stolen session data can let attackers act as you without needing your password.',
+  },
+  {
+    title: 'Credential Harvesting',
+    text: 'Fake login pages collect usernames and passwords instead of verifying access.',
+  },
+]
+
+const CASE4_WIFI_TEACHING_POINTS = [
+  {
+    title: 'Familiar names create trust',
+    text: 'A network name can look official without being official.',
+  },
+  {
+    title: 'People love free Wi-Fi',
+    text: 'Attackers know free access makes people lower their guard.',
+  },
+  {
+    title: 'Devices auto-connect',
+    text: 'Saved or similar network names can pull devices onto unsafe networks.',
+  },
+  {
+    title: 'Open networks lack protection',
+    text: 'No password often means less protection for traffic and identity.',
+  },
+]
+
+const CASE4_KNOWLEDGE_CHECK = [
+  {
+    question: 'Which Wi-Fi network is most dangerous?',
+    options: [
+      'Open network with no password',
+      'Password protected network',
+      'Mobile hotspot',
+    ],
+    answer: 0,
+    feedback:
+      'Correct - open networks are easier for attackers to abuse or imitate.',
+    wrongFeedback:
+      'Wrong - the most dangerous option is an open network with no password.',
+  },
+  {
+    question: 'A login page appears immediately after connecting to public Wi-Fi. What should you do?',
+    options: ['Enter credentials', 'Disconnect immediately', 'Refresh page'],
+    answer: 1,
+    feedback:
+      'Correct - disconnect before entering credentials into an unexpected portal.',
+    wrongFeedback:
+      'Wrong - an unexpected login portal can be credential harvesting. Disconnect immediately.',
+  },
+  {
+    question: 'What is safest in public?',
+    options: ['Free Wi-Fi', 'Mobile hotspot', 'Any network containing "Free"'],
+    answer: 1,
+    feedback:
+      'Correct - your own mobile hotspot is safer than an unknown public network.',
+    wrongFeedback:
+      'Wrong - in public, a mobile hotspot is safer than unknown free Wi-Fi.',
+  },
+]
+
 function PixelPerson({ role, label, position = '' }) {
   return (
     <div className={`pixel-person pixel-${role} ${position}`}>
@@ -5456,6 +5556,660 @@ function Case3Veteran() {
   )
 }
 
+function Case4Rookie() {
+  const navigate = useNavigate()
+  const { user, token, setUser } = useAuth()
+  const [phase, setPhase] = useState('intro')
+  const [introStep, setIntroStep] = useState(0)
+  const [scenarioChoice, setScenarioChoice] = useState(null)
+  const [outcomeStep, setOutcomeStep] = useState(0)
+  const [checkAnswers, setCheckAnswers] = useState(
+    () => CASE4_KNOWLEDGE_CHECK.map(() => null),
+  )
+  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [badge, setBadge] = useState(null)
+  const [pointsAwarded, setPointsAwarded] = useState(0)
+  const [failureLifeSpent, setFailureLifeSpent] = useState(false)
+  const [progressError, setProgressError] = useState('')
+  const [resolvingDebrief, setResolvingDebrief] = useState(false)
+  const resolvingRef = useRef(false)
+  const failureLifeSpentRef = useRef(false)
+  const internName = user?.username || 'Nova'
+  const scenarioPassed = scenarioChoice === 'mobile-hotspot'
+  const checkCorrect = checkAnswers.reduce(
+    (count, answer, index) =>
+      count + (answer === CASE4_KNOWLEDGE_CHECK[index].answer ? 1 : 0),
+    0,
+  )
+  const checkComplete = checkAnswers.every((answer) => answer !== null)
+  const checkPassed =
+    checkComplete && checkCorrect === CASE4_KNOWLEDGE_CHECK.length
+  const passed = scenarioPassed && checkPassed
+  const activeQuestion = CASE4_KNOWLEDGE_CHECK[currentQuestion]
+  const selectedCheckAnswer = checkAnswers[currentQuestion]
+  const checkAnswered = selectedCheckAnswer !== null
+  const activeOutcomeDialogue = scenarioPassed
+    ? CASE4_SUCCESS_DIALOGUE
+    : CASE4_FAILURE_DIALOGUE
+
+  function restart() {
+    setPhase('intro')
+    setIntroStep(0)
+    setScenarioChoice(null)
+    setOutcomeStep(0)
+    setCheckAnswers(CASE4_KNOWLEDGE_CHECK.map(() => null))
+    setCurrentQuestion(0)
+    setBadge(null)
+    setPointsAwarded(0)
+    setFailureLifeSpent(false)
+    setProgressError('')
+    setResolvingDebrief(false)
+    resolvingRef.current = false
+    failureLifeSpentRef.current = false
+  }
+
+  function chooseScenario(choice) {
+    if (scenarioChoice) return
+    setScenarioChoice(choice)
+    setOutcomeStep(0)
+    setPhase(choice === 'rogue-wifi' ? 'fakePortal' : 'outcome')
+    playSfx(choice === 'mobile-hotspot' ? 'correct' : 'wrong')
+  }
+
+  function answerCheck(questionIndex, optionIndex) {
+    if (checkAnswers[questionIndex] !== null) return
+    setCheckAnswers((current) =>
+      current.map((answer, index) =>
+        index === questionIndex ? optionIndex : answer,
+      ),
+    )
+    playSfx(
+      optionIndex === CASE4_KNOWLEDGE_CHECK[questionIndex].answer
+        ? 'correct'
+        : 'wrong',
+    )
+  }
+
+  async function spendFailureLife(nextAction) {
+    if (failureLifeSpentRef.current || failureLifeSpent) {
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      if (nextAction === 'continue') navigate('/play')
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    failureLifeSpentRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const data = await api.failAttempt(token, {
+        caseId: 4,
+        difficulty: 'rookie',
+      })
+      setUser(data.user)
+      setFailureLifeSpent(true)
+      playSfx('lifeLost')
+      playSfx('caseFailed')
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      if (nextAction === 'debrief') {
+        resolvingRef.current = false
+        setResolvingDebrief(false)
+        return
+      }
+      navigate('/play')
+    } catch (error) {
+      failureLifeSpentRef.current = false
+      setFailureLifeSpent(false)
+      console.error('[progress] Case 4 failed attempt update failed', {
+        endpoint: '/progress/fail-attempt',
+        caseId: 4,
+        difficulty: 'rookie',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update lives.')
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  async function finishRookie(nextAction = 'end') {
+    if (!passed) {
+      spendFailureLife(nextAction === 'replay' ? 'replay' : 'continue')
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const unlockedBadge = BADGES.networkNavigator
+      const data = await api.completeCase(token, {
+        caseId: 4,
+        difficulty: 'rookie',
+        result: 'success',
+        badge: unlockedBadge,
+      })
+      setUser(data.user)
+      setBadge(unlockedBadge)
+      setPointsAwarded(data.pointsAwarded)
+      if (data.pointsAwarded > 0) {
+        playSfx('coins')
+        playSfx('badge')
+      }
+      playSfx('caseComplete')
+      if (nextAction === 'caseFiles') {
+        navigate('/play')
+        return
+      }
+      setPhase('end')
+    } catch (error) {
+      console.error('[progress] Case 4 completion update failed', {
+        endpoint: '/progress/complete-case',
+        caseId: 4,
+        difficulty: 'rookie',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update case progress.')
+    } finally {
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  async function finishCheck() {
+    setPhase('debrief')
+    if (!passed) await spendFailureLife('debrief')
+  }
+
+  return (
+    <div className="case-shell max-w-5xl mx-auto">
+      <div className="case-title-row">
+        <div>
+          <span className="font-pixel text-sw-pink text-xs">CASE 04 ROOKIE</span>
+          <h2 className="font-pixel text-sw-cyan text-sm md:text-base">
+            The Hotspot
+          </h2>
+        </div>
+      </div>
+      {progressError && (
+        <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
+      )}
+
+      {phase === 'intro' && (
+        <section className="case-scene scene-transition">
+          <div className="case-scene-top">
+            <span>UNIT ZERO</span>
+            <span>FIELD BRIEFING</span>
+          </div>
+          <div className="case-office case3-briefing-office">
+            <div className="case-window case-window-left">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="case-window case-window-right">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="unit-poster unit-poster-left">
+              CASE 04
+              <br />
+              THE HOTSPOT
+            </div>
+            <div className="case3-zoey-station">
+              <PixelPerson role="jane" label="AGENT RICKY" />
+            </div>
+            <PixelPerson
+              role="intern"
+              label={`${internName} - YOU`}
+              position="pixel-intern-left"
+            />
+            <div className="case3-monitor-wall" aria-hidden="true">
+              <span>OXFORD CIRCUS</span>
+              <strong>ROGUE WI-FI REPORT</strong>
+            </div>
+            <div className="case-bubble case-bubble-jane case3-dialogue-bubble">
+              <span className="text-sw-yellow">Agent Ricky</span>
+              <p>{CASE4_ROOKIE_INTRO[introStep]}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan self-end"
+            onClick={() => {
+              if (introStep < CASE4_ROOKIE_INTRO.length - 1) {
+                setIntroStep((value) => value + 1)
+                playSfx('click')
+                return
+              }
+              setPhase('station')
+            }}
+          >
+            {introStep === CASE4_ROOKIE_INTRO.length - 1
+              ? 'Enter Station'
+              : 'Continue'}{' '}
+            <IconArrowRight size={16} />
+          </button>
+        </section>
+      )}
+
+      {phase === 'station' && (
+        <section className="case2-board scene-transition">
+          <div className="case2-board-header">
+            <div>
+              <span className="font-pixel text-sw-pink text-xs">
+                OXFORD CIRCUS TUBE STATION
+              </span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                The Open Gate
+              </h2>
+            </div>
+            <div className="case2-progress-chip">FIELD UPLOAD</div>
+          </div>
+          <article className="case2-file">
+            <section className="case2-social-window">
+              <div className="case2-social-window-bar">
+                <span>Station camera</span>
+                <span>Central Line crowding</span>
+              </div>
+              <div className="case2-veteran-post-frame">
+                <img src={fillerImage} alt="" />
+                <div className="case2-veteran-post-copy">
+                  <strong>Commuters move past announcements and arriving trains.</strong>
+                  <span>Your laptop needs a network to upload the field report.</span>
+                </div>
+              </div>
+            </section>
+            <div className="case2-ricky-panel mt-3">
+              <span className="font-pixel text-sw-yellow text-xs">AVAILABLE WI-FI</span>
+              <div className="case2-score-grid mt-2">
+                {CASE4_WIFI_NETWORKS.map((network) => (
+                  <article key={network} className="red-flag-card">
+                    <IconFlag size={18} />
+                    <div>
+                      <h3>{network}</h3>
+                      <p>Signal detected near platform level.</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+            <div className="case2-decision-row mt-4">
+              <button
+                type="button"
+                className="case2-decision-btn case2-flag-btn"
+                onClick={() => chooseScenario('rogue-wifi')}
+              >
+                Connect to FREE_TUBE_WIFI_123
+              </button>
+              <button
+                type="button"
+                className="case2-decision-btn case2-dismiss-btn"
+                onClick={() => chooseScenario('mobile-hotspot')}
+              >
+                Use Mobile Hotspot
+              </button>
+            </div>
+          </article>
+        </section>
+      )}
+
+      {phase === 'fakePortal' && (
+        <section className="case-debrief scene-transition">
+          <div className="breach-banner">TUBE WI-FI REQUIRES VERIFICATION</div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">LOGIN PORTAL</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                Public Access Verification
+              </h2>
+              <div className="case2-message-list mt-2">
+                <div className="case2-message case2-post-message">
+                  <div className="case2-avatar" aria-hidden="true">UZ</div>
+                  <div>
+                    <strong>Unit Zero email</strong>
+                    <p>{internName.toLowerCase()}@unitzero.gov</p>
+                  </div>
+                </div>
+                <div className="case2-message case2-post-message">
+                  <div className="case2-avatar" aria-hidden="true">**</div>
+                  <div>
+                    <strong>Password</strong>
+                    <p>••••••••••••</p>
+                  </div>
+                </div>
+              </div>
+              <div className="success-banner mt-3">Verification Complete</div>
+              <p className="text-sw-text3">
+                The upload does not start. The portal closes like nothing happened.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start"
+              onClick={() => setPhase('outcome')}
+            >
+              A few moments later <IconArrowRight size={16} />
+            </button>
+          </div>
+        </section>
+      )}
+
+      {phase === 'outcome' && (
+        <section className="case-scene scene-transition">
+          <div className="case-scene-top">
+            <span>{scenarioPassed ? 'UPLOAD COMPLETE' : 'INCOMING CALL'}</span>
+            <span>AGENT RICKY</span>
+          </div>
+          <div className="case-office case3-corridor-office">
+            <div className="case3-filler-frame" aria-hidden="true">
+              <img src={fillerImage} alt="" />
+              <span>{scenarioPassed ? 'field report uploaded' : 'rogue hotspot alert'}</span>
+            </div>
+            <PixelPerson
+              role="intern"
+              label={`${internName} - YOU`}
+              position="pixel-intern-left"
+            />
+            <div className="case3-zoey-station">
+              <PixelPerson role="jane" label="AGENT RICKY" />
+            </div>
+            <div className="case-bubble case-bubble-jane case3-dialogue-bubble">
+              <span className="text-sw-yellow">Agent Ricky</span>
+              <p>{activeOutcomeDialogue[outcomeStep]}</p>
+            </div>
+            {scenarioPassed && (
+              <div className="success-banner case3-choice-banner">
+                Nearby attacker frustrated - upload secured
+              </div>
+            )}
+            {!scenarioPassed && (
+              <div className="breach-banner case3-choice-banner">
+                Rogue hotspot confirmed - credentials exposed
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan self-end"
+            onClick={() => {
+              if (outcomeStep < activeOutcomeDialogue.length - 1) {
+                setOutcomeStep((value) => value + 1)
+                playSfx('click')
+                return
+              }
+              setPhase('training')
+            }}
+          >
+            {outcomeStep === activeOutcomeDialogue.length - 1
+              ? 'Open Training'
+              : 'Continue'}{' '}
+            <IconArrowRight size={16} />
+          </button>
+        </section>
+      )}
+
+      {phase === 'training' && (
+        <section className="case2-board scene-transition">
+          <div className="case2-board-header">
+            <div>
+              <span className="font-pixel text-sw-pink text-xs">UNIT ZERO TRAINING</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                What Are Public Wi-Fi Threats?
+              </h2>
+            </div>
+            <div className="case2-progress-chip">TRAINING</div>
+          </div>
+          <article className="case2-file">
+            <section className="case2-social-window">
+              <div className="case2-social-window-bar">
+                <span>Training visual</span>
+                <span>Rogue hotspot</span>
+              </div>
+              <div className="case2-veteran-post-frame">
+                <img src={fillerImage} alt="" />
+                <div className="case2-veteran-post-copy">
+                  <strong>Fake networks can look useful, local, and free.</strong>
+                  <span>Unknown public Wi-Fi should be treated as untrusted.</span>
+                </div>
+              </div>
+            </section>
+            <div className="case2-ricky-panel mt-3">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+              <p>"Let's break down what you just avoided."</p>
+              <p className="text-sw-text2">
+                Public Wi-Fi threats happen when attackers create fake networks
+                or intercept traffic on open networks to steal information.
+              </p>
+              <blockquote className="zoey-quote">
+                "Free Wi-Fi is never really free. Someone usually pays for it."
+              </blockquote>
+            </div>
+            <div className="case2-score-grid mt-3">
+              {CASE4_PUBLIC_WIFI_TOPICS.map((topic) => (
+                <article key={topic.title} className="red-flag-card">
+                  <IconFlag size={18} />
+                  <div>
+                    <h3>{topic.title}</h3>
+                    <p>{topic.text}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="case2-score-grid mt-3">
+              {CASE4_WIFI_TEACHING_POINTS.map((point) => (
+                <article key={point.title} className="red-flag-card">
+                  <IconFlag size={18} />
+                  <div>
+                    <h3>{point.title}</h3>
+                    <p>{point.text}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start mt-3"
+              onClick={() => setPhase('check')}
+            >
+              Start Knowledge Check <IconArrowRight size={16} />
+            </button>
+          </article>
+        </section>
+      )}
+
+      {phase === 'check' && (
+        <section className="case-debrief scene-transition">
+          <div className="success-banner">PUBLIC WI-FI CHECK</div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="veteran-quiz-progress">
+              Question {currentQuestion + 1} / {CASE4_KNOWLEDGE_CHECK.length}
+            </div>
+            <article
+              className={`veteran-quiz-card ${
+                checkAnswered && selectedCheckAnswer !== activeQuestion.answer
+                  ? 'veteran-quiz-shake'
+                  : ''
+              }`}
+            >
+              <h3>{activeQuestion.question}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {activeQuestion.options.map((option, optionIndex) => {
+                  const selected = selectedCheckAnswer === optionIndex
+                  const isCorrect = activeQuestion.answer === optionIndex
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      className={`veteran-answer-btn ${
+                        selected ? 'veteran-answer-selected' : ''
+                      } ${checkAnswered && isCorrect ? 'veteran-answer-correct' : ''} ${
+                        checkAnswered && selected && !isCorrect
+                          ? 'veteran-answer-wrong'
+                          : ''
+                      }`}
+                      onClick={() => answerCheck(currentQuestion, optionIndex)}
+                      disabled={checkAnswered}
+                    >
+                      {option}
+                    </button>
+                  )
+                })}
+              </div>
+            </article>
+            {checkAnswered && (
+              <div
+                className={
+                  selectedCheckAnswer === activeQuestion.answer
+                    ? 'success-banner'
+                    : 'breach-banner'
+                }
+              >
+                {selectedCheckAnswer === activeQuestion.answer
+                  ? activeQuestion.feedback
+                  : activeQuestion.wrongFeedback}
+              </div>
+            )}
+            {checkAnswered && (
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan self-start"
+                onClick={
+                  currentQuestion === CASE4_KNOWLEDGE_CHECK.length - 1
+                    ? finishCheck
+                    : () => setCurrentQuestion((value) => value + 1)
+                }
+                disabled={resolvingDebrief}
+              >
+                {currentQuestion === CASE4_KNOWLEDGE_CHECK.length - 1
+                  ? 'Finish Field Notes'
+                  : 'Next Question'}
+              </button>
+            )}
+          </div>
+        </section>
+      )}
+
+      {phase === 'debrief' && (
+        <section className="case-debrief scene-transition">
+          <div className={passed ? 'success-banner' : 'breach-banner'}>
+            {passed ? 'PUBLIC WI-FI TRAP AVOIDED' : 'ROOKIE ATTEMPT FAILED'}
+          </div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                The Hotspot Debrief
+              </h2>
+              <p>
+                Rogue hotspots win by looking convenient. A familiar name, a
+                free connection, and a fake login page can turn a commute into a
+                credential theft incident.
+              </p>
+              <p className="text-sw-text2">
+                Knowledge check score: {checkCorrect} / {CASE4_KNOWLEDGE_CHECK.length}.
+                Rookie completion requires using the mobile hotspot and scoring
+                3 / 3 on the knowledge check.
+              </p>
+              {!scenarioPassed && (
+                <p className="text-sw-red">
+                  Scenario failed: FREE_TUBE_WIFI_123 was a rogue hotspot.
+                </p>
+              )}
+              {scenarioPassed && !checkPassed && (
+                <p className="text-sw-red">
+                  Knowledge check failed: public Wi-Fi safety requires every
+                  answer correct for this Rookie certification.
+                </p>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[...CASE4_PUBLIC_WIFI_TOPICS, ...CASE4_WIFI_TEACHING_POINTS].map(
+                (point) => (
+                  <article key={point.title} className="red-flag-card">
+                    <IconFlag size={18} />
+                    <div>
+                      <h3>{point.title}</h3>
+                      <p>{point.text}</p>
+                    </div>
+                  </article>
+                ),
+              )}
+            </div>
+            {passed && (
+              <div className="badge-card">
+                <span>Badge unlocked</span>
+                <strong>NETWORK NAVIGATOR</strong>
+              </div>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                className="ss-btn ss-btn-pink"
+                onClick={
+                  passed
+                    ? () => finishRookie('replay')
+                    : failureLifeSpent
+                      ? restart
+                      : () => spendFailureLife('replay')
+                }
+                disabled={resolvingDebrief}
+              >
+                Replay Scene
+              </button>
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan"
+                onClick={
+                  passed
+                    ? () => finishRookie('end')
+                    : failureLifeSpent
+                      ? () => navigate('/play')
+                      : () => spendFailureLife('continue')
+                }
+                disabled={resolvingDebrief}
+              >
+                {passed ? 'Complete Rookie' : 'Return to Case Files'}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {phase === 'end' && (
+        <section className="ss-card p-6 flex flex-col gap-4">
+          <h2 className="font-pixel text-sw-cyan text-sm">Case 04 Rookie Complete</h2>
+          <p className="text-sw-text2">
+            The Hotspot closed. Rookie reward secured.
+          </p>
+          <PixelBadgeCard badge={badge} pointsAwarded={pointsAwarded} />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button type="button" className="ss-btn ss-btn-cyan" onClick={() => navigate('/play')}>
+              Return to Case Files
+            </button>
+            <button
+              type="button"
+              className="ss-btn ss-btn-pink"
+              onClick={() => navigate('/case/4/veteran')}
+            >
+              Continue to Veteran Mode
+            </button>
+          </div>
+        </section>
+      )}
+    </div>
+  )
+}
+
 function LockedCase() {
   const navigate = useNavigate()
   return (
@@ -5544,6 +6298,7 @@ export default function Case() {
   if (numericCaseId === 2) return <FutureCase caseId={numericCaseId} />
   if (numericCaseId === 3 && difficulty === 'rookie') return <Case3Rookie />
   if (numericCaseId === 3 && difficulty === 'veteran') return <Case3Veteran />
+  if (numericCaseId === 4 && difficulty === 'rookie') return <Case4Rookie />
   if (numericCaseId !== 1) return <FutureCase caseId={numericCaseId} />
   if (difficulty === 'veteran') return <VeteranCase />
 
