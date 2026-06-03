@@ -119,3 +119,36 @@ export async function buyItem(req, res, next) {
     next(error)
   }
 }
+
+// POST /api/shop/use/:itemId - spend one of a consumable the player owns
+// (e.g. a Hint Token during a case). Counting/validation is done here so a
+// player can never use a power-up they do not hold. Cosmetics are not
+// consumable and are rejected. Returns the updated inventory so the client
+// can refresh its owned counts everywhere. This is the generic foundation
+// every consumable power-up uses - the case UI decides what the effect does.
+export async function useItem(req, res, next) {
+  try {
+    const itemId = String(req.params.itemId)
+    const item = SHOP_CATALOG[itemId]
+    if (!item) return res.status(404).json({ message: 'Unknown item.' })
+    if (item.type !== 'consumable') {
+      return res.status(400).json({ message: 'This item cannot be used in a case.' })
+    }
+
+    const user = await User.findById(req.userId)
+    if (!user) return res.status(404).json({ message: 'Account not found.' })
+
+    if ((user.inventory[item.field] || 0) < 1) {
+      return res.status(400).json({ message: `You ran out of ${item.name}s.` })
+    }
+
+    user.inventory[item.field] -= 1
+    user.markModified('inventory')
+    await user.save()
+    await logActivity(req.userId, 'shop', `Used ${item.name}`, 0)
+
+    res.json({ ok: true, inventory: user.inventory })
+  } catch (error) {
+    next(error)
+  }
+}
