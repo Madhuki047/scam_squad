@@ -6927,8 +6927,19 @@ function Case4Veteran() {
               <br />
               VETERAN
             </div>
-            <div className="case3-zoey-station">
-              <PixelPerson role={activeIntro.role} label={activeIntro.speaker.toUpperCase()} />
+            <div
+              className={`case4-veteran-ricky-station ${
+                activeIntro.speaker === 'Agent Ricky' ? 'active-speaker' : ''
+              }`}
+            >
+              <PixelPerson role="jane" label="AGENT RICKY" />
+            </div>
+            <div
+              className={`case4-veteran-zoey-station ${
+                activeIntro.speaker === 'Agent Zoey' ? 'active-speaker' : ''
+              }`}
+            >
+              <PixelPerson role="zoey" label="AGENT ZOEY" />
             </div>
             <PixelPerson
               role="intern"
@@ -6974,6 +6985,10 @@ function Case4Veteran() {
             <div className="case2-progress-chip">PACKET TRACE RUNNING</div>
           </div>
           <article className="case2-file">
+            <p className="text-sw-text2 mb-3">
+              Select a network first, then run the analysis tools. Decision
+              controls unlock after a network is selected.
+            </p>
             <div className="case4-veteran-scanner">
               {CASE4_VETERAN_NETWORKS.map((network) => {
                 const selected = selectedNetwork === network.id
@@ -7020,6 +7035,12 @@ function Case4Veteran() {
                 </button>
               ))}
             </div>
+
+            {!selectedNetwork && (
+              <div className="case2-progress-chip mt-3">
+                SELECT A NETWORK TO ENABLE ANALYSIS TOOLS
+              </div>
+            )}
 
             {selectedNetwork && (
               <div className="case4-analysis-console mt-4">

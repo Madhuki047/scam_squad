@@ -4124,6 +4124,7 @@ html.ss-high-contrast {
     transparent
   );
   animation: case4-scan-line 4s linear infinite;
+  pointer-events: none;
 }
 
 .case4-veteran-network.selected {
@@ -4181,6 +4182,7 @@ html.ss-high-contrast {
   border-bottom-color: transparent;
   transform: rotate(45deg);
   animation: case4-signal-flicker 2.2s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .case4-wifi-rings span:nth-child(1) {
@@ -4231,6 +4233,34 @@ html.ss-high-contrast {
 .case4-tool-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.case4-veteran-ricky-station,
+.case4-veteran-zoey-station {
+  position: absolute;
+  bottom: 3.6rem;
+  z-index: 4;
+  opacity: 0.72;
+  filter: saturate(0.82);
+  transition:
+    opacity 160ms ease,
+    filter 160ms ease,
+    transform 160ms ease;
+}
+
+.case4-veteran-ricky-station {
+  right: 26%;
+}
+
+.case4-veteran-zoey-station {
+  right: 10%;
+}
+
+.case4-veteran-ricky-station.active-speaker,
+.case4-veteran-zoey-station.active-speaker {
+  opacity: 1;
+  filter: saturate(1.15) drop-shadow(0 0 10px rgba(93, 213, 232, 0.28));
+  transform: translateY(-2px);
 }
 
 .case4-analysis-console {
