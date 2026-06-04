@@ -6844,14 +6844,11 @@ function Case4Veteran() {
         playSfx('click')
         return
       }
-      setActionFeedback({
-        tone: 'caution',
-        title: 'FLAG NEEDS REVIEW',
-        message:
-          'This network does not match the strongest evidence. Continue investigation before filing the final malicious-network report.',
-      })
-      setPhase('networkFeedback')
+      setIncidentAction('flag-safe')
+      setRoute('wrongFlag')
+      setPhase('debrief')
       playSfx('wrong')
+      spendFailureLife('debrief')
       return
     }
     setIncidentAction(action)
@@ -7539,6 +7536,12 @@ function Case4Veteran() {
               <p className="text-sw-text3 text-sm">
                 Replay required. The investigation action must flag
                 Mall_Guest_Free as malicious before certification unlocks.
+              </p>
+            )}
+            {route === 'wrongFlag' && (
+              <p className="text-sw-text3 text-sm">
+                Replay required. You marked a legitimate mall access point as
+                malicious and missed the actual listening network.
               </p>
             )}
             {route === 'fieldFailed' && (
