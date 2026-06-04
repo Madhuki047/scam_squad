@@ -5636,7 +5636,7 @@ function Case4Rookie() {
     if (scenarioChoice) return
     setScenarioChoice(choice)
     setOutcomeStep(0)
-    setPhase(choice === 'rogue-wifi' ? 'fakePortal' : 'outcome')
+    setPhase(choice === 'rogue-wifi' ? 'fakePortal' : 'secureTransmission')
     playSfx('click')
   }
 
@@ -5983,6 +5983,54 @@ function Case4Rookie() {
                 A few moments later <IconArrowRight size={16} />
               </button>
             )}
+          </div>
+        </section>
+      )}
+
+      {phase === 'secureTransmission' && (
+        <section className="case-debrief scene-transition">
+          <div className="success-banner">SECURE UPLOAD CHANNEL</div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case4-transmission-panel" aria-live="polite">
+              <div className="case4-transmission-header">
+                <span>UNIT ZERO FIELD UPLINK</span>
+                <strong>SECURE</strong>
+              </div>
+              <div className="case4-transmission-grid" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
+              <div className="case4-transmission-status">
+                <span>SECURE CHANNEL ESTABLISHED</span>
+                <span>ENCRYPTION ACTIVE</span>
+                <span>FIELD REPORT TRANSMITTING...</span>
+                <span>TRANSMISSION COMPLETE</span>
+              </div>
+              <div className="case4-transmission-track">
+                <span />
+              </div>
+              <div className="case4-packet-stream" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </div>
+            </div>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start"
+              onClick={() => {
+                playSfx('pickup')
+                setPhase('outcome')
+              }}
+            >
+              Confirm Transmission <IconArrowRight size={16} />
+            </button>
           </div>
         </section>
       )}
