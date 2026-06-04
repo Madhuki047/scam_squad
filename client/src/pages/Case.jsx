@@ -1216,7 +1216,7 @@ const CASE4_KNOWLEDGE_CHECK = [
   },
 ]
 
-const CASE4_VETERAN_PASS_SCORE = 6
+const CASE4_VETERAN_PASS_SCORE = 5
 
 const CASE4_VETERAN_INTRO = [
   {
@@ -6845,10 +6845,8 @@ function Case4Veteran() {
         return
       }
       setIncidentAction('flag-safe')
-      setRoute('wrongFlag')
-      setPhase('debrief')
+      setPhase('flagged')
       playSfx('wrong')
-      spendFailureLife('debrief')
       return
     }
     setIncidentAction(action)
@@ -6882,8 +6880,16 @@ function Case4Veteran() {
   async function submitJudgments() {
     playSfx(incidentPassed && fieldPassed ? 'correct' : 'wrong')
     if (!incidentPassed || !fieldPassed) {
-      setRoute(!incidentPassed ? 'incidentFailed' : 'fieldFailed')
-      setPhase('debrief')
+      const investigationRoute =
+        incidentAction === 'flag-safe'
+          ? 'wrongFlag'
+          : incidentAction === 'ignore'
+            ? 'ignoredThreat'
+            : incidentAction === 'connect'
+              ? 'connectedThreat'
+              : 'incidentFailed'
+      setRoute(!incidentPassed ? investigationRoute : 'fieldFailed')
+      setPhase('failureSequence')
       await spendFailureLife('debrief')
       return
     }
@@ -7379,14 +7385,76 @@ function Case4Veteran() {
         </section>
       )}
 
+      {phase === 'failureSequence' && (
+        <section className="case-debrief scene-transition">
+          <div className="breach-banner">NETWORK INVESTIGATION FAILED</div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case4-upload-glitch" aria-live="polite">
+              <div className="case4-upload-label">
+                <span>RED PACKET TRACE</span>
+                <strong>ACTIVE</strong>
+              </div>
+              <div className="case4-upload-track">
+                <span />
+              </div>
+              <div className="case4-warning-scan">
+                CREDENTIAL LEAK CONTINUES
+              </div>
+              <p>The rogue access point remained active.</p>
+              <p>Credentials continued leaking across the mall.</p>
+            </div>
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">
+                {route === 'connectedThreat' ? 'AGENT ZOEY' : 'AGENT RICKY'}
+              </span>
+              {route === 'wrongFlag' && (
+                <p>
+                  You isolated the wrong access point. The malicious network
+                  kept listening.
+                </p>
+              )}
+              {route === 'ignoredThreat' && (
+                <p>Inaction let the credential harvest continue.</p>
+              )}
+              {route === 'connectedThreat' && (
+                <p>Testing by connecting exposed the government device.</p>
+              )}
+              {route === 'fieldFailed' && (
+                <p>
+                  You found the right network, but your report missed a critical
+                  threat indicator.
+                </p>
+              )}
+              {route === 'incidentFailed' && (
+                <p>
+                  The final network decision did not contain the rogue access
+                  point before the harvest continued.
+                </p>
+              )}
+            </div>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start"
+              onClick={() => {
+                setPhase('debrief')
+                playSfx('click')
+              }}
+              disabled={resolvingDebrief}
+            >
+              Open Failure Debrief <IconArrowRight size={16} />
+            </button>
+          </div>
+        </section>
+      )}
+
       {phase === 'quiz' && (
         <section className="case-debrief scene-transition">
           <div className="success-banner">FINAL CERTIFICATION - NETWORK NAVIGATOR</div>
           <div className="ss-card p-5 flex flex-col gap-4">
             <h2 className="font-pixel text-sw-cyan text-sm">Silent Listener certification</h2>
             <p className="text-sw-text2">
-              Each correct answer is worth 10 coins. Passing requires more than
-              50%, so 6 or more answers closes the Veteran file.
+              Each correct answer is worth 10 coins. Passing requires at least
+              50%, so 5 or more answers closes the Veteran file.
             </p>
             {!quizSubmitted ? (
               <>
@@ -7544,6 +7612,18 @@ function Case4Veteran() {
                 malicious and missed the actual listening network.
               </p>
             )}
+            {route === 'ignoredThreat' && (
+              <p className="text-sw-text3 text-sm">
+                Replay required. The malicious network was left active, allowing
+                the credential harvest to continue.
+              </p>
+            )}
+            {route === 'connectedThreat' && (
+              <p className="text-sw-text3 text-sm">
+                Replay required. Connecting to the suspect network exposed the
+                government device before the threat was contained.
+              </p>
+            )}
             {route === 'fieldFailed' && (
               <p className="text-sw-text3 text-sm">
                 Replay required. Every Veteran judgment call must be correct
@@ -7552,7 +7632,7 @@ function Case4Veteran() {
             )}
             {route === 'quizFailed' && (
               <p className="text-sw-text3 text-sm">
-                The final certification score was not above 50%. Replay is required.
+                The final certification score was below 50%. Replay is required.
               </p>
             )}
             <div className="flex flex-col sm:flex-row gap-3">
