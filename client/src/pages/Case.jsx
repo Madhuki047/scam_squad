@@ -1247,10 +1247,10 @@ const CASE4_VETERAN_NETWORKS = [
     name: 'Mall_Guest',
     encryption: 'WPA2',
     mac: '7C:21:A1:44:19:02',
-    signal: '72%',
-    traffic: 'Normal browsing, low login bursts',
-    deviceNames: 'Hidden by encrypted sessions',
-    verdict: 'Official guest network. Protected and stable.',
+    signal: '72% - strongest near information desk',
+    traffic: 'Normal browsing pattern with low login bursts',
+    deviceNames: 'Device metadata protected by encrypted sessions',
+    registry: 'Staff registry: approved guest access point record found',
     malicious: false,
   },
   {
@@ -1258,21 +1258,21 @@ const CASE4_VETERAN_NETWORKS = [
     name: 'Mall_Guest_5G',
     encryption: 'WPA3',
     mac: '7C:21:A1:44:19:05',
-    signal: '81%',
+    signal: '81% - strongest near customer services',
     traffic: 'Steady checkout and directory traffic',
-    deviceNames: 'Protected client names',
-    verdict: 'Official 5G guest network. Protected and stable.',
+    deviceNames: 'Client names masked in monitor view',
+    registry: 'Staff registry: approved 5G access point record found',
     malicious: false,
   },
   {
     id: 'mall-guest-free',
     name: 'Mall_Guest_Free',
-    encryption: 'OPEN',
-    mac: 'A4:91:2C:??:??:?? rotating',
-    signal: '96%',
-    traffic: 'Spikes when users log into social media',
-    deviceNames: 'Phone names visible in plain text',
-    verdict: 'Rogue access point. Open network, MAC spoofing, and packet sniffing indicators.',
+    encryption: 'Open',
+    mac: 'Changes detected across scan windows',
+    signal: '96% - unusually strong near food court',
+    traffic: 'Login bursts at repeated intervals',
+    deviceNames: 'Some device names visible in plain text',
+    registry: 'Staff registry: no matching approved access point record',
     malicious: true,
   },
 ]
@@ -6642,6 +6642,7 @@ function Case4Veteran() {
   const [inspected, setInspected] = useState({})
   const [selectedNetwork, setSelectedNetwork] = useState(null)
   const [incidentAction, setIncidentAction] = useState(null)
+  const [actionFeedback, setActionFeedback] = useState(null)
   const [malwareInstalled, setMalwareInstalled] = useState(false)
   const [judgmentAnswers, setJudgmentAnswers] = useState({})
   const [currentJudgmentIndex, setCurrentJudgmentIndex] = useState(0)
@@ -6700,6 +6701,7 @@ function Case4Veteran() {
     setInspected({})
     setSelectedNetwork(null)
     setIncidentAction(null)
+    setActionFeedback(null)
     setMalwareInstalled(false)
     setJudgmentAnswers({})
     setCurrentJudgmentIndex(0)
@@ -6816,6 +6818,42 @@ function Case4Veteran() {
 
   function chooseAction(action) {
     if (!selectedNetwork) return
+    const network = CASE4_VETERAN_NETWORKS.find(
+      (item) => item.id === selectedNetwork,
+    )
+    if (!network?.malicious) {
+      if (action === 'ignore') {
+        setActionFeedback({
+          tone: 'neutral',
+          title: 'NO ACTIVE THREAT FOUND',
+          message:
+            'No active threat found on this network. Continue investigation and compare the remaining access points.',
+        })
+        setPhase('networkFeedback')
+        playSfx('click')
+        return
+      }
+      if (action === 'connect') {
+        setActionFeedback({
+          tone: 'caution',
+          title: 'CONNECTION TEST COMPLETED',
+          message:
+            'Connection test completed, but Unit Zero policy discourages connecting unnecessarily. Continue analysis.',
+        })
+        setPhase('networkFeedback')
+        playSfx('click')
+        return
+      }
+      setActionFeedback({
+        tone: 'caution',
+        title: 'FLAG NEEDS REVIEW',
+        message:
+          'This network does not match the strongest evidence. Continue investigation before filing the final malicious-network report.',
+      })
+      setPhase('networkFeedback')
+      playSfx('wrong')
+      return
+    }
     setIncidentAction(action)
     if (action === 'connect') {
       setPhase('malware')
@@ -6999,14 +7037,16 @@ function Case4Veteran() {
                     className={`case4-veteran-network ${selected ? 'selected' : ''}`}
                     onClick={() => {
                       setSelectedNetwork(network.id)
+                      setInspected({})
+                      setActionFeedback(null)
                       playSfx('click')
                     }}
                   >
-                    <span className={network.encryption === 'OPEN' ? 'open' : 'locked'}>
-                      {network.encryption === 'OPEN' ? 'OPEN' : 'LOCK'}
+                    <span className={network.encryption === 'Open' ? 'open' : 'locked'}>
+                      {network.encryption === 'Open' ? 'OPEN' : 'LOCK'}
                     </span>
                     <strong>{network.name}</strong>
-                    <em>{network.signal} signal</em>
+                    <em>Signal detected</em>
                     <div className="case4-wifi-rings" aria-hidden="true">
                       <span />
                       <span />
@@ -7046,26 +7086,38 @@ function Case4Veteran() {
               <div className="case4-analysis-console mt-4">
                 <div className="case4-analysis-header">
                   <span>{activeNetwork.name}</span>
-                  <strong>{activeNetwork.malicious ? 'SUSPICIOUS PACKETS' : 'STABLE'}</strong>
+                  <strong>SCAN WINDOW ACTIVE</strong>
                 </div>
                 <div className="case4-analysis-grid">
                   <article className={inspected.encryption ? 'visible' : ''}>
                     <span>Encryption</span>
-                    <strong>{activeNetwork.encryption}</strong>
+                    <strong>
+                      {inspected.encryption ? activeNetwork.encryption : 'Awaiting analysis'}
+                    </strong>
                   </article>
                   <article className={inspected.mac ? 'visible' : ''}>
                     <span>MAC trace</span>
-                    <strong className={activeNetwork.malicious ? 'case4-mac-flicker' : ''}>
-                      {activeNetwork.mac}
+                    <strong
+                      className={
+                        inspected.mac && activeNetwork.malicious
+                          ? 'case4-mac-flicker'
+                          : ''
+                      }
+                    >
+                      {inspected.mac ? activeNetwork.mac : 'Awaiting analysis'}
                     </strong>
                   </article>
                   <article className={inspected.signal ? 'visible' : ''}>
                     <span>Signal</span>
-                    <strong>{activeNetwork.signal}</strong>
+                    <strong>
+                      {inspected.signal ? activeNetwork.signal : 'Awaiting analysis'}
+                    </strong>
                   </article>
                   <article className={inspected.traffic ? 'visible' : ''}>
                     <span>Traffic</span>
-                    <strong>{activeNetwork.traffic}</strong>
+                    <strong>
+                      {inspected.traffic ? activeNetwork.traffic : 'Awaiting analysis'}
+                    </strong>
                   </article>
                 </div>
                 <div className="case4-traffic-chart" aria-hidden="true">
@@ -7076,10 +7128,16 @@ function Case4Veteran() {
                   <span />
                   <span />
                 </div>
-                <p className="text-sw-text2">{activeNetwork.deviceNames}</p>
-                <div className={activeNetwork.malicious ? 'breach-banner' : 'success-banner'}>
-                  {activeNetwork.verdict}
-                </div>
+                <p className="text-sw-text2">
+                  {inspected.traffic
+                    ? activeNetwork.deviceNames
+                    : 'Run traffic logs to reveal device metadata.'}
+                </p>
+                {Object.keys(inspected).length >= 4 && (
+                  <div className="case4-registry-note">
+                    {activeNetwork.registry}
+                  </div>
+                )}
               </div>
             )}
 
@@ -7110,6 +7168,43 @@ function Case4Veteran() {
               </button>
             </div>
           </article>
+        </section>
+      )}
+
+      {phase === 'networkFeedback' && actionFeedback && (
+        <section className="case-debrief scene-transition">
+          <div
+            className={
+              actionFeedback.tone === 'neutral'
+                ? 'success-banner'
+                : 'case4-caution-banner'
+            }
+          >
+            {actionFeedback.title}
+          </div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case4-transmission-panel">
+              <div className="case4-transmission-header">
+                <span>NETWORK REVIEW NOTE</span>
+                <strong>CONTINUE SCAN</strong>
+              </div>
+              <div className="case4-transmission-status">
+                <span>{activeNetwork.name}</span>
+                <span>{actionFeedback.message}</span>
+                <span>Return to scanner and compare remaining access points.</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start"
+              onClick={() => {
+                setPhase('scan')
+                playSfx('click')
+              }}
+            >
+              Return to Scanner <IconArrowRight size={16} />
+            </button>
+          </div>
         </section>
       )}
 
