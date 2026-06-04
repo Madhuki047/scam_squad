@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
-// Account creation. Username + password are required; email is OPTIONAL
-// - adding one turns on 2FA (an emailed code) for future logins.
+// Account creation. Username, email and password are required; the emailed
+// PIN must be verified before the first session is issued.
 // The backend enforces the real rules (username >= 3, password >= 8).
 export default function Register() {
   const { isAuthenticated, loading, register } = useAuth()
@@ -24,7 +24,10 @@ export default function Register() {
     if (username.trim().length < 3) {
       return 'Code name must be at least 3 characters.'
     }
-    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email.trim())) {
+    if (!email.trim()) {
+      return 'Email is required for Agent Verification.'
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
       return 'That email address looks invalid.'
     }
     if (password.length < 8) {
@@ -47,8 +50,8 @@ export default function Register() {
     setError('')
     setSubmitting(true)
     try {
-      await register(username.trim(), password, email.trim() || undefined)
-      navigate('/home')
+      await register(username.trim(), password, email.trim())
+      navigate('/verify-otp')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -82,15 +85,14 @@ export default function Register() {
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sw-text3">
-            Email <span className="text-sw-text3">(optional — enables 2FA)</span>
-          </span>
+          <span className="text-sw-text3">Email for Agent Verification</span>
           <input
             className="ss-input"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
+            required
           />
         </label>
 

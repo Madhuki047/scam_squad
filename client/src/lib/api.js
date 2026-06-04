@@ -66,10 +66,20 @@ export const api = {
     }),
   login: (username, password) =>
     request('/auth/login', { method: 'POST', body: { username, password } }),
+  addEmailForVerification: (pendingToken, email) =>
+    request('/auth/add-email', {
+      method: 'POST',
+      body: { pendingToken, email },
+    }),
   verifyOtp: (pendingToken, code) =>
     request('/auth/verify-otp', {
       method: 'POST',
       body: { pendingToken, code },
+    }),
+  resendOtp: (pendingToken) =>
+    request('/auth/resend-otp', {
+      method: 'POST',
+      body: { pendingToken },
     }),
   logout: (token) => request('/auth/logout', { method: 'POST', token }),
 

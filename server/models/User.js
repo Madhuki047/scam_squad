@@ -27,15 +27,24 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // Optional. When set, logins require an emailed OTP (2FA). Indexed
-    // `sparse` so the many accounts WITHOUT an email do not collide on
-    // the unique index - only accounts that actually set one are checked.
+    // Email is used for PIN delivery and future password reset only. It is
+    // intentionally not unique: multiple agents may share a family/school email.
     email: {
       type: String,
       trim: true,
       lowercase: true,
-      unique: true,
-      sparse: true,
+    },
+    emailVerified: { type: Boolean, default: false },
+    twoFactorEnabled: { type: Boolean, default: true },
+    verificationCodeHash: { type: String, default: null },
+    verificationCodeExpires: { type: Date, default: null },
+    verificationCodeSentAt: { type: Date, default: null },
+    verificationCodeAttempts: { type: Number, default: 0, min: 0 },
+    pendingEmail: {
+      type: String,
+      lowercase: true,
+      trim: true,
+      default: null,
     },
 
     // --- Currency -----------------------------------------------------

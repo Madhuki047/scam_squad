@@ -2,25 +2,25 @@ import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 import { applyRegen } from '../services/livesService.js'
-import { saveOtp, checkOtp } from '../services/otpStore.js'
 import { sendOtpEmail } from '../services/mailService.js'
+
+const PIN_TTL_MS = 10 * 60 * 1000
+const PIN_RESEND_MS = 60 * 1000
+const PIN_MAX_ATTEMPTS = 5
+let legacyEmailIndexDropStarted = false
 
 // --- token helpers ---------------------------------------------------
 
-// Full 7-day session token. The `protect` middleware accepts these.
 function createSessionToken(userId) {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '7d' })
 }
 
-// Short-lived token that proves the password step passed but 2FA has
-// NOT. Only verifyOtp accepts it; `protect` explicitly rejects it.
-function createPendingToken(userId) {
-  return jwt.sign({ id: userId, pending: true }, process.env.JWT_SECRET, {
+function createPendingToken(userId, purpose = 'login') {
+  return jwt.sign({ id: userId, pending: true, purpose }, process.env.JWT_SECRET, {
     expiresIn: '10m',
   })
 }
 
-// Standard shape returned for a fully completed sign-in.
 function sessionResponse(user) {
   return {
     token: createSessionToken(user._id),
@@ -28,32 +28,117 @@ function sessionResponse(user) {
   }
 }
 
-// agent@mail.com -> a***t@mail.com, so the UI can hint where the code went.
-function maskEmail(email) {
-  const [name, domain] = email.split('@')
-  if (name.length <= 2) return `${name[0]}***@${domain}`
+function maskEmail(email = '') {
+  const [name = '', domain = ''] = email.split('@')
+  if (!name || !domain) return ''
+  if (name.length <= 2) return `${name[0] || '*'}***@${domain}`
   return `${name[0]}${'*'.repeat(name.length - 2)}${name.slice(-1)}@${domain}`
+}
+
+function hashPin(pin) {
+  return crypto
+    .createHmac('sha256', process.env.JWT_SECRET)
+    .update(String(pin))
+    .digest('hex')
+}
+
+function generatePin() {
+  return String(crypto.randomInt(100000, 1000000))
+}
+
+function clearVerification(user) {
+  user.verificationCodeHash = null
+  user.verificationCodeExpires = null
+  user.verificationCodeSentAt = null
+  user.verificationCodeAttempts = 0
+  user.pendingEmail = null
+}
+
+async function issueVerificationPin(user, { force = false, email } = {}) {
+  const targetEmail = email || user.email
+  if (!targetEmail) {
+    const error = new Error('Add an email address before email verification can be used.')
+    error.status = 409
+    throw error
+  }
+
+  const now = Date.now()
+  const lastSent = user.verificationCodeSentAt?.getTime?.() || 0
+  if (!force && lastSent && now - lastSent < PIN_RESEND_MS) {
+    const waitSeconds = Math.ceil((PIN_RESEND_MS - (now - lastSent)) / 1000)
+    const error = new Error(`Please wait ${waitSeconds} seconds before requesting another PIN.`)
+    error.status = 429
+    throw error
+  }
+
+  const pin = generatePin()
+  user.verificationCodeHash = hashPin(pin)
+  user.verificationCodeExpires = new Date(now + PIN_TTL_MS)
+  user.verificationCodeSentAt = new Date(now)
+  user.verificationCodeAttempts = 0
+  await sendOtpEmail(targetEmail, pin)
+  await user.save()
+}
+
+function pendingResponse(user, purpose, email = user.email) {
+  return {
+    otpRequired: true,
+    pendingToken: createPendingToken(user._id, purpose),
+    emailHint: maskEmail(email),
+    purpose,
+    expiresInSeconds: Math.floor(PIN_TTL_MS / 1000),
+  }
+}
+
+function verifyPendingToken(pendingToken) {
+  try {
+    const payload = jwt.verify(pendingToken, process.env.JWT_SECRET)
+    if (!payload.pending) return null
+    return payload
+  } catch {
+    return null
+  }
+}
+
+function normalizeEmail(email) {
+  return email?.trim().toLowerCase()
+}
+
+function isValidEmail(email) {
+  return /^\S+@\S+\.\S+$/.test(email)
+}
+
+async function dropLegacyEmailUniqueIndex() {
+  if (legacyEmailIndexDropStarted) return
+  legacyEmailIndexDropStarted = true
+  try {
+    await User.collection.dropIndex('email_1')
+    console.info('[auth] Dropped legacy unique email index.')
+  } catch (error) {
+    if (error?.codeName !== 'IndexNotFound' && error?.code !== 27) {
+      console.warn('[auth] Could not drop legacy email index:', error.message)
+    }
+  }
 }
 
 // --- controllers -----------------------------------------------------
 
-// POST /api/auth/register - create a player account. Email is OPTIONAL;
-// supplying one means future logins will require an emailed OTP.
 export async function register(req, res, next) {
   try {
     const { username, password, email } = req.body
+    const normalizedEmail = normalizeEmail(email)
 
-    if (!username || !password) {
+    if (!username || !password || !normalizedEmail) {
       return res
         .status(400)
-        .json({ message: 'Username and password are required.' })
+        .json({ message: 'Username, password, and email are required.' })
     }
     if (password.length < 8) {
       return res
         .status(400)
         .json({ message: 'Password must be at least 8 characters.' })
     }
-    if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+    if (!isValidEmail(normalizedEmail)) {
       return res
         .status(400)
         .json({ message: 'That email address looks invalid.' })
@@ -64,29 +149,23 @@ export async function register(req, res, next) {
         .status(409)
         .json({ message: 'That code name is already taken.' })
     }
-    if (email && (await User.findOne({ email: email.toLowerCase() }))) {
-      return res
-        .status(409)
-        .json({ message: 'That email is already registered.' })
-    }
+    await dropLegacyEmailUniqueIndex()
 
-    const user = await User.create({
+    const user = new User({
       username,
       password,
-      ...(email ? { email } : {}),
+      email: normalizedEmail,
+      emailVerified: false,
+      twoFactorEnabled: true,
     })
 
-    // Registration signs the player straight in - no OTP on the first
-    // session (the email is not verified yet, and this keeps sign-up simple).
-    res.status(201).json(sessionResponse(user))
+    await issueVerificationPin(user, { force: true })
+    res.status(201).json(pendingResponse(user, 'register'))
   } catch (error) {
     next(error)
   }
 }
 
-// POST /api/auth/login - verify the password. Accounts with an email get
-// only a PENDING token plus an emailed OTP and must finish at
-// /verify-otp; email-less accounts sign in immediately.
 export async function login(req, res, next) {
   try {
     const { username, password } = req.body
@@ -94,10 +173,11 @@ export async function login(req, res, next) {
     if (!username || !password) {
       return res
         .status(400)
-        .json({ message: 'Username and password are required.' })
+        .json({ message: 'Code name and password are required.' })
     }
 
-    const user = await User.findOne({ username })
+    const identifier = username.trim()
+    const user = await User.findOne({ username: identifier })
     const passwordMatches = user && (await user.comparePassword(password))
     if (!passwordMatches) {
       return res
@@ -105,78 +185,163 @@ export async function login(req, res, next) {
         .json({ message: 'Invalid code name or password.' })
     }
 
-    applyRegen(user)
-    user.lastLogin = new Date()
-    await user.save()
-
-    // No email on file -> no second factor, straight in.
     if (!user.email) {
-      return res.json(sessionResponse(user))
+      return res.json({
+        requiresEmailSetup: true,
+        pendingToken: createPendingToken(user._id, 'add_email'),
+        purpose: 'add_email',
+        message:
+          'Your old agent profile needs an email before secure verification can be enabled.',
+      })
     }
 
-    // 2FA: generate, store and email a 6-digit code.
-    const code = String(crypto.randomInt(100000, 1000000))
-    await saveOtp(String(user._id), code)
-    await sendOtpEmail(user.email, code)
+    applyRegen(user)
+    user.lastLogin = new Date()
+    if (user.emailVerified == null) user.emailVerified = false
+    if (user.twoFactorEnabled == null) user.twoFactorEnabled = true
+    await issueVerificationPin(user, { force: true })
 
-    res.json({
-      otpRequired: true,
-      pendingToken: createPendingToken(user._id),
-      emailHint: maskEmail(user.email),
-    })
+    res.json(pendingResponse(user, 'login'))
   } catch (error) {
     next(error)
   }
 }
 
-// POST /api/auth/verify-otp - exchange a pending token + OTP for a full
-// session.
-export async function verifyOtp(req, res, next) {
+export async function addEmailForVerification(req, res, next) {
   try {
-    const { pendingToken, code } = req.body
-    if (!pendingToken || !code) {
-      return res
-        .status(400)
-        .json({ message: 'Verification code is required.' })
+    const { pendingToken, email } = req.body
+    const normalizedEmail = normalizeEmail(email)
+
+    if (!pendingToken) {
+      return res.status(400).json({ message: 'Verification session is required.' })
+    }
+    if (!normalizedEmail) {
+      return res.status(400).json({ message: 'Email is required.' })
+    }
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({ message: 'That email address looks invalid.' })
     }
 
-    let payload
-    try {
-      payload = jwt.verify(pendingToken, process.env.JWT_SECRET)
-    } catch {
+    const payload = verifyPendingToken(pendingToken)
+    if (!payload || payload.purpose !== 'add_email') {
       return res
         .status(401)
-        .json({ message: 'Your sign-in attempt expired. Please log in again.' })
-    }
-    if (!payload.pending) {
-      return res.status(400).json({ message: 'Invalid verification request.' })
-    }
-
-    const result = await checkOtp(payload.id, String(code).trim())
-    if (result === 'expired') {
-      return res
-        .status(401)
-        .json({ message: 'That code has expired. Please log in again.' })
-    }
-    if (result === 'mismatch') {
-      return res.status(401).json({ message: 'Incorrect code. Try again.' })
+        .json({ message: 'Your email verification session expired. Please log in again.' })
     }
 
     const user = await User.findById(payload.id)
-    if (!user) {
-      return res.status(404).json({ message: 'Account not found.' })
+    if (!user) return res.status(404).json({ message: 'Account not found.' })
+    if (user.email) {
+      return res.status(409).json({
+        message: 'This account already has an email address. Please log in again.',
+      })
     }
-    if (applyRegen(user)) await user.save()
+    await dropLegacyEmailUniqueIndex()
+    user.pendingEmail = normalizedEmail
+    await issueVerificationPin(user, { force: true, email: normalizedEmail })
+    res.json(pendingResponse(user, 'add_email', normalizedEmail))
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function verifyOtp(req, res, next) {
+  try {
+    const { pendingToken, code } = req.body
+    const pin = String(code || '').trim()
+    if (!pendingToken || !pin) {
+      return res.status(400).json({ message: 'Verification PIN is required.' })
+    }
+    if (!/^\d{6}$/.test(pin)) {
+      return res.status(400).json({ message: 'Enter the 6-digit verification PIN.' })
+    }
+
+    const payload = verifyPendingToken(pendingToken)
+    if (!payload) {
+      return res
+        .status(401)
+        .json({ message: 'Your verification attempt expired. Please log in again.' })
+    }
+
+    const user = await User.findById(payload.id)
+    if (!user) return res.status(404).json({ message: 'Account not found.' })
+    const targetEmail =
+      payload.purpose === 'add_email' ? user.pendingEmail : user.email
+    if (!targetEmail) {
+      return res.status(409).json({
+        message: 'No email address is attached to this verification request.',
+      })
+    }
+    if (!user.verificationCodeHash || !user.verificationCodeExpires) {
+      return res.status(400).json({ message: 'No verification PIN is active.' })
+    }
+    if (user.verificationCodeExpires.getTime() < Date.now()) {
+      clearVerification(user)
+      await user.save()
+      return res
+        .status(401)
+        .json({ message: 'That PIN has expired. Request a new one.' })
+    }
+
+    if (user.verificationCodeHash !== hashPin(pin)) {
+      user.verificationCodeAttempts = (user.verificationCodeAttempts || 0) + 1
+      if (user.verificationCodeAttempts >= PIN_MAX_ATTEMPTS) {
+        clearVerification(user)
+        await user.save()
+        return res
+          .status(401)
+          .json({ message: 'Too many incorrect PIN attempts. Request a new PIN.' })
+      }
+      await user.save()
+      return res.status(401).json({ message: 'Invalid verification PIN.' })
+    }
+
+    if (payload.purpose === 'add_email') {
+      await dropLegacyEmailUniqueIndex()
+      user.email = targetEmail
+    }
+    user.emailVerified = true
+    user.twoFactorEnabled = user.twoFactorEnabled ?? true
+    clearVerification(user)
+    if (applyRegen(user)) {
+      // applyRegen mutates the user; save below covers it.
+    }
+    await user.save()
     res.json(sessionResponse(user))
   } catch (error) {
     next(error)
   }
 }
 
-// POST /api/auth/logout - JWTs are stateless, so "logging out" is really
-// the client discarding its token. This endpoint exists so the client
-// has one place to call; server-side token revocation (a Redis denylist)
-// is a later hardening step.
+export async function resendOtp(req, res, next) {
+  try {
+    const { pendingToken } = req.body
+    if (!pendingToken) {
+      return res.status(400).json({ message: 'Verification session is required.' })
+    }
+
+    const payload = verifyPendingToken(pendingToken)
+    if (!payload) {
+      return res
+        .status(401)
+        .json({ message: 'Your verification attempt expired. Please log in again.' })
+    }
+
+    const user = await User.findById(payload.id)
+    if (!user) return res.status(404).json({ message: 'Account not found.' })
+    const targetEmail =
+      payload.purpose === 'add_email' ? user.pendingEmail : user.email
+    await issueVerificationPin(user, { email: targetEmail })
+    res.json({
+      ok: true,
+      emailHint: maskEmail(targetEmail),
+      expiresInSeconds: Math.floor(PIN_TTL_MS / 1000),
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export function logout(req, res) {
   res.json({ ok: true })
 }

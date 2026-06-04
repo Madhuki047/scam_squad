@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
-// Sign-in screen. On success, accounts with an email are sent to the
-// OTP step (/verify-otp); email-less accounts go straight to Home.
+// Sign-in screen. Password validation is followed by email PIN verification.
 export default function Login() {
   const { isAuthenticated, loading, login } = useAuth()
   const navigate = useNavigate()
@@ -22,7 +21,14 @@ export default function Login() {
     setError('')
     setSubmitting(true)
     try {
-      const { otpRequired } = await login(username.trim(), password)
+      const { otpRequired, requiresEmailSetup } = await login(
+        username.trim(),
+        password,
+      )
+      if (requiresEmailSetup) {
+        navigate('/verify-email')
+        return
+      }
       navigate(otpRequired ? '/verify-otp' : '/home')
     } catch (err) {
       setError(err.message)
