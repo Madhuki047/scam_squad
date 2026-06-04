@@ -1,44 +1,30 @@
-import nodemailer from 'nodemailer'
-
 // Transactional mail for Scam Squad authentication.
-// Provider: Nodemailer over Gmail SMTP.
+// Provider: Resend API.
 //
-// Required environment variables:
-// - Preferred: SMTP_USER, SMTP_PASS, optional SMTP_FROM
-// - Backward-compatible aliases: GMAIL_USER, GMAIL_APP_PASSWORD
+// Required Railway variable:
+// - RESEND_API_KEY
+//
+// Optional sender variables:
+// - EMAIL_FROM
+// - RESEND_FROM
 //
 // Development fallback:
-// - If no SMTP credentials are configured and NODE_ENV !== 'production',
+// - If RESEND_API_KEY is missing and NODE_ENV !== 'production',
 //   the PIN is logged to the server console so local auth can be tested.
 // - PINs are never logged in production.
 
-let transporter = null
+const RESEND_EMAIL_URL = 'https://api.resend.com/emails'
+const DEFAULT_FROM = 'Scam Squad <onboarding@resend.dev>'
 
 function isProduction() {
   return process.env.NODE_ENV === 'production'
 }
 
-function getSmtpConfig() {
-  const user = process.env.SMTP_USER || process.env.GMAIL_USER
-  const pass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD
-  const from = process.env.SMTP_FROM || user
-  return { user, pass, from }
-}
-
-function getTransporter() {
-  if (transporter) return transporter
-
-  const { user, pass } = getSmtpConfig()
-  if (!user || !pass) return null
-
-  transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user, pass },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
-  })
-  return transporter
+function getMailConfig() {
+  return {
+    apiKey: process.env.RESEND_API_KEY,
+    from: process.env.EMAIL_FROM || process.env.RESEND_FROM || DEFAULT_FROM,
+  }
 }
 
 function mailError(message) {
@@ -47,46 +33,75 @@ function mailError(message) {
   return error
 }
 
-function safeSmtpError(error) {
+function safeResendError(status, body) {
   return {
-    code: error?.code,
-    command: error?.command,
-    responseCode: error?.responseCode,
-    message: error?.message,
+    status,
+    message: body?.message,
+    name: body?.name,
+  }
+}
+
+async function readJsonSafely(response) {
+  try {
+    return await response.json()
+  } catch {
+    return {}
   }
 }
 
 export async function sendOtpEmail(to, code) {
-  const tx = getTransporter()
+  const { apiKey, from } = getMailConfig()
 
-  if (!tx) {
+  if (!apiKey) {
     if (!isProduction()) {
       console.warn(
-        `[mailService] SMTP not configured. Development PIN for ${to}: ${code}`,
+        `[mailService] RESEND_API_KEY not configured. Development PIN for ${to}: ${code}`,
       )
       return
     }
     throw mailError(
-      'Verification email could not be sent because SMTP is not configured.',
+      'Verification email could not be sent because RESEND_API_KEY is not configured.',
     )
   }
 
+  const payload = {
+    from,
+    to,
+    subject: 'Your Scam Squad verification PIN',
+    text: `Agent, your secure access PIN is ${code}. It expires in 10 minutes.`,
+    html: `<p>Agent, your secure access PIN is <strong style="font-size:20px">${code}</strong>.</p><p>It expires in 10 minutes.</p>`,
+  }
+
+  let response
   try {
-    const { from } = getSmtpConfig()
-    await tx.sendMail({
-      from,
-      to,
-      subject: 'Your Scam Squad verification PIN',
-      text: `Agent, your secure access PIN is ${code}. It expires in 10 minutes.`,
-      html: `<p>Agent, your secure access PIN is <strong style="font-size:20px">${code}</strong>.</p><p>It expires in 10 minutes.</p>`,
+    response = await fetch(RESEND_EMAIL_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
     })
   } catch (error) {
+    console.error('[mailService] Resend request failed:', {
+      name: error?.name,
+      message: error?.message,
+      causeCode: error?.cause?.code,
+    })
+    throw mailError(
+      'Verification email could not be sent. Resend API request failed.',
+    )
+  }
+
+  if (!response.ok) {
+    const body = await readJsonSafely(response)
     console.error(
-      '[mailService] Failed to send verification email:',
-      safeSmtpError(error),
+      '[mailService] Resend rejected verification email:',
+      safeResendError(response.status, body),
     )
     throw mailError(
-      'Verification email could not be sent. Check mail configuration and try again.',
+      body?.message ||
+        'Verification email could not be sent. Check Resend configuration and try again.',
     )
   }
 }
