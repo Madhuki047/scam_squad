@@ -4051,6 +4051,45 @@ html.ss-high-contrast {
   bottom: 1rem;
 }
 
+.case4-wifi-card {
+  align-items: center;
+}
+
+.case4-wifi-lock {
+  display: grid;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2rem;
+  place-items: center;
+  border: 1.5px solid currentColor;
+  border-radius: 0.2rem;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 0 14px rgba(93, 213, 232, 0.15);
+}
+
+.case4-wifi-secure .case4-wifi-lock {
+  color: var(--cyan);
+  background: rgba(93, 213, 232, 0.12);
+}
+
+.case4-wifi-open {
+  border-color: rgba(255, 78, 201, 0.72);
+  background: rgba(255, 78, 201, 0.12);
+}
+
+.case4-wifi-open .case4-wifi-lock {
+  color: var(--pink);
+  background: rgba(255, 78, 201, 0.18);
+  box-shadow: 0 0 18px rgba(255, 78, 201, 0.24);
+}
+
+.case4-wifi-open h3 {
+  color: var(--pink);
+}
+
 @media (max-width: 820px) {
   .case2-intro-grid,
   .case2-thread-layout,

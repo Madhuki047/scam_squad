@@ -15,6 +15,7 @@ import threadImage6 from '../assets/case2/thread6.jpeg'
 import threadImage7 from '../assets/case2/thread7.jpeg'
 import threadImage8 from '../assets/case2/thread8.jpeg'
 import fillerImage from '../assets/filler.jpg'
+import oxfordCircusStationImage from '../assets/case4/oxford-circus-station.svg'
 
 const INTRO_STEPS = [
   {
@@ -1107,10 +1108,26 @@ const CASE4_ROOKIE_INTRO = [
 ]
 
 const CASE4_WIFI_NETWORKS = [
-  'TFL_WiFi_Official',
-  'TFL_WiFi_Free',
-  'FREE_TUBE_WIFI_123',
-  'UnitZero_Guest',
+  {
+    name: 'TFL_WiFi_Official',
+    secure: true,
+    status: 'Protected network',
+  },
+  {
+    name: 'TFL_WiFi_Free',
+    secure: true,
+    status: 'Protected network',
+  },
+  {
+    name: 'FREE_TUBE_WIFI_123',
+    secure: false,
+    status: 'Open network',
+  },
+  {
+    name: 'UnitZero_Guest',
+    secure: true,
+    status: 'Protected network',
+  },
 ]
 
 const CASE4_FAILURE_DIALOGUE = [
@@ -5822,7 +5839,7 @@ function Case4Rookie() {
                 <span>Central Line crowding</span>
               </div>
               <div className="case2-veteran-post-frame">
-                <img src={fillerImage} alt="" />
+                <img src={oxfordCircusStationImage} alt="" />
                 <div className="case2-veteran-post-copy">
                   <strong>Commuters move past announcements and arriving trains.</strong>
                   <span>Your laptop needs a network to upload the field report.</span>
@@ -5833,11 +5850,18 @@ function Case4Rookie() {
               <span className="font-pixel text-sw-yellow text-xs">AVAILABLE WI-FI</span>
               <div className="case2-score-grid mt-2">
                 {CASE4_WIFI_NETWORKS.map((network) => (
-                  <article key={network} className="red-flag-card">
-                    <IconFlag size={18} />
+                  <article
+                    key={network.name}
+                    className={`red-flag-card case4-wifi-card ${
+                      network.secure ? 'case4-wifi-secure' : 'case4-wifi-open'
+                    }`}
+                  >
+                    <span className="case4-wifi-lock" aria-hidden="true">
+                      {network.secure ? 'LOCK' : 'OPEN'}
+                    </span>
                     <div>
-                      <h3>{network}</h3>
-                      <p>Signal detected near platform level.</p>
+                      <h3>{network.name}</h3>
+                      <p>{network.status}</p>
                     </div>
                   </article>
                 ))}
