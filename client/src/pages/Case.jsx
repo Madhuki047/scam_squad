@@ -5656,9 +5656,9 @@ function Case4Rookie() {
 
   function primeFakePortalCredentials() {
     setFakePortalEmail((value) =>
-      value.trim() ? value : 'cadet.training@unitzero.gov',
+      value.trim() ? value : 'cadet@unitzero.gov',
     )
-    setFakePortalPassword((value) => (value.trim() ? value : 'training-only'))
+    setFakePortalPassword((value) => (value.trim() ? value : '---'))
   }
 
   async function spendFailureLife(nextAction) {
@@ -5964,9 +5964,19 @@ function Case4Rookie() {
               ) : (
                 <>
                   <div className="success-banner mt-3">Verification Complete</div>
-                  <p className="text-sw-text3">
-                    The upload does not start. The portal closes like nothing happened.
-                  </p>
+                  <div className="case4-upload-glitch" aria-live="polite">
+                    <div className="case4-upload-label">
+                      <span>FIELD REPORT UPLOAD</span>
+                      <strong>0%</strong>
+                    </div>
+                    <div className="case4-upload-track">
+                      <span />
+                    </div>
+                    <div className="case4-warning-scan">
+                      UNKNOWN RELAY DETECTED
+                    </div>
+                    <p>Credentials transmitted... Upload stalled.</p>
+                  </div>
                 </>
               )}
             </div>
@@ -6013,10 +6023,10 @@ function Case4Rookie() {
               label={`${internName} - YOU`}
               position="pixel-intern-left"
             />
-            <div className="case3-zoey-station">
+            <div className="case4-ricky-station">
               <PixelPerson role="jane" label="AGENT RICKY" />
             </div>
-            <div className="case-bubble case-bubble-jane case3-dialogue-bubble">
+            <div className="case-bubble case-bubble-jane case4-ricky-bubble">
               <span className="text-sw-yellow">Agent Ricky</span>
               <p>{activeOutcomeDialogue[outcomeStep]}</p>
             </div>
