@@ -47,6 +47,12 @@ export const BADGES = {
     message: 'You avoided a rogue public Wi-Fi trap.',
     icon: 'shield',
   },
+  eyesOpenBeginner: {
+    id: 'eyes-open-beginner',
+    name: 'Eyes Open - Beginner',
+    message: 'You reviewed AI-manipulated evidence without over-trusting the image.',
+    icon: 'eye',
+  },
 }
 
 export const BADGE_CATALOG = [
@@ -64,6 +70,7 @@ export const BADGE_CATALOG = [
   BADGES.humanFirewallBeginner,
   BADGES.humanFirewall,
   BADGES.networkNavigator,
+  BADGES.eyesOpenBeginner,
   { id: 'night-owl', name: 'Night Owl' },
   { id: 'perfect-run', name: 'Perfect Run' },
   { id: 'mentor', name: 'Mentor' },
