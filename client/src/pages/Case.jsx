@@ -1216,6 +1216,285 @@ const CASE4_KNOWLEDGE_CHECK = [
   },
 ]
 
+const CASE4_VETERAN_PASS_SCORE = 6
+
+const CASE4_VETERAN_INTRO = [
+  {
+    speaker: 'Agent Ricky',
+    role: 'jane',
+    text: 'Cadet, you handled the Tube hotspot. Now we go deeper.',
+  },
+  {
+    speaker: 'Agent Zoey',
+    role: 'zoey',
+    text: 'This time, you are not choosing a network. You are analysing one.',
+  },
+  {
+    speaker: 'Agent Ricky',
+    role: 'jane',
+    text: 'A shopping mall reported strange Wi-Fi behaviour. Three networks look almost identical.',
+  },
+  {
+    speaker: 'Agent Zoey',
+    role: 'zoey',
+    text: 'One of them is listening.',
+  },
+]
+
+const CASE4_VETERAN_NETWORKS = [
+  {
+    id: 'mall-guest',
+    name: 'Mall_Guest',
+    encryption: 'WPA2',
+    mac: '7C:21:A1:44:19:02',
+    signal: '72%',
+    traffic: 'Normal browsing, low login bursts',
+    deviceNames: 'Hidden by encrypted sessions',
+    verdict: 'Official guest network. Protected and stable.',
+    malicious: false,
+  },
+  {
+    id: 'mall-guest-5g',
+    name: 'Mall_Guest_5G',
+    encryption: 'WPA3',
+    mac: '7C:21:A1:44:19:05',
+    signal: '81%',
+    traffic: 'Steady checkout and directory traffic',
+    deviceNames: 'Protected client names',
+    verdict: 'Official 5G guest network. Protected and stable.',
+    malicious: false,
+  },
+  {
+    id: 'mall-guest-free',
+    name: 'Mall_Guest_Free',
+    encryption: 'OPEN',
+    mac: 'A4:91:2C:??:??:?? rotating',
+    signal: '96%',
+    traffic: 'Spikes when users log into social media',
+    deviceNames: 'Phone names visible in plain text',
+    verdict: 'Rogue access point. Open network, MAC spoofing, and packet sniffing indicators.',
+    malicious: true,
+  },
+]
+
+const CASE4_VETERAN_JUDGMENTS = [
+  {
+    id: 'malicious-network',
+    question: 'Which network is malicious?',
+    answer: 'mall-guest-free',
+    options: [
+      { value: 'mall-guest', label: 'Mall_Guest' },
+      { value: 'mall-guest-5g', label: 'Mall_Guest_5G' },
+      { value: 'mall-guest-free', label: 'Mall_Guest_Free' },
+      { value: 'none', label: 'None of them' },
+    ],
+    correctFeedback:
+      'Correct - Mall_Guest_Free has open encryption, rotating MAC data, login spikes, and plain-text device names.',
+    wrongFeedback:
+      'Wrong - the malicious network is Mall_Guest_Free because it shows multiple rogue access point indicators.',
+  },
+  {
+    id: 'strongest-clue',
+    question: 'Which clue is strongest?',
+    answer: 'open-spikes',
+    options: [
+      { value: 'strong-signal', label: 'It has the strongest signal' },
+      { value: 'open-spikes', label: 'No encryption plus traffic spikes during logins' },
+      { value: 'similar-name', label: 'The name contains Mall' },
+      { value: 'five-g', label: 'It is not a 5G network' },
+    ],
+    correctFeedback:
+      'Correct - open encryption combined with login-time traffic spikes points to credential interception.',
+    wrongFeedback:
+      'Wrong - signal strength alone is not enough. The strongest clue is no encryption plus login traffic spikes.',
+  },
+  {
+    id: 'mac-spoofing',
+    question: 'What does a changing MAC address suggest?',
+    answer: 'spoofing',
+    options: [
+      { value: 'maintenance', label: 'Routine maintenance' },
+      { value: 'spoofing', label: 'MAC spoofing or an attacker hiding identity' },
+      { value: 'bandwidth', label: 'Better bandwidth' },
+      { value: 'battery', label: 'A low-battery access point' },
+    ],
+    correctFeedback:
+      'Correct - rotating hardware identifiers can indicate spoofing or evasion.',
+    wrongFeedback:
+      'Wrong - a changing MAC address suggests spoofing or an attacker trying to avoid identification.',
+  },
+  {
+    id: 'connect-testing',
+    question: 'Why is connecting "for testing" dangerous?',
+    answer: 'exposure',
+    options: [
+      { value: 'faster', label: 'It makes the scan too fast' },
+      { value: 'exposure', label: 'It exposes the device to interception and malware delivery' },
+      { value: 'battery', label: 'It drains battery' },
+      { value: 'legal', label: 'It always breaks the law' },
+    ],
+    correctFeedback:
+      'Correct - connecting can expose the device before you know what the network is doing.',
+    wrongFeedback:
+      'Wrong - connecting to a suspected rogue network risks interception and fake update malware.',
+  },
+  {
+    id: 'plain-text',
+    question: 'What does seeing device names in plain text suggest?',
+    answer: 'sniffing',
+    options: [
+      { value: 'sniffing', label: 'Traffic is not properly protected and may be sniffed' },
+      { value: 'official', label: 'The network is definitely official' },
+      { value: 'crowded', label: 'The mall is crowded' },
+      { value: 'safe', label: 'The network has strong encryption' },
+    ],
+    correctFeedback:
+      'Correct - exposed device names are a warning that traffic or metadata is leaking.',
+    wrongFeedback:
+      'Wrong - plain-text device names suggest weak protection and possible packet sniffing.',
+  },
+  {
+    id: 'safest-response',
+    question: 'What is the safest response?',
+    answer: 'flag-report',
+    options: [
+      { value: 'ignore', label: 'Ignore it until someone complains' },
+      { value: 'connect', label: 'Connect to gather proof' },
+      { value: 'flag-report', label: 'Flag/report the rogue network and verify with mall or network staff' },
+      { value: 'post', label: 'Post the password online' },
+    ],
+    correctFeedback:
+      'Correct - report the rogue network and verify through trusted staff instead of joining it.',
+    wrongFeedback:
+      'Wrong - the safest response is to flag/report the network and verify with trusted mall or network staff.',
+  },
+]
+
+const CASE4_VETERAN_TEACHING_POINTS = [
+  {
+    title: 'Rogue hotspots mimic real networks',
+    text: 'Attackers choose names that look official so users trust the wrong access point.',
+  },
+  {
+    title: 'Encryption matters',
+    text: 'WPA2 or WPA3 protects traffic better than open networks with no password.',
+  },
+  {
+    title: 'MAC spoofing hides identity',
+    text: 'Changing hardware identifiers can help a rogue device avoid simple blocking or tracing.',
+  },
+  {
+    title: 'Packet sniffing watches traffic',
+    text: 'Open networks can expose device names, sessions, and login timing to anyone listening.',
+  },
+  {
+    title: 'Fake updates deliver malware',
+    text: 'A captive portal or popup can pretend to be a browser update while installing malware.',
+  },
+  {
+    title: 'Do not connect for testing',
+    text: 'Use monitoring tools and trusted staff verification instead of placing a protected device on a suspect network.',
+  },
+]
+
+const CASE4_VETERAN_QUIZ = [
+  {
+    question: 'Why do rogue hotspots use names similar to real networks?',
+    options: [
+      'To make users trust and join them',
+      'To improve battery life',
+      'To encrypt traffic automatically',
+      'To reduce signal strength',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'Which option is usually safer than an open public network?',
+    options: ['Any network with Free in the name', 'WPA2 or WPA3 protected Wi-Fi', 'A fake update portal', 'A rotating MAC address'],
+    answer: 1,
+  },
+  {
+    question: 'What is MAC spoofing?',
+    options: [
+      'Changing or faking a device hardware address',
+      'Installing a browser update',
+      'Making a password longer',
+      'Using a phone hotspot',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'What is packet sniffing?',
+    options: [
+      'Listening to network traffic as it passes',
+      'Turning Wi-Fi off',
+      'Buying more bandwidth',
+      'Locking a laptop screen',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'Why is a fake browser update popup dangerous?',
+    options: [
+      'It may deliver malware',
+      'It always improves security',
+      'It proves the network is official',
+      'It blocks all attackers',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'Why should you avoid connecting to a suspect network for testing?',
+    options: [
+      'It can expose your device to interception or malware',
+      'It makes the network disappear',
+      'It prevents logs from being collected',
+      'It makes encryption stronger',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'How should you verify an official mall network name?',
+    options: [
+      'Ask trusted mall or network staff',
+      'Pick the strongest signal',
+      'Choose the network with Free in the name',
+      'Install whatever popup appears',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'Why are login-time traffic spikes suspicious on an open network?',
+    options: [
+      'They can indicate credential harvesting or interception',
+      'They prove the network is safe',
+      'They mean the mall is closing',
+      'They disable Wi-Fi',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'What does plain-text device name exposure suggest?',
+    options: [
+      'The network may be leaking metadata',
+      'The network uses perfect encryption',
+      'The user has no device',
+      'The access point is offline',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'What should happen when a rogue access point is identified?',
+    options: [
+      'Flag it, report it, and verify with trusted staff',
+      'Ignore it',
+      'Connect to see what happens',
+      'Share login credentials',
+    ],
+    answer: 0,
+  },
+]
+
 function PixelPerson({ role, label, position = '' }) {
   return (
     <div className={`pixel-person pixel-${role} ${position}`}>
@@ -6355,6 +6634,873 @@ function Case4Rookie() {
   )
 }
 
+function Case4Veteran() {
+  const navigate = useNavigate()
+  const { user, token, setUser } = useAuth()
+  const [phase, setPhase] = useState('intro')
+  const [introStep, setIntroStep] = useState(0)
+  const [inspected, setInspected] = useState({})
+  const [selectedNetwork, setSelectedNetwork] = useState(null)
+  const [incidentAction, setIncidentAction] = useState(null)
+  const [malwareInstalled, setMalwareInstalled] = useState(false)
+  const [judgmentAnswers, setJudgmentAnswers] = useState({})
+  const [currentJudgmentIndex, setCurrentJudgmentIndex] = useState(0)
+  const [quizAnswers, setQuizAnswers] = useState(
+    () => CASE4_VETERAN_QUIZ.map(() => null),
+  )
+  const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0)
+  const [quizSubmitted, setQuizSubmitted] = useState(false)
+  const [route, setRoute] = useState(null)
+  const [badge, setBadge] = useState(null)
+  const [pointsAwarded, setPointsAwarded] = useState(0)
+  const [failureLifeSpent, setFailureLifeSpent] = useState(false)
+  const [progressError, setProgressError] = useState('')
+  const [resolvingDebrief, setResolvingDebrief] = useState(false)
+  const resolvingRef = useRef(false)
+  const failureLifeSpentRef = useRef(false)
+  const internName = user?.username || 'Nova'
+  const activeIntro = CASE4_VETERAN_INTRO[introStep]
+  const activeNetwork =
+    CASE4_VETERAN_NETWORKS.find((network) => network.id === selectedNetwork) ||
+    CASE4_VETERAN_NETWORKS[0]
+  const incidentPassed =
+    incidentAction === 'flag' && selectedNetwork === 'mall-guest-free'
+  const judgmentCorrect = CASE4_VETERAN_JUDGMENTS.reduce(
+    (count, item) => count + (judgmentAnswers[item.id] === item.answer ? 1 : 0),
+    0,
+  )
+  const judgmentComplete = CASE4_VETERAN_JUDGMENTS.every(
+    (item) => judgmentAnswers[item.id],
+  )
+  const fieldPassed =
+    judgmentComplete && judgmentCorrect === CASE4_VETERAN_JUDGMENTS.length
+  const quizCorrect = quizAnswers.reduce(
+    (count, answer, index) =>
+      count + (answer === CASE4_VETERAN_QUIZ[index].answer ? 1 : 0),
+    0,
+  )
+  const quizPassed = quizSubmitted && quizCorrect >= CASE4_VETERAN_PASS_SCORE
+  const passedVeteran = incidentPassed && fieldPassed && quizPassed
+  const activeJudgment = CASE4_VETERAN_JUDGMENTS[currentJudgmentIndex]
+  const selectedJudgment = judgmentAnswers[activeJudgment.id] || null
+  const judgmentAnswered = Boolean(selectedJudgment)
+  const judgmentSelectedCorrect = selectedJudgment === activeJudgment.answer
+  const lastJudgment =
+    currentJudgmentIndex === CASE4_VETERAN_JUDGMENTS.length - 1
+  const activeQuizQuestion = CASE4_VETERAN_QUIZ[currentQuizQuestion]
+  const selectedQuizAnswer = quizAnswers[currentQuizQuestion]
+  const quizAnswered = selectedQuizAnswer !== null
+  const quizSelectedCorrect = selectedQuizAnswer === activeQuizQuestion.answer
+  const lastQuizQuestion =
+    currentQuizQuestion === CASE4_VETERAN_QUIZ.length - 1
+
+  function restart() {
+    setPhase('intro')
+    setIntroStep(0)
+    setInspected({})
+    setSelectedNetwork(null)
+    setIncidentAction(null)
+    setMalwareInstalled(false)
+    setJudgmentAnswers({})
+    setCurrentJudgmentIndex(0)
+    setQuizAnswers(CASE4_VETERAN_QUIZ.map(() => null))
+    setCurrentQuizQuestion(0)
+    setQuizSubmitted(false)
+    setRoute(null)
+    setBadge(null)
+    setPointsAwarded(0)
+    setFailureLifeSpent(false)
+    setProgressError('')
+    setResolvingDebrief(false)
+    resolvingRef.current = false
+    failureLifeSpentRef.current = false
+  }
+
+  async function spendFailureLife(nextAction) {
+    if (failureLifeSpentRef.current || failureLifeSpent) {
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      if (nextAction === 'continue') navigate('/play')
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    failureLifeSpentRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const data = await api.failAttempt(token, {
+        caseId: 4,
+        difficulty: 'veteran',
+      })
+      setUser(data.user)
+      setFailureLifeSpent(true)
+      playSfx('lifeLost')
+      playSfx('caseFailed')
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      if (nextAction === 'debrief') {
+        resolvingRef.current = false
+        setResolvingDebrief(false)
+        return
+      }
+      navigate('/play')
+    } catch (error) {
+      failureLifeSpentRef.current = false
+      setFailureLifeSpent(false)
+      console.error('[progress] Case 4 Veteran failed attempt update failed', {
+        endpoint: '/progress/fail-attempt',
+        caseId: 4,
+        difficulty: 'veteran',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update lives.')
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  async function finishVeteran(nextAction = 'end') {
+    if (!passedVeteran) {
+      spendFailureLife(nextAction === 'replay' ? 'replay' : 'continue')
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const unlockedBadge = BADGES.networkNavigator
+      const data = await api.completeCase(token, {
+        caseId: 4,
+        difficulty: 'veteran',
+        result: 'success',
+        badge: unlockedBadge,
+        bonusPoints: quizCorrect * 10,
+      })
+      setUser(data.user)
+      setBadge(unlockedBadge)
+      setPointsAwarded(data.pointsAwarded)
+      if (data.pointsAwarded > 0) {
+        playSfx('coins')
+        playSfx('badge')
+      }
+      playSfx('caseComplete')
+      if (nextAction === 'caseFiles') {
+        navigate('/play')
+        return
+      }
+      setPhase('end')
+    } catch (error) {
+      console.error('[progress] Case 4 Veteran completion update failed', {
+        endpoint: '/progress/complete-case',
+        caseId: 4,
+        difficulty: 'veteran',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update case progress.')
+    } finally {
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  function inspectTool(tool) {
+    setInspected((current) => ({ ...current, [tool]: true }))
+    playSfx('click')
+  }
+
+  function chooseAction(action) {
+    if (!selectedNetwork) return
+    setIncidentAction(action)
+    if (action === 'connect') {
+      setPhase('malware')
+      playSfx('wrong')
+      return
+    }
+    if (action === 'ignore') {
+      setPhase('ignored')
+      playSfx('wrong')
+      return
+    }
+    setPhase('flagged')
+    playSfx(selectedNetwork === 'mall-guest-free' ? 'correct' : 'wrong')
+  }
+
+  function answerJudgment(judgmentId, value) {
+    if (judgmentAnswers[judgmentId]) return
+    setJudgmentAnswers((current) => ({ ...current, [judgmentId]: value }))
+    const judgment = CASE4_VETERAN_JUDGMENTS.find((item) => item.id === judgmentId)
+    playSfx(value === judgment.answer ? 'correct' : 'wrong')
+  }
+
+  function nextJudgment() {
+    setCurrentJudgmentIndex((value) =>
+      Math.min(value + 1, CASE4_VETERAN_JUDGMENTS.length - 1),
+    )
+  }
+
+  async function submitJudgments() {
+    playSfx(incidentPassed && fieldPassed ? 'correct' : 'wrong')
+    if (!incidentPassed || !fieldPassed) {
+      setRoute(!incidentPassed ? 'incidentFailed' : 'fieldFailed')
+      setPhase('debrief')
+      await spendFailureLife('debrief')
+      return
+    }
+    setPhase('quiz')
+  }
+
+  function answerQuiz(questionIndex, optionIndex) {
+    if (quizAnswers[questionIndex] !== null) return
+    setQuizAnswers((current) =>
+      current.map((answer, index) =>
+        index === questionIndex ? optionIndex : answer,
+      ),
+    )
+    playSfx(
+      optionIndex === CASE4_VETERAN_QUIZ[questionIndex].answer
+        ? 'correct'
+        : 'wrong',
+    )
+  }
+
+  function nextQuizQuestion() {
+    setCurrentQuizQuestion((value) =>
+      Math.min(value + 1, CASE4_VETERAN_QUIZ.length - 1),
+    )
+  }
+
+  async function submitQuiz() {
+    if (!quizSubmitted) {
+      setQuizSubmitted(true)
+      return
+    }
+    if (quizCorrect < CASE4_VETERAN_PASS_SCORE) {
+      setRoute('quizFailed')
+      setPhase('debrief')
+      await spendFailureLife('debrief')
+      return
+    }
+    setPhase('debrief')
+  }
+
+  return (
+    <div className="case-shell max-w-5xl mx-auto">
+      <div className="case-title-row">
+        <div>
+          <span className="font-pixel text-sw-pink text-xs">CASE 04 VETERAN</span>
+          <h2 className="font-pixel text-sw-cyan text-sm md:text-base">
+            The Silent Listener
+          </h2>
+        </div>
+      </div>
+      {progressError && (
+        <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
+      )}
+
+      {phase === 'intro' && (
+        <section className="case-scene scene-transition">
+          <div className="case-scene-top">
+            <span>UNIT ZERO NETWORK OPS</span>
+            <span>VETERAN BRIEFING</span>
+          </div>
+          <div className="case-office case3-briefing-office">
+            <div className="case-window case-window-left">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="case-window case-window-right">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="unit-poster unit-poster-left">
+              CASE 04
+              <br />
+              VETERAN
+            </div>
+            <div className="case3-zoey-station">
+              <PixelPerson role={activeIntro.role} label={activeIntro.speaker.toUpperCase()} />
+            </div>
+            <PixelPerson
+              role="intern"
+              label={`${internName} - YOU`}
+              position="pixel-intern-left"
+            />
+            <div className="case3-monitor-wall" aria-hidden="true">
+              <span>SHOPPING MALL AP GRID</span>
+              <strong>LIVE NETWORK DATA</strong>
+            </div>
+            <div className="case-bubble case-bubble-jane case3-dialogue-bubble">
+              <span className="text-sw-yellow">{activeIntro.speaker}</span>
+              <p>{activeIntro.text}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan self-end"
+            onClick={() => {
+              if (introStep < CASE4_VETERAN_INTRO.length - 1) {
+                setIntroStep((value) => value + 1)
+                playSfx('click')
+                return
+              }
+              setPhase('scan')
+            }}
+          >
+            {introStep === CASE4_VETERAN_INTRO.length - 1
+              ? 'Open Network Scanner'
+              : 'Continue'}{' '}
+            <IconArrowRight size={16} />
+          </button>
+        </section>
+      )}
+
+      {phase === 'scan' && (
+        <section className="case2-board scene-transition">
+          <div className="case2-board-header">
+            <div>
+              <span className="font-pixel text-sw-pink text-xs">MALL ACCESS POINT MAP</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">Live Network Analysis</h2>
+            </div>
+            <div className="case2-progress-chip">PACKET TRACE RUNNING</div>
+          </div>
+          <article className="case2-file">
+            <div className="case4-veteran-scanner">
+              {CASE4_VETERAN_NETWORKS.map((network) => {
+                const selected = selectedNetwork === network.id
+                return (
+                  <button
+                    key={network.id}
+                    type="button"
+                    className={`case4-veteran-network ${selected ? 'selected' : ''}`}
+                    onClick={() => {
+                      setSelectedNetwork(network.id)
+                      playSfx('click')
+                    }}
+                  >
+                    <span className={network.encryption === 'OPEN' ? 'open' : 'locked'}>
+                      {network.encryption === 'OPEN' ? 'OPEN' : 'LOCK'}
+                    </span>
+                    <strong>{network.name}</strong>
+                    <em>{network.signal} signal</em>
+                    <div className="case4-wifi-rings" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="case4-tool-grid mt-4">
+              {[
+                ['encryption', 'Encryption Type'],
+                ['mac', 'MAC Address Trace'],
+                ['signal', 'Signal Strength'],
+                ['traffic', 'Traffic Logs'],
+              ].map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`case4-tool-btn ${inspected[id] ? 'active' : ''}`}
+                  onClick={() => inspectTool(id)}
+                  disabled={!selectedNetwork}
+                >
+                  {inspected[id] ? 'ANALYSED' : 'ANALYSE'} - {label}
+                </button>
+              ))}
+            </div>
+
+            {selectedNetwork && (
+              <div className="case4-analysis-console mt-4">
+                <div className="case4-analysis-header">
+                  <span>{activeNetwork.name}</span>
+                  <strong>{activeNetwork.malicious ? 'SUSPICIOUS PACKETS' : 'STABLE'}</strong>
+                </div>
+                <div className="case4-analysis-grid">
+                  <article className={inspected.encryption ? 'visible' : ''}>
+                    <span>Encryption</span>
+                    <strong>{activeNetwork.encryption}</strong>
+                  </article>
+                  <article className={inspected.mac ? 'visible' : ''}>
+                    <span>MAC trace</span>
+                    <strong className={activeNetwork.malicious ? 'case4-mac-flicker' : ''}>
+                      {activeNetwork.mac}
+                    </strong>
+                  </article>
+                  <article className={inspected.signal ? 'visible' : ''}>
+                    <span>Signal</span>
+                    <strong>{activeNetwork.signal}</strong>
+                  </article>
+                  <article className={inspected.traffic ? 'visible' : ''}>
+                    <span>Traffic</span>
+                    <strong>{activeNetwork.traffic}</strong>
+                  </article>
+                </div>
+                <div className="case4-traffic-chart" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <p className="text-sw-text2">{activeNetwork.deviceNames}</p>
+                <div className={activeNetwork.malicious ? 'breach-banner' : 'success-banner'}>
+                  {activeNetwork.verdict}
+                </div>
+              </div>
+            )}
+
+            <div className="case2-decision-row mt-4">
+              <button
+                type="button"
+                className="case2-decision-btn case2-dismiss-btn"
+                onClick={() => chooseAction('flag')}
+                disabled={!selectedNetwork}
+              >
+                Flag Network As Malicious
+              </button>
+              <button
+                type="button"
+                className="case2-decision-btn"
+                onClick={() => chooseAction('ignore')}
+                disabled={!selectedNetwork}
+              >
+                Ignore It
+              </button>
+              <button
+                type="button"
+                className="case2-decision-btn case2-flag-btn"
+                onClick={() => chooseAction('connect')}
+                disabled={!selectedNetwork}
+              >
+                Attempt To Connect For Testing
+              </button>
+            </div>
+          </article>
+        </section>
+      )}
+
+      {phase === 'malware' && (
+        <section className="case-debrief scene-transition">
+          <div className="breach-banner">SUSPECT NETWORK JOINED</div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case4-fake-update">
+              <span>Browser Security Update</span>
+              <h2>Your browser needs an update. Install now.</h2>
+              <div className="case4-update-bar"><span /></div>
+              {!malwareInstalled ? (
+                <button
+                  type="button"
+                  className="ss-btn ss-btn-pink self-start"
+                  onClick={() => {
+                    setMalwareInstalled(true)
+                    playSfx('wrong')
+                  }}
+                >
+                  Install Update
+                </button>
+              ) : (
+                <div className="breach-banner">MALWARE PAYLOAD EXECUTED</div>
+              )}
+            </div>
+            {malwareInstalled && (
+              <>
+                <div className="case2-ricky-panel">
+                  <span className="font-pixel text-sw-yellow text-xs">AGENT ZOEY</span>
+                  <p>Cadet. You just installed malware onto a government device.</p>
+                  <p>That wasn't an update - that was an attack.</p>
+                </div>
+                <button
+                  type="button"
+                  className="ss-btn ss-btn-cyan self-start"
+                  onClick={() => setPhase('judgment')}
+                >
+                  Open Investigation Review <IconArrowRight size={16} />
+                </button>
+              </>
+            )}
+          </div>
+        </section>
+      )}
+
+      {phase === 'ignored' && (
+        <section className="case-debrief scene-transition">
+          <div className="breach-banner">ATTACK LEFT RUNNING</div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case4-upload-glitch">
+              <div className="case4-upload-label">
+                <span>CREDENTIAL EXPOSURE</span>
+                <strong>RISING</strong>
+              </div>
+              <div className="case4-upload-track"><span /></div>
+              <div className="case4-warning-scan">SUSPICIOUS TRAFFIC CONTINUES</div>
+              <p>More shoppers connect. More login sessions pass through the rogue access point.</p>
+            </div>
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+              <p>Inaction is still a decision. Leaving a rogue hotspot active lets the harvest continue.</p>
+            </div>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start"
+              onClick={() => setPhase('judgment')}
+            >
+              Open Investigation Review <IconArrowRight size={16} />
+            </button>
+          </div>
+        </section>
+      )}
+
+      {phase === 'flagged' && (
+        <section className="case-debrief scene-transition">
+          <div className={incidentPassed ? 'success-banner' : 'breach-banner'}>
+            {incidentPassed ? 'ROGUE ACCESS POINT FLAGGED' : 'WRONG NETWORK FLAGGED'}
+          </div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case4-transmission-panel">
+              <div className="case4-transmission-header">
+                <span>NETWORK CONTAINMENT REPORT</span>
+                <strong>{incidentPassed ? 'CONFIRMED' : 'REVIEW'}</strong>
+              </div>
+              <div className="case4-transmission-status">
+                <span>PACKET TRACE LOCKED</span>
+                <span>MAC SPOOFING INDICATOR SAVED</span>
+                <span>MALL NETWORK STAFF NOTIFIED</span>
+                <span>{incidentPassed ? 'CREDENTIAL HARVEST PREVENTED' : 'INVESTIGATION NEEDS REVIEW'}</span>
+              </div>
+              <div className="case4-transmission-track"><span /></div>
+            </div>
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+              <p>
+                {incidentPassed
+                  ? "Nice work. That's a rogue access point using MAC spoofing and packet sniffing."
+                  : 'That report is not clean yet. The selected network does not match the strongest evidence.'}
+              </p>
+              {incidentPassed && <p>You just prevented a mall-wide credential harvest.</p>}
+            </div>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start"
+              onClick={() => setPhase('judgment')}
+            >
+              Open Judgment Calls <IconArrowRight size={16} />
+            </button>
+          </div>
+        </section>
+      )}
+
+      {phase === 'judgment' && (
+        <section className="case2-board scene-transition">
+          <div className="case2-board-header">
+            <div>
+              <span className="font-pixel text-sw-pink text-xs">SILENT LISTENER REVIEW</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">Veteran Judgment Calls</h2>
+            </div>
+            <div className="case2-progress-chip">
+              {currentJudgmentIndex + 1} / {CASE4_VETERAN_JUDGMENTS.length}
+            </div>
+          </div>
+          <article
+            className={`veteran-quiz-card veteran-quiz-focus ${
+              judgmentAnswered && !judgmentSelectedCorrect
+                ? 'veteran-quiz-shake'
+                : ''
+            }`}
+          >
+            <h3>{activeJudgment.question}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {activeJudgment.options.map((option) => {
+                const selected = selectedJudgment === option.value
+                const isCorrect = activeJudgment.answer === option.value
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`veteran-answer-btn ${
+                      selected ? 'veteran-answer-selected' : ''
+                    } ${judgmentAnswered && isCorrect ? 'veteran-answer-correct' : ''} ${
+                      judgmentAnswered && selected && !isCorrect
+                        ? 'veteran-answer-wrong'
+                        : ''
+                    }`}
+                    onClick={() => answerJudgment(activeJudgment.id, option.value)}
+                    disabled={judgmentAnswered}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
+            {judgmentAnswered && (
+              <div className={judgmentSelectedCorrect ? 'success-banner' : 'breach-banner'}>
+                {judgmentSelectedCorrect
+                  ? activeJudgment.correctFeedback
+                  : activeJudgment.wrongFeedback}
+              </div>
+            )}
+            {judgmentAnswered && (
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan self-start"
+                onClick={lastJudgment ? submitJudgments : nextJudgment}
+                disabled={resolvingDebrief}
+              >
+                {lastJudgment ? 'Submit Investigation' : 'Next Judgment'}{' '}
+                <IconArrowRight size={16} />
+              </button>
+            )}
+          </article>
+        </section>
+      )}
+
+      {phase === 'quiz' && (
+        <section className="case-debrief scene-transition">
+          <div className="success-banner">FINAL CERTIFICATION - NETWORK NAVIGATOR</div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <h2 className="font-pixel text-sw-cyan text-sm">Silent Listener certification</h2>
+            <p className="text-sw-text2">
+              Each correct answer is worth 10 coins. Passing requires more than
+              50%, so 6 or more answers closes the Veteran file.
+            </p>
+            {!quizSubmitted ? (
+              <>
+                <div className="veteran-quiz-progress">
+                  Question {currentQuizQuestion + 1} / {CASE4_VETERAN_QUIZ.length}
+                </div>
+                <article
+                  className={`veteran-quiz-card veteran-quiz-focus ${
+                    quizAnswered && !quizSelectedCorrect
+                      ? 'veteran-quiz-shake'
+                      : ''
+                  }`}
+                >
+                  <h3>{activeQuizQuestion.question}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {activeQuizQuestion.options.map((option, optionIndex) => {
+                      const selected = selectedQuizAnswer === optionIndex
+                      const isCorrect = activeQuizQuestion.answer === optionIndex
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          className={`veteran-answer-btn ${
+                            selected ? 'veteran-answer-selected' : ''
+                          } ${
+                            quizAnswered && isCorrect
+                              ? 'veteran-answer-correct'
+                              : ''
+                          } ${
+                            quizAnswered && selected && !isCorrect
+                              ? 'veteran-answer-wrong'
+                              : ''
+                          }`}
+                          onClick={() => answerQuiz(currentQuizQuestion, optionIndex)}
+                          disabled={quizAnswered}
+                        >
+                          {option}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </article>
+                {quizAnswered && (
+                  <div className={quizSelectedCorrect ? 'success-banner' : 'breach-banner'}>
+                    {quizSelectedCorrect
+                      ? 'Correct. +10 quiz coins secured.'
+                      : `Correct answer: ${
+                          activeQuizQuestion.options[activeQuizQuestion.answer]
+                        }`}
+                  </div>
+                )}
+                {quizAnswered && (
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-cyan self-start"
+                    onClick={lastQuizQuestion ? submitQuiz : nextQuizQuestion}
+                  >
+                    {lastQuizQuestion ? 'View results' : 'Next Question'}
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <div className={quizPassed ? 'success-banner' : 'breach-banner'}>
+                  {quizPassed ? 'Certification passed' : 'Certification failed'}
+                </div>
+                <div className="veteran-results-grid">
+                  <div>
+                    <span>Correct</span>
+                    <strong>{quizCorrect} / 10</strong>
+                  </div>
+                  <div>
+                    <span>Quiz coins</span>
+                    <strong>{quizCorrect * 10}</strong>
+                  </div>
+                  <div>
+                    <span>Status</span>
+                    <strong>{quizPassed ? 'Case can close' : 'Replay required'}</strong>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="ss-btn ss-btn-cyan self-start"
+                  onClick={submitQuiz}
+                >
+                  Continue debrief
+                </button>
+              </>
+            )}
+          </div>
+        </section>
+      )}
+
+      {phase === 'debrief' && (
+        <section className="case-debrief scene-transition">
+          <div className={passedVeteran ? 'success-banner' : 'breach-banner'}>
+            {passedVeteran ? 'CASE 04 VETERAN SECURED' : 'SILENT LISTENER REVIEW FAILED'}
+          </div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">AGENTS RICKY + ZOEY</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">The listener was the network</h2>
+              <p>
+                A rogue access point does not need to shout. It waits for people
+                to trust a familiar name, then listens for traffic, device names,
+                sessions, and credentials.
+              </p>
+              <blockquote className="zoey-quote">
+                "Verification matters because a network can lie with a name just
+                like a person can lie with a badge."
+              </blockquote>
+            </div>
+            <div className="veteran-results-grid">
+              <div>
+                <span>Action</span>
+                <strong>{incidentPassed ? 'Rogue AP flagged' : 'Unsafe'}</strong>
+              </div>
+              <div>
+                <span>Judgments</span>
+                <strong>
+                  {judgmentCorrect} / {CASE4_VETERAN_JUDGMENTS.length}
+                </strong>
+              </div>
+              <div>
+                <span>Quiz</span>
+                <strong>{quizCorrect} / 10</strong>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {CASE4_VETERAN_TEACHING_POINTS.map((point) => (
+                <article key={point.title} className="red-flag-card">
+                  <IconFlag size={18} />
+                  <div>
+                    <h3>{point.title}</h3>
+                    <p>{point.text}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            {passedVeteran && (
+              <div className="badge-card">
+                <span>Badge unlocked</span>
+                <strong>NETWORK NAVIGATOR</strong>
+              </div>
+            )}
+            {route === 'incidentFailed' && (
+              <p className="text-sw-text3 text-sm">
+                Replay required. The investigation action must flag
+                Mall_Guest_Free as malicious before certification unlocks.
+              </p>
+            )}
+            {route === 'fieldFailed' && (
+              <p className="text-sw-text3 text-sm">
+                Replay required. Every Veteran judgment call must be correct
+                before the final certification unlocks.
+              </p>
+            )}
+            {route === 'quizFailed' && (
+              <p className="text-sw-text3 text-sm">
+                The final certification score was not above 50%. Replay is required.
+              </p>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                className="ss-btn ss-btn-pink"
+                onClick={
+                  passedVeteran
+                    ? restart
+                    : failureLifeSpent
+                      ? restart
+                      : () => spendFailureLife('replay')
+                }
+                disabled={resolvingDebrief}
+              >
+                Replay Veteran
+              </button>
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan"
+                onClick={
+                  passedVeteran
+                    ? () => finishVeteran('caseFiles')
+                    : failureLifeSpent
+                      ? () => navigate('/play')
+                      : () => spendFailureLife('continue')
+                }
+                disabled={resolvingDebrief}
+              >
+                Continue to Case Files
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {phase === 'end' && (
+        <section className="ss-card p-6 flex flex-col gap-4">
+          <h2 className="font-pixel text-sw-cyan text-sm">
+            Case 04 Veteran Complete
+          </h2>
+          <p className="text-sw-text2">
+            The Silent Listener closed. Quiz score: {quizCorrect}/10.
+          </p>
+          <PixelBadgeCard badge={badge} pointsAwarded={pointsAwarded} />
+          <div className="badge-card">
+            <span>Field guide unlocked</span>
+            <strong>NETWORK NAVIGATOR</strong>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan"
+              onClick={() => navigate('/play')}
+            >
+              Return to Case Files
+            </button>
+            <button type="button" className="ss-btn ss-btn-pink" onClick={restart}>
+              Replay Veteran
+            </button>
+          </div>
+        </section>
+      )}
+    </div>
+  )
+}
+
 function LockedCase() {
   const navigate = useNavigate()
   return (
@@ -6444,6 +7590,7 @@ export default function Case() {
   if (numericCaseId === 3 && difficulty === 'rookie') return <Case3Rookie />
   if (numericCaseId === 3 && difficulty === 'veteran') return <Case3Veteran />
   if (numericCaseId === 4 && difficulty === 'rookie') return <Case4Rookie />
+  if (numericCaseId === 4 && difficulty === 'veteran') return <Case4Veteran />
   if (numericCaseId !== 1) return <FutureCase caseId={numericCaseId} />
   if (difficulty === 'veteran') return <VeteranCase />
 
