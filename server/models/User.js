@@ -37,6 +37,12 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
     },
+    emailVerified: { type: Boolean, default: false },
+    twoFactorEnabled: { type: Boolean, default: true },
+    verificationCodeHash: { type: String, default: null },
+    verificationCodeExpires: { type: Date, default: null },
+    verificationCodeSentAt: { type: Date, default: null },
+    verificationCodeAttempts: { type: Number, default: 0, min: 0 },
 
     // --- Currency -----------------------------------------------------
     points: { type: Number, default: 0, min: 0 },

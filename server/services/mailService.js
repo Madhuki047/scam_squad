@@ -14,8 +14,8 @@ let transporter = null
 function getTransporter() {
   if (transporter) return transporter
 
-  const user = process.env.SMTP_USER
-  const pass = process.env.SMTP_PASS
+  const user = process.env.SMTP_USER || process.env.GMAIL_USER
+  const pass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD
   if (!user || !pass) return null
 
   transporter = nodemailer.createTransport({
@@ -42,11 +42,14 @@ export async function sendOtpEmail(to, code) {
 
   try {
     await tx.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      from:
+        process.env.SMTP_FROM ||
+        process.env.SMTP_USER ||
+        process.env.GMAIL_USER,
       to,
-      subject: 'Your Scam Squad verification code',
-      text: `Agent, your one-time code is ${code}. It expires in 5 minutes.`,
-      html: `<p>Agent, your one-time code is <strong style="font-size:20px">${code}</strong>.</p><p>It expires in 5 minutes.</p>`,
+      subject: 'Your Scam Squad verification PIN',
+      text: `Agent, your secure access PIN is ${code}. It expires in 10 minutes.`,
+      html: `<p>Agent, your secure access PIN is <strong style="font-size:20px">${code}</strong>.</p><p>It expires in 10 minutes.</p>`,
     })
   } catch (error) {
     console.warn('[mailService] Failed to send OTP email:', error.message)

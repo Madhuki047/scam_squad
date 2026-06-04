@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
-// Sign-in screen. On success, accounts with an email are sent to the
-// OTP step (/verify-otp); email-less accounts go straight to Home.
+// Sign-in screen. Password validation is followed by email PIN verification.
 export default function Login() {
   const { isAuthenticated, loading, login } = useAuth()
   const navigate = useNavigate()
@@ -43,7 +42,7 @@ export default function Login() {
         <p className="text-sw-text2 text-center -mt-2">Agent sign-in</p>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sw-text3">Code name</span>
+          <span className="text-sw-text3">Code name or email</span>
           <input
             className="ss-input"
             type="text"

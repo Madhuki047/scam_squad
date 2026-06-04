@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(() =>
     Boolean(localStorage.getItem(TOKEN_KEY)),
   )
-  // { pendingToken, emailHint } between login and OTP verification.
+  // { pendingToken, emailHint, purpose } between password/signup and PIN verification.
   const [pendingAuth, setPendingAuth] = useState(null)
 
   // On first load, verify any stored token and fetch the player record.
@@ -64,7 +64,12 @@ export function AuthProvider({ children }) {
 
   async function register(username, password, email) {
     const data = await api.register(username, password, email)
-    await completeSession(data.token)
+    setPendingAuth({
+      pendingToken: data.pendingToken,
+      emailHint: data.emailHint,
+      purpose: data.purpose || 'register',
+    })
+    return { otpRequired: true }
   }
 
   // Returns { otpRequired } so the Login screen knows whether to route
@@ -75,6 +80,7 @@ export function AuthProvider({ children }) {
       setPendingAuth({
         pendingToken: data.pendingToken,
         emailHint: data.emailHint,
+        purpose: data.purpose || 'login',
       })
       return { otpRequired: true }
     }
@@ -88,6 +94,22 @@ export function AuthProvider({ children }) {
     }
     const data = await api.verifyOtp(pendingAuth.pendingToken, code)
     await completeSession(data.token)
+  }
+
+  async function resendOtp() {
+    if (!pendingAuth) {
+      throw new Error('No verification in progress. Please start again.')
+    }
+    const data = await api.resendOtp(pendingAuth.pendingToken)
+    setPendingAuth((current) =>
+      current
+        ? {
+            ...current,
+            emailHint: data.emailHint || current.emailHint,
+          }
+        : current,
+    )
+    return data
   }
 
   async function logout() {
@@ -120,6 +142,7 @@ export function AuthProvider({ children }) {
     register,
     login,
     verifyOtp,
+    resendOtp,
     logout,
     refreshUser,
     setUser, // lets a screen apply the user returned by a PATCH directly

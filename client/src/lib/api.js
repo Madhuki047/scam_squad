@@ -71,6 +71,11 @@ export const api = {
       method: 'POST',
       body: { pendingToken, code },
     }),
+  resendOtp: (pendingToken) =>
+    request('/auth/resend-otp', {
+      method: 'POST',
+      body: { pendingToken },
+    }),
   logout: (token) => request('/auth/logout', { method: 'POST', token }),
 
   // --- user ---
