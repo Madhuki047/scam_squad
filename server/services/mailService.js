@@ -32,11 +32,11 @@ function getTransporter() {
   if (!user || !pass) return null
 
   transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    requireTLS: true,
+    service: 'gmail',
     auth: { user, pass },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
   })
   return transporter
 }
