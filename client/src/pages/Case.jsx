@@ -5654,6 +5654,13 @@ function Case4Rookie() {
     )
   }
 
+  function primeFakePortalCredentials() {
+    setFakePortalEmail((value) =>
+      value.trim() ? value : 'cadet.training@unitzero.gov',
+    )
+    setFakePortalPassword((value) => (value.trim() ? value : 'training-only'))
+  }
+
   async function spendFailureLife(nextAction) {
     if (failureLifeSpentRef.current || failureLifeSpent) {
       if (nextAction === 'replay') {
@@ -5927,6 +5934,7 @@ function Case4Rookie() {
                       value={fakePortalEmail}
                       placeholder="cadet@unitzero.gov"
                       autoComplete="off"
+                      onFocus={primeFakePortalCredentials}
                       onChange={(event) => setFakePortalEmail(event.target.value)}
                     />
                   </label>
@@ -5937,14 +5945,15 @@ function Case4Rookie() {
                       value={fakePortalPassword}
                       placeholder="training password"
                       autoComplete="off"
+                      onFocus={primeFakePortalCredentials}
                       onChange={(event) => setFakePortalPassword(event.target.value)}
                     />
                   </label>
                   <button
                     type="button"
                     className="ss-btn ss-btn-pink self-start"
-                    disabled={!fakePortalEmail.trim() || !fakePortalPassword.trim()}
                     onClick={() => {
+                      primeFakePortalCredentials()
                       setFakePortalSubmitted(true)
                       playSfx('wrong')
                     }}
