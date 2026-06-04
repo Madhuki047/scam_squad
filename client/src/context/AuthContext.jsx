@@ -84,13 +84,13 @@ export function AuthProvider({ children }) {
       })
       return { otpRequired: true }
     }
-    if (data.emailRequired) {
+    if (data.requiresEmailSetup) {
       setPendingAuth({
         pendingToken: data.pendingToken,
         emailHint: '',
         purpose: data.purpose || 'add_email',
       })
-      return { emailRequired: true }
+      return { requiresEmailSetup: true }
     }
     await completeSession(data.token)
     return { otpRequired: false }

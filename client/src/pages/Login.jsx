@@ -21,8 +21,11 @@ export default function Login() {
     setError('')
     setSubmitting(true)
     try {
-      const { otpRequired, emailRequired } = await login(username.trim(), password)
-      if (emailRequired) {
+      const { otpRequired, requiresEmailSetup } = await login(
+        username.trim(),
+        password,
+      )
+      if (requiresEmailSetup) {
         navigate('/verify-email')
         return
       }
@@ -46,7 +49,7 @@ export default function Login() {
         <p className="text-sw-text2 text-center -mt-2">Agent sign-in</p>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sw-text3">Code name or email</span>
+          <span className="text-sw-text3">Code name</span>
           <input
             className="ss-input"
             type="text"

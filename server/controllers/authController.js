@@ -7,6 +7,7 @@ import { sendOtpEmail } from '../services/mailService.js'
 const PIN_TTL_MS = 10 * 60 * 1000
 const PIN_RESEND_MS = 60 * 1000
 const PIN_MAX_ATTEMPTS = 5
+let legacyEmailIndexDropStarted = false
 
 // --- token helpers ---------------------------------------------------
 
@@ -107,6 +108,19 @@ function isValidEmail(email) {
   return /^\S+@\S+\.\S+$/.test(email)
 }
 
+async function dropLegacyEmailUniqueIndex() {
+  if (legacyEmailIndexDropStarted) return
+  legacyEmailIndexDropStarted = true
+  try {
+    await User.collection.dropIndex('email_1')
+    console.info('[auth] Dropped legacy unique email index.')
+  } catch (error) {
+    if (error?.codeName !== 'IndexNotFound' && error?.code !== 27) {
+      console.warn('[auth] Could not drop legacy email index:', error.message)
+    }
+  }
+}
+
 // --- controllers -----------------------------------------------------
 
 export async function register(req, res, next) {
@@ -135,11 +149,7 @@ export async function register(req, res, next) {
         .status(409)
         .json({ message: 'That code name is already taken.' })
     }
-    if (await User.findOne({ email: normalizedEmail })) {
-      return res
-        .status(409)
-        .json({ message: 'That email is already registered.' })
-    }
+    await dropLegacyEmailUniqueIndex()
 
     const user = new User({
       username,
@@ -163,28 +173,25 @@ export async function login(req, res, next) {
     if (!username || !password) {
       return res
         .status(400)
-        .json({ message: 'Username or email and password are required.' })
+        .json({ message: 'Code name and password are required.' })
     }
 
     const identifier = username.trim()
-    const query = identifier.includes('@')
-      ? { email: identifier.toLowerCase() }
-      : { username: identifier }
-    const user = await User.findOne(query)
+    const user = await User.findOne({ username: identifier })
     const passwordMatches = user && (await user.comparePassword(password))
     if (!passwordMatches) {
       return res
         .status(401)
-        .json({ message: 'Invalid code name/email or password.' })
+        .json({ message: 'Invalid code name or password.' })
     }
 
     if (!user.email) {
-      return res.status(409).json({
-        emailRequired: true,
+      return res.json({
+        requiresEmailSetup: true,
         pendingToken: createPendingToken(user._id, 'add_email'),
         purpose: 'add_email',
         message:
-          'This account needs an email address before Agent Verification can be used. Add or confirm an email to continue.',
+          'Your old agent profile needs an email before secure verification can be enabled.',
       })
     }
 
@@ -229,10 +236,7 @@ export async function addEmailForVerification(req, res, next) {
         message: 'This account already has an email address. Please log in again.',
       })
     }
-    if (await User.findOne({ email: normalizedEmail, _id: { $ne: user._id } })) {
-      return res.status(409).json({ message: 'That email is already registered.' })
-    }
-
+    await dropLegacyEmailUniqueIndex()
     user.pendingEmail = normalizedEmail
     await issueVerificationPin(user, { force: true, email: normalizedEmail })
     res.json(pendingResponse(user, 'add_email', normalizedEmail))
@@ -293,11 +297,7 @@ export async function verifyOtp(req, res, next) {
     }
 
     if (payload.purpose === 'add_email') {
-      if (await User.findOne({ email: targetEmail, _id: { $ne: user._id } })) {
-        clearVerification(user)
-        await user.save()
-        return res.status(409).json({ message: 'That email is already registered.' })
-      }
+      await dropLegacyEmailUniqueIndex()
       user.email = targetEmail
     }
     user.emailVerified = true
