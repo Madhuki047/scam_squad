@@ -16,6 +16,7 @@ import threadImage7 from '../assets/case2/thread7.jpeg'
 import threadImage8 from '../assets/case2/thread8.jpeg'
 import fillerImage from '../assets/filler.jpg'
 import oxfordCircusStationImage from '../assets/case4/oxford-circus-station.svg'
+import publicWifiThreatsImage from '../assets/case4/public-wifi-threats.svg'
 
 const INTRO_STEPS = [
   {
@@ -5580,6 +5581,9 @@ function Case4Rookie() {
   const [introStep, setIntroStep] = useState(0)
   const [scenarioChoice, setScenarioChoice] = useState(null)
   const [outcomeStep, setOutcomeStep] = useState(0)
+  const [fakePortalEmail, setFakePortalEmail] = useState('')
+  const [fakePortalPassword, setFakePortalPassword] = useState('')
+  const [fakePortalSubmitted, setFakePortalSubmitted] = useState(false)
   const [checkAnswers, setCheckAnswers] = useState(
     () => CASE4_KNOWLEDGE_CHECK.map(() => null),
   )
@@ -5614,6 +5618,9 @@ function Case4Rookie() {
     setIntroStep(0)
     setScenarioChoice(null)
     setOutcomeStep(0)
+    setFakePortalEmail('')
+    setFakePortalPassword('')
+    setFakePortalSubmitted(false)
     setCheckAnswers(CASE4_KNOWLEDGE_CHECK.map(() => null))
     setCurrentQuestion(0)
     setBadge(null)
@@ -5891,39 +5898,78 @@ function Case4Rookie() {
         <section className="case-debrief scene-transition">
           <div className="breach-banner">TUBE WI-FI REQUIRES VERIFICATION</div>
           <div className="ss-card p-5 flex flex-col gap-4">
-            <div className="case2-ricky-panel">
+            <div className="case4-fake-portal">
               <span className="font-pixel text-sw-yellow text-xs">LOGIN PORTAL</span>
               <h2 className="font-pixel text-sw-cyan text-sm">
                 Public Access Verification
               </h2>
-              <div className="case2-message-list mt-2">
-                <div className="case2-message case2-post-message">
-                  <div className="case2-avatar" aria-hidden="true">UZ</div>
-                  <div>
-                    <strong>Unit Zero email</strong>
-                    <p>{internName.toLowerCase()}@unitzero.gov</p>
-                  </div>
+              <p className="text-sw-text2">
+                Tube Wi-Fi requires verification. Please log in to continue.
+              </p>
+              <div className="case4-portal-visual" aria-hidden="true">
+                <div className="case4-portal-router">
+                  <span />
+                  <span />
+                  <span />
                 </div>
-                <div className="case2-message case2-post-message">
-                  <div className="case2-avatar" aria-hidden="true">**</div>
-                  <div>
-                    <strong>Password</strong>
-                    <p>••••••••••••</p>
-                  </div>
+                <div className="case4-portal-waves">
+                  <span />
+                  <span />
+                  <span />
                 </div>
               </div>
-              <div className="success-banner mt-3">Verification Complete</div>
-              <p className="text-sw-text3">
-                The upload does not start. The portal closes like nothing happened.
-              </p>
+              {!fakePortalSubmitted ? (
+                <>
+                  <label className="case4-portal-field">
+                    <span>Unit Zero email</span>
+                    <input
+                      type="text"
+                      value={fakePortalEmail}
+                      placeholder="cadet@unitzero.gov"
+                      autoComplete="off"
+                      onChange={(event) => setFakePortalEmail(event.target.value)}
+                    />
+                  </label>
+                  <label className="case4-portal-field">
+                    <span>Password</span>
+                    <input
+                      type="password"
+                      value={fakePortalPassword}
+                      placeholder="training password"
+                      autoComplete="off"
+                      onChange={(event) => setFakePortalPassword(event.target.value)}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-pink self-start"
+                    disabled={!fakePortalEmail.trim() || !fakePortalPassword.trim()}
+                    onClick={() => {
+                      setFakePortalSubmitted(true)
+                      playSfx('wrong')
+                    }}
+                  >
+                    Submit Verification
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="success-banner mt-3">Verification Complete</div>
+                  <p className="text-sw-text3">
+                    The upload does not start. The portal closes like nothing happened.
+                  </p>
+                </>
+              )}
             </div>
-            <button
-              type="button"
-              className="ss-btn ss-btn-cyan self-start"
-              onClick={() => setPhase('outcome')}
-            >
-              A few moments later <IconArrowRight size={16} />
-            </button>
+            {fakePortalSubmitted && (
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan self-start"
+                onClick={() => setPhase('outcome')}
+              >
+                A few moments later <IconArrowRight size={16} />
+              </button>
+            )}
           </div>
         </section>
       )}
@@ -5935,8 +5981,22 @@ function Case4Rookie() {
             <span>AGENT RICKY</span>
           </div>
           <div className="case-office case3-corridor-office">
-            <div className="case3-filler-frame" aria-hidden="true">
-              <img src={fillerImage} alt="" />
+            <div className="case4-outcome-visual" aria-hidden="true">
+              <div className="case4-outcome-laptop">
+                <span />
+              </div>
+              <div
+                className={
+                  scenarioPassed
+                    ? 'case4-outcome-signal case4-outcome-signal-safe'
+                    : 'case4-outcome-signal case4-outcome-signal-danger'
+                }
+              >
+                <span />
+                <span />
+                <span />
+              </div>
+              {!scenarioPassed && <div className="case4-attacker-device" />}
               <span>{scenarioPassed ? 'field report uploaded' : 'rogue hotspot alert'}</span>
             </div>
             <PixelPerson
@@ -6000,7 +6060,7 @@ function Case4Rookie() {
                 <span>Rogue hotspot</span>
               </div>
               <div className="case2-veteran-post-frame">
-                <img src={fillerImage} alt="" />
+                <img src={publicWifiThreatsImage} alt="" />
                 <div className="case2-veteran-post-copy">
                   <strong>Fake networks can look useful, local, and free.</strong>
                   <span>Unknown public Wi-Fi should be treated as untrusted.</span>
