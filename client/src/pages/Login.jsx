@@ -21,7 +21,11 @@ export default function Login() {
     setError('')
     setSubmitting(true)
     try {
-      const { otpRequired } = await login(username.trim(), password)
+      const { otpRequired, emailRequired } = await login(username.trim(), password)
+      if (emailRequired) {
+        navigate('/verify-email')
+        return
+      }
       navigate(otpRequired ? '/verify-otp' : '/home')
     } catch (err) {
       setError(err.message)

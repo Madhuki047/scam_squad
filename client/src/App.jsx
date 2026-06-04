@@ -5,6 +5,7 @@ import AppLayout from './components/AppLayout.jsx'
 import Title from './pages/Title.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
+import VerifyEmail from './pages/VerifyEmail.jsx'
 import VerifyOtp from './pages/VerifyOtp.jsx'
 import Home from './pages/Home.jsx'
 import Profile from './pages/Profile.jsx'
@@ -26,6 +27,7 @@ export default function App() {
       {/* Public auth screens. */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/verify-otp" element={<VerifyOtp />} />
 
       {/* Signed-in screens - gated by auth, wrapped in the Sidebar +

@@ -43,6 +43,12 @@ const userSchema = new mongoose.Schema(
     verificationCodeExpires: { type: Date, default: null },
     verificationCodeSentAt: { type: Date, default: null },
     verificationCodeAttempts: { type: Number, default: 0, min: 0 },
+    pendingEmail: {
+      type: String,
+      lowercase: true,
+      trim: true,
+      default: null,
+    },
 
     // --- Currency -----------------------------------------------------
     points: { type: Number, default: 0, min: 0 },

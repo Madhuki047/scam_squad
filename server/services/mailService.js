@@ -1,21 +1,34 @@
 import nodemailer from 'nodemailer'
 
-// Sends transactional email - currently just 2FA one-time codes - over
-// Gmail SMTP.
+// Transactional mail for Scam Squad authentication.
+// Provider: Nodemailer over Gmail SMTP.
 //
-// GRACEFUL BY DESIGN: if SMTP credentials are not configured, the 2FA
-// flow still works for development. Instead of sending mail, the code is
-// printed to the server console, so you can test login + verify-otp
-// without setting up a Gmail App Password.
+// Required environment variables:
+// - Preferred: SMTP_USER, SMTP_PASS, optional SMTP_FROM
+// - Backward-compatible aliases: GMAIL_USER, GMAIL_APP_PASSWORD
+//
+// Development fallback:
+// - If no SMTP credentials are configured and NODE_ENV !== 'production',
+//   the PIN is logged to the server console so local auth can be tested.
+// - PINs are never logged in production.
 
 let transporter = null
 
-// Built lazily on first use so a missing config never crashes startup.
+function isProduction() {
+  return process.env.NODE_ENV === 'production'
+}
+
+function getSmtpConfig() {
+  const user = process.env.SMTP_USER || process.env.GMAIL_USER
+  const pass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD
+  const from = process.env.SMTP_FROM || user
+  return { user, pass, from }
+}
+
 function getTransporter() {
   if (transporter) return transporter
 
-  const user = process.env.SMTP_USER || process.env.GMAIL_USER
-  const pass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD
+  const { user, pass } = getSmtpConfig()
   if (!user || !pass) return null
 
   transporter = nodemailer.createTransport({
@@ -25,34 +38,45 @@ function getTransporter() {
   return transporter
 }
 
-// Email a 6-digit OTP. Always resolves: a mail failure must not break
-// login, and the console fallback keeps the flow testable.
+function mailError(message, cause) {
+  const error = new Error(message)
+  error.status = 503
+  if (cause) error.cause = cause
+  return error
+}
+
 export async function sendOtpEmail(to, code) {
   const tx = getTransporter()
 
   if (!tx) {
-    // Warning, not info: SMTP being unconfigured is a dev-only fallback.
-    // Using stderr also guarantees the OTP shows up promptly when stdout
-    // is piped or redirected (Node's stderr is blocking by default).
-    console.warn(
-      `[mailService] SMTP not configured - OTP for ${to} is: ${code}`,
+    if (!isProduction()) {
+      console.warn(
+        `[mailService] SMTP not configured. Development PIN for ${to}: ${code}`,
+      )
+      return
+    }
+    throw mailError(
+      'Verification email could not be sent because SMTP is not configured.',
     )
-    return
   }
 
   try {
+    const { from } = getSmtpConfig()
     await tx.sendMail({
-      from:
-        process.env.SMTP_FROM ||
-        process.env.SMTP_USER ||
-        process.env.GMAIL_USER,
+      from,
       to,
       subject: 'Your Scam Squad verification PIN',
       text: `Agent, your secure access PIN is ${code}. It expires in 10 minutes.`,
       html: `<p>Agent, your secure access PIN is <strong style="font-size:20px">${code}</strong>.</p><p>It expires in 10 minutes.</p>`,
     })
   } catch (error) {
-    console.warn('[mailService] Failed to send OTP email:', error.message)
-    console.log(`[mailService] OTP for ${to} is: ${code}`)
+    console.error('[mailService] Failed to send verification email:', {
+      to,
+      message: error.message,
+    })
+    throw mailError(
+      'Verification email could not be sent. Check mail configuration and try again.',
+      error,
+    )
   }
 }

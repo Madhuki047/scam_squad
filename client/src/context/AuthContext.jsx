@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(() =>
     Boolean(localStorage.getItem(TOKEN_KEY)),
   )
-  // { pendingToken, emailHint, purpose } between password/signup and PIN verification.
+  // { pendingToken, emailHint, purpose } between password/signup/email setup and PIN verification.
   const [pendingAuth, setPendingAuth] = useState(null)
 
   // On first load, verify any stored token and fetch the player record.
@@ -84,8 +84,32 @@ export function AuthProvider({ children }) {
       })
       return { otpRequired: true }
     }
+    if (data.emailRequired) {
+      setPendingAuth({
+        pendingToken: data.pendingToken,
+        emailHint: '',
+        purpose: data.purpose || 'add_email',
+      })
+      return { emailRequired: true }
+    }
     await completeSession(data.token)
     return { otpRequired: false }
+  }
+
+  async function addEmailForVerification(email) {
+    if (!pendingAuth) {
+      throw new Error('No sign-in in progress. Please log in again.')
+    }
+    const data = await api.addEmailForVerification(
+      pendingAuth.pendingToken,
+      email,
+    )
+    setPendingAuth({
+      pendingToken: data.pendingToken,
+      emailHint: data.emailHint,
+      purpose: data.purpose || 'add_email',
+    })
+    return { otpRequired: true }
   }
 
   async function verifyOtp(code) {
@@ -141,6 +165,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(token && user),
     register,
     login,
+    addEmailForVerification,
     verifyOtp,
     resendOtp,
     logout,

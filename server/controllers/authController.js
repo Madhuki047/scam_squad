@@ -50,10 +50,12 @@ function clearVerification(user) {
   user.verificationCodeExpires = null
   user.verificationCodeSentAt = null
   user.verificationCodeAttempts = 0
+  user.pendingEmail = null
 }
 
-async function issueVerificationPin(user, { force = false } = {}) {
-  if (!user.email) {
+async function issueVerificationPin(user, { force = false, email } = {}) {
+  const targetEmail = email || user.email
+  if (!targetEmail) {
     const error = new Error('Add an email address before email verification can be used.')
     error.status = 409
     throw error
@@ -73,15 +75,15 @@ async function issueVerificationPin(user, { force = false } = {}) {
   user.verificationCodeExpires = new Date(now + PIN_TTL_MS)
   user.verificationCodeSentAt = new Date(now)
   user.verificationCodeAttempts = 0
+  await sendOtpEmail(targetEmail, pin)
   await user.save()
-  await sendOtpEmail(user.email, pin)
 }
 
-function pendingResponse(user, purpose) {
+function pendingResponse(user, purpose, email = user.email) {
   return {
     otpRequired: true,
     pendingToken: createPendingToken(user._id, purpose),
-    emailHint: maskEmail(user.email),
+    emailHint: maskEmail(email),
     purpose,
     expiresInSeconds: Math.floor(PIN_TTL_MS / 1000),
   }
@@ -97,12 +99,20 @@ function verifyPendingToken(pendingToken) {
   }
 }
 
+function normalizeEmail(email) {
+  return email?.trim().toLowerCase()
+}
+
+function isValidEmail(email) {
+  return /^\S+@\S+\.\S+$/.test(email)
+}
+
 // --- controllers -----------------------------------------------------
 
 export async function register(req, res, next) {
   try {
     const { username, password, email } = req.body
-    const normalizedEmail = email?.trim().toLowerCase()
+    const normalizedEmail = normalizeEmail(email)
 
     if (!username || !password || !normalizedEmail) {
       return res
@@ -114,7 +124,7 @@ export async function register(req, res, next) {
         .status(400)
         .json({ message: 'Password must be at least 8 characters.' })
     }
-    if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
+    if (!isValidEmail(normalizedEmail)) {
       return res
         .status(400)
         .json({ message: 'That email address looks invalid.' })
@@ -131,7 +141,7 @@ export async function register(req, res, next) {
         .json({ message: 'That email is already registered.' })
     }
 
-    const user = await User.create({
+    const user = new User({
       username,
       password,
       email: normalizedEmail,
@@ -171,6 +181,8 @@ export async function login(req, res, next) {
     if (!user.email) {
       return res.status(409).json({
         emailRequired: true,
+        pendingToken: createPendingToken(user._id, 'add_email'),
+        purpose: 'add_email',
         message:
           'This account needs an email address before Agent Verification can be used. Add or confirm an email to continue.',
       })
@@ -183,6 +195,47 @@ export async function login(req, res, next) {
     await issueVerificationPin(user, { force: true })
 
     res.json(pendingResponse(user, 'login'))
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function addEmailForVerification(req, res, next) {
+  try {
+    const { pendingToken, email } = req.body
+    const normalizedEmail = normalizeEmail(email)
+
+    if (!pendingToken) {
+      return res.status(400).json({ message: 'Verification session is required.' })
+    }
+    if (!normalizedEmail) {
+      return res.status(400).json({ message: 'Email is required.' })
+    }
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({ message: 'That email address looks invalid.' })
+    }
+
+    const payload = verifyPendingToken(pendingToken)
+    if (!payload || payload.purpose !== 'add_email') {
+      return res
+        .status(401)
+        .json({ message: 'Your email verification session expired. Please log in again.' })
+    }
+
+    const user = await User.findById(payload.id)
+    if (!user) return res.status(404).json({ message: 'Account not found.' })
+    if (user.email) {
+      return res.status(409).json({
+        message: 'This account already has an email address. Please log in again.',
+      })
+    }
+    if (await User.findOne({ email: normalizedEmail, _id: { $ne: user._id } })) {
+      return res.status(409).json({ message: 'That email is already registered.' })
+    }
+
+    user.pendingEmail = normalizedEmail
+    await issueVerificationPin(user, { force: true, email: normalizedEmail })
+    res.json(pendingResponse(user, 'add_email', normalizedEmail))
   } catch (error) {
     next(error)
   }
@@ -208,9 +261,11 @@ export async function verifyOtp(req, res, next) {
 
     const user = await User.findById(payload.id)
     if (!user) return res.status(404).json({ message: 'Account not found.' })
-    if (!user.email) {
+    const targetEmail =
+      payload.purpose === 'add_email' ? user.pendingEmail : user.email
+    if (!targetEmail) {
       return res.status(409).json({
-        message: 'No email address is attached to this account.',
+        message: 'No email address is attached to this verification request.',
       })
     }
     if (!user.verificationCodeHash || !user.verificationCodeExpires) {
@@ -237,6 +292,14 @@ export async function verifyOtp(req, res, next) {
       return res.status(401).json({ message: 'Invalid verification PIN.' })
     }
 
+    if (payload.purpose === 'add_email') {
+      if (await User.findOne({ email: targetEmail, _id: { $ne: user._id } })) {
+        clearVerification(user)
+        await user.save()
+        return res.status(409).json({ message: 'That email is already registered.' })
+      }
+      user.email = targetEmail
+    }
     user.emailVerified = true
     user.twoFactorEnabled = user.twoFactorEnabled ?? true
     clearVerification(user)
@@ -266,10 +329,12 @@ export async function resendOtp(req, res, next) {
 
     const user = await User.findById(payload.id)
     if (!user) return res.status(404).json({ message: 'Account not found.' })
-    await issueVerificationPin(user)
+    const targetEmail =
+      payload.purpose === 'add_email' ? user.pendingEmail : user.email
+    await issueVerificationPin(user, { email: targetEmail })
     res.json({
       ok: true,
-      emailHint: maskEmail(user.email),
+      emailHint: maskEmail(targetEmail),
       expiresInSeconds: Math.floor(PIN_TTL_MS / 1000),
     })
   } catch (error) {

@@ -2,6 +2,7 @@ import { Router } from 'express'
 import {
   register,
   login,
+  addEmailForVerification,
   verifyOtp,
   resendOtp,
   logout,
@@ -12,6 +13,7 @@ const router = Router()
 
 router.post('/register', register)
 router.post('/login', login)
+router.post('/add-email', addEmailForVerification)
 router.post('/verify-otp', verifyOtp) // second step of 2FA sign-in
 router.post('/resend-otp', resendOtp)
 router.post('/logout', logout)
