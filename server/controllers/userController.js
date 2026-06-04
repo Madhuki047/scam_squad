@@ -37,7 +37,19 @@ export async function updateMe(req, res, next) {
     const user = await User.findById(req.userId)
     if (!user) return res.status(404).json({ message: 'Account not found.' })
 
-    const { notifications, email, currentPassword, newPassword } = req.body
+    const { notifications, email, currentPassword, newPassword, customTitle } =
+      req.body
+
+    // Custom Title cosmetic. Only players who bought it (inventory.titleOwned)
+    // may set or change the title shown on their profile.
+    if (typeof customTitle === 'string') {
+      if (!user.inventory?.titleOwned) {
+        return res
+          .status(403)
+          .json({ message: 'Buy the Custom Title cosmetic to set a title.' })
+      }
+      user.customTitle = customTitle.trim().slice(0, 30)
+    }
 
     // Notification preferences.
     if (notifications && typeof notifications === 'object') {

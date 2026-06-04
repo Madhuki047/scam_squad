@@ -9,14 +9,14 @@ import { logActivity } from '../services/activityService.js'
 const SHOP_CATALOG = {
   magnifier: {
     name: 'Evidence Magnifier',
-    desc: 'Reveal one extra clue during a case.',
+    desc: 'Cross out two wrong answers on a quiz question.',
     price: 150,
     type: 'consumable',
     field: 'magnifier',
   },
   time: {
     name: 'Time Extender',
-    desc: 'Add 30 seconds to a timed challenge.',
+    desc: 'Cross out one wrong answer on a quiz question.',
     price: 120,
     type: 'consumable',
     field: 'time',
@@ -30,7 +30,7 @@ const SHOP_CATALOG = {
   },
   hint: {
     name: 'Hint Token',
-    desc: 'Get a nudge on a tough question.',
+    desc: 'Cross out one wrong answer on a quiz question.',
     price: 100,
     type: 'consumable',
     field: 'hint',
@@ -120,26 +120,25 @@ export async function buyItem(req, res, next) {
   }
 }
 
-// POST /api/shop/use/:itemId - spend one of a consumable the player owns
-// (e.g. a Hint Token during a case). Counting/validation is done here so a
-// player can never use a power-up they do not hold. Cosmetics are not
-// consumable and are rejected. Returns the updated inventory so the client
-// can refresh its owned counts everywhere. This is the generic foundation
-// every consumable power-up uses - the case UI decides what the effect does.
+// POST /api/shop/use/:itemId - consume one of a held consumable power-up.
+// Cosmetics can't be "used"; consumables decrement their counter and must
+// have at least one in stock. The effect itself is applied client-side
+// during gameplay; this endpoint is the authoritative ledger so a player
+// can't spend a power-up they don't own.
 export async function useItem(req, res, next) {
   try {
     const itemId = String(req.params.itemId)
     const item = SHOP_CATALOG[itemId]
     if (!item) return res.status(404).json({ message: 'Unknown item.' })
     if (item.type !== 'consumable') {
-      return res.status(400).json({ message: 'This item cannot be used in a case.' })
+      return res.status(400).json({ message: 'This item cannot be used.' })
     }
 
     const user = await User.findById(req.userId)
     if (!user) return res.status(404).json({ message: 'Account not found.' })
 
     if ((user.inventory[item.field] || 0) < 1) {
-      return res.status(400).json({ message: `You ran out of ${item.name}s.` })
+      return res.status(400).json({ message: `No ${item.name} left to use.` })
     }
 
     user.inventory[item.field] -= 1
@@ -147,7 +146,7 @@ export async function useItem(req, res, next) {
     await user.save()
     await logActivity(req.userId, 'shop', `Used ${item.name}`, 0)
 
-    res.json({ ok: true, inventory: user.inventory })
+    res.json({ ok: true, points: user.points, inventory: user.inventory })
   } catch (error) {
     next(error)
   }

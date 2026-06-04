@@ -25,6 +25,25 @@
   --mono: 'VT323', monospace;
 }
 
+/* Neon Skin cosmetic (shop). Auto-applied while owned: AppLayout sets
+   data-skin="neon" on <html>, swapping the base palette for a brighter,
+   higher-voltage neon treatment so the purchase has a visible effect. */
+:root[data-skin='neon'] {
+  --cyan: #00f0ff;
+  --pink: #ff2bd6;
+  --pink-soft: #ff6be0;
+  --yellow: #faff00;
+  --orange: #ff9e2c;
+  --green: #39ff14;
+  --red: #ff3b6b;
+  --violet: #b56bff;
+  --line: rgba(0, 240, 255, 0.5);
+  --line2: rgba(255, 43, 214, 0.5);
+  --text2: #aff4ff;
+  --text3: #6ad6ff;
+  --bg-gradient: linear-gradient(180deg, #04001c 0%, #11003c 50%, #1d0058 100%);
+}
+
 /* The gradient background sits on every in-app screen. VT323 is small at
    its natural size, so the base size is bumped for readability. */
 html,
@@ -688,6 +707,90 @@ html.ss-high-contrast {
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+.powerup-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.powerup-bar-label {
+  letter-spacing: 0.08em;
+}
+
+.powerup-bar-items {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.powerup-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.55rem;
+  border: 1.5px solid rgba(93, 213, 232, 0.5);
+  border-radius: 0.375rem;
+  background: rgba(93, 213, 232, 0.08);
+  color: var(--cyan);
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    transform 80ms ease;
+}
+
+.powerup-chip:hover:not(:disabled) {
+  background: rgba(93, 213, 232, 0.18);
+  transform: translateY(-1px);
+}
+
+.powerup-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.powerup-chip-armed {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(93, 202, 151, 0.12);
+  opacity: 1;
+}
+
+.powerup-chip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 700;
+}
+
+.powerup-chip-count {
+  color: var(--text3);
+  font-size: 0.66rem;
+}
+
+.powerup-active-note {
+  border: 1.5px solid rgba(93, 202, 151, 0.5);
+  background: rgba(93, 202, 151, 0.1);
+  color: var(--green);
+  border-radius: 0.375rem;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.veteran-answer-eliminated {
+  opacity: 0.32;
+  text-decoration: line-through;
+  pointer-events: none;
 }
 
 .case-threat {

@@ -69,6 +69,10 @@ const userSchema = new mongoose.Schema(
     xp: { type: Number, default: 0, min: 0 },
     introCompleted: { type: Boolean, default: false },
 
+    // Custom Title cosmetic. Free text shown under the username on the
+    // profile; only settable once the player owns inventory.titleOwned.
+    customTitle: { type: String, default: '', trim: true, maxlength: 30 },
+
     // --- Badges -------------------------------------------------------
     badges: [
       {

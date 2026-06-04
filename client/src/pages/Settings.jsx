@@ -39,6 +39,28 @@ export default function Settings() {
     }
   }
 
+  // --- custom title (cosmetic) ---
+  // Only players who bought the Custom Title cosmetic can set one.
+  const titleOwned = Boolean(user?.inventory?.titleOwned)
+  const [titleDraft, setTitleDraft] = useState(user?.customTitle || '')
+  const [titleMsg, setTitleMsg] = useState(null)
+  const [titleBusy, setTitleBusy] = useState(false)
+
+  async function saveTitle(event) {
+    event.preventDefault()
+    setTitleMsg(null)
+    setTitleBusy(true)
+    try {
+      const data = await api.updateMe(token, { customTitle: titleDraft.trim() })
+      setUser(data.user)
+      setTitleMsg({ ok: true, text: 'Title updated.' })
+    } catch (err) {
+      setTitleMsg({ ok: false, text: err.message })
+    } finally {
+      setTitleBusy(false)
+    }
+  }
+
   // --- change password ---
   const [pwd, setPwd] = useState({ current: '', next: '', confirm: '' })
   const [pwdMsg, setPwdMsg] = useState(null)
@@ -146,6 +168,36 @@ export default function Settings() {
           <p className="text-sw-text3 text-sm mt-1">Saving…</p>
         )}
       </Section>
+
+      {titleOwned && (
+        <Section title="CUSTOM TITLE">
+          <form onSubmit={saveTitle} className="flex flex-col gap-3">
+            <p className="text-sw-text3">
+              Shown on your profile under your name. Up to 30 characters.
+            </p>
+            <input
+              className="ss-input"
+              type="text"
+              maxLength={30}
+              placeholder="e.g. Phish Hunter"
+              value={titleDraft}
+              onChange={(e) => setTitleDraft(e.target.value)}
+            />
+            {titleMsg && (
+              <p className={titleMsg.ok ? 'text-sw-green' : 'text-sw-red'}>
+                {titleMsg.text}
+              </p>
+            )}
+            <button
+              type="submit"
+              className="ss-btn ss-btn-cyan self-start"
+              disabled={titleBusy}
+            >
+              {titleBusy ? 'Saving…' : 'Save title'}
+            </button>
+          </form>
+        </Section>
+      )}
 
       <Section title="ACCOUNT">
         <form onSubmit={changePassword} className="flex flex-col gap-3">

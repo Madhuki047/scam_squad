@@ -73,6 +73,11 @@ export default function Profile() {
         />
         <div>
           <h2 className="font-pixel text-sw-cyan text-base">{user.username}</h2>
+          {user.customTitle && (
+            <p className="font-pixel text-sw-pink text-xs mt-2">
+              {user.customTitle}
+            </p>
+          )}
           <p className="text-sw-text2 mt-2">Level {level} Agent</p>
         </div>
       </div>

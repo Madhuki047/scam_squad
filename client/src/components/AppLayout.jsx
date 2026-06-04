@@ -1,8 +1,10 @@
+import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar.jsx'
 import TopNav from './TopNav.jsx'
 import SoundLayer from './SoundLayer.jsx'
 import { getPageTitle } from '../lib/nav.js'
+import { useAuth } from '../context/AuthContext.jsx'
 import { SocialNotificationsProvider } from '../context/SocialNotificationsContext.jsx'
 
 // Frame for every signed-in screen: a fixed Sidebar and TopNav, with the
@@ -10,6 +12,19 @@ import { SocialNotificationsProvider } from '../context/SocialNotificationsConte
 // route in App.jsx, so child routes render through <Outlet />.
 export default function AppLayout() {
   const { pathname } = useLocation()
+  const { user } = useAuth()
+
+  // Neon Skin cosmetic: while the player owns it, tag <html> so the
+  // [data-skin="neon"] palette override in index.css takes effect app-wide.
+  const neonSkin = Boolean(user?.inventory?.skinOwned)
+  useEffect(() => {
+    const root = document.documentElement
+    if (neonSkin) root.dataset.skin = 'neon'
+    else delete root.dataset.skin
+    return () => {
+      delete root.dataset.skin
+    }
+  }, [neonSkin])
 
   return (
     <SocialNotificationsProvider>

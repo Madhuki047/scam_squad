@@ -6,6 +6,8 @@ import { isCaseModeUnlocked } from '../lib/caseProgress.js'
 import { api } from '../lib/api.js'
 import { BADGES } from '../lib/badges.js'
 import { playSfx } from '../lib/sound.js'
+import PowerUpBar from '../components/PowerUpBar.jsx'
+import { useQuizPowerUps } from '../lib/useQuizPowerUps.js'
 import threadImage1 from '../assets/case2/thread1.jpeg'
 import threadImage2 from '../assets/case2/thread2.jpeg'
 import threadImage3 from '../assets/case2/thread3.jpeg'
@@ -978,7 +980,7 @@ function InboxScene({ onNext, internName }) {
   )
 }
 
-function EmailScene({ onClaim, onReport, internName }) {
+function EmailScene({ onClaim, onReport, internName, secondChanceArmed = false }) {
   const [secondsLeft, setSecondsLeft] = useState(48 * 60 * 60)
 
   useEffect(() => {
@@ -1020,6 +1022,11 @@ function EmailScene({ onClaim, onReport, internName }) {
           Report to supervisor
         </button>
       </div>
+      {secondChanceArmed && (
+        <div className="powerup-active-note">
+          Second Chance armed - claiming the scam voucher will be forgiven once.
+        </div>
+      )}
       <div className="case-choice-hint">
         Choose: click the voucher or report it
       </div>
@@ -1393,11 +1400,24 @@ function OneHourLater({ onNext }) {
   )
 }
 
-function DomainCheck({ selectedAnswer, onAnswer, onNext, onWrongAnswer }) {
+function DomainCheck({
+  selectedAnswer,
+  onAnswer,
+  onNext,
+  onWrongAnswer,
+  onForgiveWrong,
+  secondChanceArmed = false,
+}) {
   const answered = selectedAnswer !== null
   const correct = selectedAnswer === 'no'
 
   function chooseAnswer(answer) {
+    // 'yes' is the wrong call (lookalike domain). Second Chance forgives it
+    // once: don't record the answer or trigger the capture, let them retry.
+    if (answer === 'yes' && onForgiveWrong?.()) {
+      playSfx('wrong')
+      return
+    }
     onAnswer(answer)
     if (answer === 'yes') onWrongAnswer()
   }
@@ -1410,6 +1430,11 @@ function DomainCheck({ selectedAnswer, onAnswer, onNext, onWrongAnswer }) {
       <h3 className="font-pixel text-sw-cyan text-sm">
         Is this the real Unit Zero website?
       </h3>
+      {!answered && secondChanceArmed && (
+        <div className="powerup-active-note">
+          Second Chance armed - a wrong call here will be forgiven once.
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           type="button"
@@ -1628,6 +1653,8 @@ function VeteranQuiz({
   onNextQuestion,
   onSubmit,
   submitted,
+  eliminated = [],
+  secondChanceArmed = false,
 }) {
   const correct = answers.reduce(
     (count, answer, index) => count + (answer === VETERAN_QUIZ[index].answer ? 1 : 0),
@@ -1667,6 +1694,7 @@ function VeteranQuiz({
                 {currentQuestion.options.map((option, optionIndex) => {
                   const selected = selectedAnswer === optionIndex
                   const isCorrect = currentQuestion.answer === optionIndex
+                  const isEliminated = eliminated.includes(optionIndex)
                   return (
                     <button
                       key={option}
@@ -1679,9 +1707,9 @@ function VeteranQuiz({
                         answered && selected && !isCorrect
                           ? 'veteran-answer-wrong'
                           : ''
-                      }`}
+                      } ${isEliminated ? 'veteran-answer-eliminated' : ''}`}
                       onClick={() => onAnswer(currentQuestionIndex, optionIndex)}
-                      disabled={answered}
+                      disabled={answered || isEliminated}
                     >
                       {option}
                     </button>
@@ -1689,6 +1717,11 @@ function VeteranQuiz({
                 })}
               </div>
             </article>
+            {secondChanceArmed && (
+              <div className="powerup-active-note">
+                Second Chance armed - your next wrong answer is forgiven.
+              </div>
+            )}
             {answered && (
               <div className={selectedCorrect ? 'success-banner' : 'breach-banner'}>
                 {selectedCorrect
@@ -1872,6 +1905,7 @@ function VeteranCase() {
   )
   const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0)
   const [quizSubmitted, setQuizSubmitted] = useState(false)
+  const powerUps = useQuizPowerUps(VETERAN_QUIZ)
   const [badge, setBadge] = useState(null)
   const [pointsAwarded, setPointsAwarded] = useState(0)
   const [progressError, setProgressError] = useState('')
@@ -1895,6 +1929,7 @@ function VeteranCase() {
     setQuizAnswers(VETERAN_QUIZ.map(() => null))
     setCurrentQuizQuestion(0)
     setQuizSubmitted(false)
+    powerUps.reset()
     setBadge(null)
     setPointsAwarded(0)
     setProgressError('')
@@ -1997,15 +2032,31 @@ function VeteranCase() {
 
   function answerQuiz(questionIndex, optionIndex) {
     if (quizAnswers[questionIndex] !== null) return
+    const isCorrect = optionIndex === VETERAN_QUIZ[questionIndex].answer
+    // Second Chance: a wrong answer is forgiven once - the question stays
+    // open so the player can pick again, and the token's effect is spent.
+    if (!isCorrect && powerUps.consumeForgiveOnWrong()) {
+      playSfx('wrong')
+      return
+    }
     setQuizAnswers((current) =>
       current.map((answer, index) =>
         index === questionIndex ? optionIndex : answer,
       ),
     )
-    playSfx(
-      optionIndex === VETERAN_QUIZ[questionIndex].answer ? 'correct' : 'wrong',
-    )
+    playSfx(isCorrect ? 'correct' : 'wrong')
   }
+
+  // The bar appears wherever a power-up can act: the quiz (hint/magnifier/
+  // time eliminate options + Second Chance) and the binary domain check
+  // (Second Chance only - eliminating one of two options would reveal it).
+  const quizActive = phase === 'quiz' && !quizSubmitted
+  const powerUpEffects = quizActive
+    ? powerUps.effectsFor(
+        currentQuizQuestion,
+        quizAnswers[currentQuizQuestion] !== null,
+      )
+    : powerUps.secondChanceEffects(phase === 'domain' && domainAnswer === null)
 
   function nextQuizQuestion() {
     setCurrentQuizQuestion((value) =>
@@ -2031,6 +2082,7 @@ function VeteranCase() {
             The Double Bluff
           </h2>
         </div>
+        <PowerUpBar effects={powerUpEffects} armed={powerUps.armed} />
       </div>
       {progressError && (
         <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
@@ -2078,6 +2130,8 @@ function VeteranCase() {
             setRoute('captured')
             setPhase('portal')
           }}
+          onForgiveWrong={powerUps.consumeForgiveOnWrong}
+          secondChanceArmed={powerUps.secondChanceArmed}
           onNext={() => setPhase('timeSkip')}
         />
       )}
@@ -2104,6 +2158,8 @@ function VeteranCase() {
           onNextQuestion={nextQuizQuestion}
           onSubmit={submitQuiz}
           submitted={quizSubmitted}
+          eliminated={powerUps.eliminatedFor(currentQuizQuestion)}
+          secondChanceArmed={powerUps.secondChanceArmed}
         />
       )}
       {phase === 'debrief' && (
@@ -2872,6 +2928,8 @@ function Case2VeteranQuiz({
   onNextQuestion,
   onSubmit,
   submitted,
+  eliminated = [],
+  secondChanceArmed = false,
 }) {
   const correct = answers.reduce(
     (count, answer, index) =>
@@ -2911,6 +2969,7 @@ function Case2VeteranQuiz({
                 {currentQuestion.options.map((option, optionIndex) => {
                   const selected = selectedAnswer === optionIndex
                   const isCorrect = currentQuestion.answer === optionIndex
+                  const isEliminated = eliminated.includes(optionIndex)
                   return (
                     <button
                       key={option}
@@ -2923,9 +2982,9 @@ function Case2VeteranQuiz({
                         answered && selected && !isCorrect
                           ? 'veteran-answer-wrong'
                           : ''
-                      }`}
+                      } ${isEliminated ? 'veteran-answer-eliminated' : ''}`}
                       onClick={() => onAnswer(currentQuestionIndex, optionIndex)}
-                      disabled={answered}
+                      disabled={answered || isEliminated}
                     >
                       {option}
                     </button>
@@ -2933,6 +2992,11 @@ function Case2VeteranQuiz({
                 })}
               </div>
             </article>
+            {secondChanceArmed && (
+              <div className="powerup-active-note">
+                Second Chance armed - your next wrong answer is forgiven.
+              </div>
+            )}
             {answered && (
               <div className={selectedCorrect ? 'success-banner' : 'breach-banner'}>
                 {selectedCorrect
@@ -3127,6 +3191,7 @@ function Case2Veteran() {
   )
   const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0)
   const [quizSubmitted, setQuizSubmitted] = useState(false)
+  const powerUps = useQuizPowerUps(CASE2_VETERAN_QUIZ)
   const [badge, setBadge] = useState(null)
   const [pointsAwarded, setPointsAwarded] = useState(0)
   const [failureLifeSpent, setFailureLifeSpent] = useState(false)
@@ -3161,6 +3226,7 @@ function Case2Veteran() {
     setQuizAnswers(CASE2_VETERAN_QUIZ.map(() => null))
     setCurrentQuizQuestion(0)
     setQuizSubmitted(false)
+    powerUps.reset()
     setBadge(null)
     setPointsAwarded(0)
     setFailureLifeSpent(false)
@@ -3299,14 +3365,17 @@ function Case2Veteran() {
 
   function answerQuiz(questionIndex, optionIndex) {
     if (quizAnswers[questionIndex] !== null) return
+    const isCorrect = optionIndex === CASE2_VETERAN_QUIZ[questionIndex].answer
+    if (!isCorrect && powerUps.consumeForgiveOnWrong()) {
+      playSfx('wrong')
+      return
+    }
     setQuizAnswers((current) =>
       current.map((answer, index) =>
         index === questionIndex ? optionIndex : answer,
       ),
     )
-    playSfx(
-      optionIndex === CASE2_VETERAN_QUIZ[questionIndex].answer ? 'correct' : 'wrong',
-    )
+    playSfx(isCorrect ? 'correct' : 'wrong')
   }
 
   function nextQuizQuestion() {
@@ -3314,6 +3383,14 @@ function Case2Veteran() {
       Math.min(value + 1, CASE2_VETERAN_QUIZ.length - 1),
     )
   }
+
+  const quizActive = phase === 'quiz' && !quizSubmitted
+  const powerUpEffects = quizActive
+    ? powerUps.effectsFor(
+        currentQuizQuestion,
+        quizAnswers[currentQuizQuestion] !== null,
+      )
+    : {}
 
   async function submitQuiz() {
     if (!quizSubmitted) {
@@ -3338,6 +3415,7 @@ function Case2Veteran() {
             The Pile-On
           </h2>
         </div>
+        <PowerUpBar effects={powerUpEffects} armed={powerUps.armed} />
       </div>
       {progressError && (
         <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
@@ -3373,6 +3451,8 @@ function Case2Veteran() {
           onNextQuestion={nextQuizQuestion}
           onSubmit={submitQuiz}
           submitted={quizSubmitted}
+          eliminated={powerUps.eliminatedFor(currentQuizQuestion)}
+          secondChanceArmed={powerUps.secondChanceArmed}
         />
       )}
       {phase === 'debrief' && (
@@ -3640,21 +3720,13 @@ function Case3Rookie() {
     () => CASE3_KNOWLEDGE_CHECK.map(() => null),
   )
   const [currentQuestion, setCurrentQuestion] = useState(0)
-  // Per-question wrong option revealed by a spent Hint Token (50/50 help).
-  const [hintEliminated, setHintEliminated] = useState(
-    () => CASE3_KNOWLEDGE_CHECK.map(() => null),
-  )
-  const [powerNotice, setPowerNotice] = useState(null) // { ok, text }
-  const [usingHint, setUsingHint] = useState(false)
-  const [lifeSpentInCheck, setLifeSpentInCheck] = useState(false)
-  const [outOfLives, setOutOfLives] = useState(false)
+  const powerUps = useQuizPowerUps(CASE3_KNOWLEDGE_CHECK)
   const [badge, setBadge] = useState(null)
   const [pointsAwarded, setPointsAwarded] = useState(0)
   const [progressError, setProgressError] = useState('')
   const [resolvingDebrief, setResolvingDebrief] = useState(false)
   const resolvingRef = useRef(false)
   const internName = user?.username || 'Nova'
-  const hintsLeft = user?.inventory?.hint ?? 0
   const scenarioPassed = scenarioChoice === 'verify'
   const checkCorrect = checkAnswers.reduce(
     (count, answer, index) =>
@@ -3673,83 +3745,12 @@ function Case3Rookie() {
     setScenarioChoice(null)
     setCheckAnswers(CASE3_KNOWLEDGE_CHECK.map(() => null))
     setCurrentQuestion(0)
-    setHintEliminated(CASE3_KNOWLEDGE_CHECK.map(() => null))
-    setPowerNotice(null)
-    setUsingHint(false)
-    setLifeSpentInCheck(false)
-    setOutOfLives(false)
+    powerUps.reset()
     setBadge(null)
     setPointsAwarded(0)
     setProgressError('')
     setResolvingDebrief(false)
     resolvingRef.current = false
-  }
-
-  // Spend a Hint Token to grey out one wrong option on the current
-  // question (50/50). The token is consumed server-side first so a player
-  // can never reveal help they have not paid for; the inventory count then
-  // syncs back into auth context so the Shop and TopNav stay accurate.
-  async function useHint() {
-    if (usingHint) return
-    const question = CASE3_KNOWLEDGE_CHECK[currentQuestion]
-    if (checkAnswers[currentQuestion] !== null) return
-    if (hintEliminated[currentQuestion] !== null) {
-      setPowerNotice({ ok: false, text: 'Hint already used on this question.' })
-      return
-    }
-    if (hintsLeft < 1) {
-      setPowerNotice({
-        ok: false,
-        text: 'You ran out of Hint Tokens. Visit the shop to restock.',
-      })
-      return
-    }
-    setUsingHint(true)
-    setPowerNotice(null)
-    try {
-      const res = await api.useItem(token, 'hint')
-      setUser((current) => ({ ...current, inventory: res.inventory }))
-      // Pick one wrong option to eliminate (never the correct answer).
-      const wrongOptions = question.options
-        .map((_, index) => index)
-        .filter((index) => index !== question.answer)
-      const eliminate =
-        wrongOptions[Math.floor(Math.random() * wrongOptions.length)]
-      setHintEliminated((current) =>
-        current.map((value, index) =>
-          index === currentQuestion ? eliminate : value,
-        ),
-      )
-      playSfx('click')
-      setPowerNotice({ ok: true, text: 'Hint used - one wrong answer removed.' })
-    } catch (error) {
-      setPowerNotice({
-        ok: false,
-        text: error.message || 'Could not use the Hint Token.',
-      })
-    } finally {
-      setUsingHint(false)
-    }
-  }
-
-  // A wrong knowledge-check answer costs one life immediately. We spend it
-  // through the existing lives endpoint so the server stays the source of
-  // truth, then mirror the new count into auth context. Running the count
-  // to zero ends the attempt straight away (handled in answerCheck).
-  async function spendLifeForWrongAnswer() {
-    try {
-      const data = await api.useLife(token)
-      setLifeSpentInCheck(true)
-      setUser((current) => ({
-        ...current,
-        livesRemaining: data.livesRemaining,
-      }))
-      playSfx('lifeLost')
-      if (data.livesRemaining <= 0) setOutOfLives(true)
-    } catch (error) {
-      // 409 = already out of lives. Either way, the attempt is over.
-      setOutOfLives(true)
-    }
   }
 
   function chooseScenario(choice) {
@@ -3760,16 +3761,17 @@ function Case3Rookie() {
 
   function answerCheck(questionIndex, optionIndex) {
     if (checkAnswers[questionIndex] !== null) return
+    const isCorrect = optionIndex === CASE3_KNOWLEDGE_CHECK[questionIndex].answer
+    if (!isCorrect && powerUps.consumeForgiveOnWrong()) {
+      playSfx('wrong')
+      return
+    }
     setCheckAnswers((current) =>
       current.map((answer, index) =>
         index === questionIndex ? optionIndex : answer,
       ),
     )
-    const isWrong = optionIndex !== CASE3_KNOWLEDGE_CHECK[questionIndex].answer
-    playSfx(isWrong ? 'wrong' : 'correct')
-    // A wrong pick burns a life on the spot - this is what the Hint Token
-    // guards against. Lives are spent through the server (source of truth).
-    if (isWrong) spendLifeForWrongAnswer()
+    playSfx(isCorrect ? 'correct' : 'wrong')
   }
 
   async function spendFailureLife(nextAction) {
@@ -3777,21 +3779,6 @@ function Case3Rookie() {
     resolvingRef.current = true
     setResolvingDebrief(true)
     setProgressError('')
-    // A wrong knowledge-check answer already burned a life inline, so the
-    // debrief must not charge a second one - that would double-penalise the
-    // same mistake. The scenario-only failure path (perfect check, wrong
-    // corridor) still spends its life here as before.
-    if (lifeSpentInCheck) {
-      playSfx('caseFailed')
-      resolvingRef.current = false
-      setResolvingDebrief(false)
-      if (nextAction === 'replay') {
-        restart()
-      } else {
-        navigate('/play')
-      }
-      return
-    }
     try {
       const data = await api.failAttempt(token, {
         caseId: 3,
@@ -3865,33 +3852,10 @@ function Case3Rookie() {
   const activeQuestion = CASE3_KNOWLEDGE_CHECK[currentQuestion]
   const selectedCheckAnswer = checkAnswers[currentQuestion]
   const checkAnswered = selectedCheckAnswer !== null
-  const hintUsedHere = hintEliminated[currentQuestion] !== null
-
-  // A wrong answer can drain the last life mid-check. When that happens the
-  // attempt is over - route the player out instead of letting them finish a
-  // run they can no longer pass.
-  if (outOfLives) {
-    return (
-      <div className="case-shell max-w-5xl mx-auto">
-        <section className="ss-card p-6 flex flex-col gap-4 max-w-3xl mx-auto opacity-90">
-          <IconLock size={28} className="text-sw-red" />
-          <h2 className="font-pixel text-sw-cyan text-sm">No lives remaining</h2>
-          <p className="text-sw-text2">
-            A wrong answer cost your last life. Lives regenerate over time, or
-            you can earn points in the quiz to buy Hint Tokens before your next
-            attempt.
-          </p>
-          <button
-            type="button"
-            className="ss-btn ss-btn-cyan self-start"
-            onClick={() => navigate('/play')}
-          >
-            Return to Case Files
-          </button>
-        </section>
-      </div>
-    )
-  }
+  const powerUpEffects =
+    phase === 'check'
+      ? powerUps.effectsFor(currentQuestion, checkAnswered)
+      : {}
 
   return (
     <div className="case-shell max-w-5xl mx-auto">
@@ -3902,6 +3866,7 @@ function Case3Rookie() {
             Friendly Faces
           </h2>
         </div>
+        <PowerUpBar effects={powerUpEffects} armed={powerUps.armed} />
       </div>
       {progressError && (
         <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
@@ -4192,28 +4157,6 @@ function Case3Rookie() {
             <div className="veteran-quiz-progress">
               Question {currentQuestion + 1} / {CASE3_KNOWLEDGE_CHECK.length}
             </div>
-            <div className="case-powerup-bar">
-              <span className="case-powerup-lives">
-                Lives: {user?.livesRemaining ?? 0} - a wrong answer costs one
-              </span>
-              <button
-                type="button"
-                className="ss-btn ss-btn-pink text-xs"
-                onClick={useHint}
-                disabled={usingHint || checkAnswered || hintUsedHere}
-              >
-                {hintUsedHere
-                  ? 'Hint used'
-                  : usingHint
-                    ? '…'
-                    : `Use Hint (x${hintsLeft})`}
-              </button>
-            </div>
-            {powerNotice && (
-              <p className={powerNotice.ok ? 'text-sw-green' : 'text-sw-yellow'}>
-                {powerNotice.text}
-              </p>
-            )}
             <article
               className={`veteran-quiz-card ${
                 checkAnswered && selectedCheckAnswer !== activeQuestion.answer
@@ -4226,8 +4169,9 @@ function Case3Rookie() {
                 {activeQuestion.options.map((option, optionIndex) => {
                   const selected = selectedCheckAnswer === optionIndex
                   const isCorrect = activeQuestion.answer === optionIndex
-                  const eliminated =
-                    hintEliminated[currentQuestion] === optionIndex
+                  const isEliminated = powerUps
+                    .eliminatedFor(currentQuestion)
+                    .includes(optionIndex)
                   return (
                     <button
                       key={option}
@@ -4238,9 +4182,9 @@ function Case3Rookie() {
                         checkAnswered && selected && !isCorrect
                           ? 'veteran-answer-wrong'
                           : ''
-                      } ${eliminated ? 'veteran-answer-eliminated' : ''}`}
+                      } ${isEliminated ? 'veteran-answer-eliminated' : ''}`}
                       onClick={() => answerCheck(currentQuestion, optionIndex)}
-                      disabled={checkAnswered || eliminated}
+                      disabled={checkAnswered || isEliminated}
                     >
                       {option}
                     </button>
@@ -4248,6 +4192,11 @@ function Case3Rookie() {
                 })}
               </div>
             </article>
+            {powerUps.secondChanceArmed && (
+              <div className="powerup-active-note">
+                Second Chance armed - your next wrong answer is forgiven.
+              </div>
+            )}
             {checkAnswered && (
               <div
                 className={
@@ -4450,6 +4399,7 @@ export default function Case() {
   const [resolvingDebrief, setResolvingDebrief] = useState(false)
   const [progressError, setProgressError] = useState('')
   const resolvingRef = useRef(false)
+  const powerUps = useQuizPowerUps()
   const internName = user?.username || 'Nova'
   const hasLives = (user?.livesRemaining ?? 0) > 0
 
@@ -4489,6 +4439,13 @@ export default function Case() {
   }
 
   async function handleClaimVoucher() {
+    // Claiming the voucher is the scam action. With Second Chance armed, the
+    // mistake is forgiven once - stay on the email so the player can report
+    // it instead of walking into the phishing flow.
+    if (powerUps.consumeForgiveOnWrong()) {
+      playSfx('wrong')
+      return
+    }
     setPhase('glitch')
   }
 
@@ -4501,8 +4458,11 @@ export default function Case() {
     setSceneExiting(false)
     setResolvingDebrief(false)
     setProgressError('')
+    powerUps.reset()
     resolvingRef.current = false
   }
+
+  const powerUpEffects = powerUps.secondChanceEffects(phase === 'email')
 
   async function finishFailedAttempt(nextAction) {
     if (resolvingRef.current) return
@@ -4604,6 +4564,7 @@ export default function Case() {
             The Bait
           </h2>
         </div>
+        <PowerUpBar effects={powerUpEffects} armed={powerUps.armed} />
       </div>
       {progressError && (
         <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
@@ -4629,6 +4590,7 @@ export default function Case() {
             setOutcome('report')
             setPhase('zoey')
           }}
+          secondChanceArmed={powerUps.secondChanceArmed}
         />
       )}
       {phase === 'glitch' && <GlitchScreen onNext={() => setPhase('form')} />}
