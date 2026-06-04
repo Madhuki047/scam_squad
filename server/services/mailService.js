@@ -32,17 +32,28 @@ function getTransporter() {
   if (!user || !pass) return null
 
   transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    requireTLS: true,
     auth: { user, pass },
   })
   return transporter
 }
 
-function mailError(message, cause) {
+function mailError(message) {
   const error = new Error(message)
   error.status = 503
-  if (cause) error.cause = cause
   return error
+}
+
+function safeSmtpError(error) {
+  return {
+    code: error?.code,
+    command: error?.command,
+    responseCode: error?.responseCode,
+    message: error?.message,
+  }
 }
 
 export async function sendOtpEmail(to, code) {
@@ -70,13 +81,12 @@ export async function sendOtpEmail(to, code) {
       html: `<p>Agent, your secure access PIN is <strong style="font-size:20px">${code}</strong>.</p><p>It expires in 10 minutes.</p>`,
     })
   } catch (error) {
-    console.error('[mailService] Failed to send verification email:', {
-      to,
-      message: error.message,
-    })
+    console.error(
+      '[mailService] Failed to send verification email:',
+      safeSmtpError(error),
+    )
     throw mailError(
       'Verification email could not be sent. Check mail configuration and try again.',
-      error,
     )
   }
 }
