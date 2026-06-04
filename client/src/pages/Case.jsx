@@ -5637,7 +5637,7 @@ function Case4Rookie() {
     setScenarioChoice(choice)
     setOutcomeStep(0)
     setPhase(choice === 'rogue-wifi' ? 'fakePortal' : 'outcome')
-    playSfx(choice === 'mobile-hotspot' ? 'correct' : 'wrong')
+    playSfx('click')
   }
 
   function answerCheck(questionIndex, optionIndex) {
@@ -5652,13 +5652,6 @@ function Case4Rookie() {
         ? 'correct'
         : 'wrong',
     )
-  }
-
-  function primeFakePortalCredentials() {
-    setFakePortalEmail((value) =>
-      value.trim() ? value : 'cadet@unitzero.gov',
-    )
-    setFakePortalPassword((value) => (value.trim() ? value : '---'))
   }
 
   async function spendFailureLife(nextAction) {
@@ -5932,9 +5925,8 @@ function Case4Rookie() {
                     <input
                       type="text"
                       value={fakePortalEmail}
-                      placeholder="cadet@unitzero.gov"
+                      placeholder="Unit Zero email"
                       autoComplete="off"
-                      onFocus={primeFakePortalCredentials}
                       onChange={(event) => setFakePortalEmail(event.target.value)}
                     />
                   </label>
@@ -5943,19 +5935,18 @@ function Case4Rookie() {
                     <input
                       type="password"
                       value={fakePortalPassword}
-                      placeholder="training password"
+                      placeholder="Password"
                       autoComplete="off"
-                      onFocus={primeFakePortalCredentials}
                       onChange={(event) => setFakePortalPassword(event.target.value)}
                     />
                   </label>
                   <button
                     type="button"
                     className="ss-btn ss-btn-pink self-start"
+                    disabled={!fakePortalEmail.trim() || !fakePortalPassword.trim()}
                     onClick={() => {
-                      primeFakePortalCredentials()
                       setFakePortalSubmitted(true)
-                      playSfx('wrong')
+                      playSfx('click')
                     }}
                   >
                     Submit Verification
@@ -5984,7 +5975,10 @@ function Case4Rookie() {
               <button
                 type="button"
                 className="ss-btn ss-btn-cyan self-start"
-                onClick={() => setPhase('outcome')}
+                onClick={() => {
+                  playSfx('wrong')
+                  setPhase('outcome')
+                }}
               >
                 A few moments later <IconArrowRight size={16} />
               </button>
