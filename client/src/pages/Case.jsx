@@ -1234,6 +1234,13 @@ const CASE5_EVIDENCE = [
     correct: 'real',
     visual: 'street',
     tags: ['natural clutter', 'background noise', 'crowd density'],
+    zoomNotes: [
+      'No fused body parts.',
+      'Lighting direction is consistent.',
+      'Background clutter is natural, not automatically suspicious.',
+    ],
+    keyNote:
+      'Real photos can be messy. Visual clutter alone is not evidence of AI manipulation.',
     teaching:
       'Natural clutter and background noise do not automatically mean AI manipulation.',
   },
@@ -1249,6 +1256,12 @@ const CASE5_EVIDENCE = [
       'Hands are slightly fused where they meet.',
       "One man's ear is partly buried into his collar.",
     ],
+    zoomNotes: [
+      'Handshake area: fingers overlap unnaturally.',
+      'Collar edge: ear boundary is unclear.',
+    ],
+    keyNote:
+      'Hands, ears, collars, and edges are common weak points in manipulated images.',
     teaching:
       'Hands, fingers, ears, and clothing edges are common weak points in generated or manipulated images.',
   },
@@ -1260,6 +1273,13 @@ const CASE5_EVIDENCE = [
     correct: 'real',
     visual: 'restaurant',
     tags: ['noise', 'uneven lighting', 'handheld camera'],
+    zoomNotes: [
+      'Noise is consistent across the image.',
+      'Uneven lighting matches indoor restaurant conditions.',
+      'No impossible geometry or distorted body parts.',
+    ],
+    keyNote:
+      'Noise and uneven lighting can happen in genuine photos. Imperfection is not automatically fake.',
     teaching:
       'Real photos can have noise, blur, uneven lighting, and imperfect shadows. Imperfection alone is not proof of AI.',
   },
@@ -1274,6 +1294,12 @@ const CASE5_EVIDENCE = [
     tells: [
       'The reflection in the glass table does not match the people present.',
     ],
+    zoomNotes: [
+      'Glass table: reflection does not match people seated at the table.',
+      'Reflective surfaces must stay spatially consistent.',
+    ],
+    keyNote:
+      'AI often struggles with reflections because it must model the full environment, not just faces.',
     teaching:
       'AI can struggle with reflective surfaces because reflections require spatial consistency.',
     critical: true,
@@ -1286,6 +1312,12 @@ const CASE5_EVIDENCE = [
     correct: 'real',
     visual: 'outdoor',
     tags: ['motion blur', 'moving subject', 'handheld camera'],
+    zoomNotes: [
+      'Motion blur follows the moving subject.',
+      'Shadows and light direction stay consistent.',
+      'Blur alone does not prove manipulation.',
+    ],
+    keyNote: 'Real candid photos often contain motion blur.',
     teaching:
       'Motion blur can be normal if people are moving or the camera is handheld.',
   },
@@ -1302,6 +1334,13 @@ const CASE5_EVIDENCE = [
       'Hair near the temple looks soft or painted.',
       'Eyes do not reflect the visible light source correctly.',
     ],
+    zoomNotes: [
+      'Mouth: teeth are too uniform.',
+      'Temple: hairline has a soft painted edge.',
+      'Eyes: reflection does not match the visible light source.',
+    ],
+    keyNote:
+      'Teeth, hairlines, eyes, and light reflections are common deepfake tells.',
     teaching:
       'Teeth, hairlines, eyes, and light reflections are common deepfake indicators.',
   },
@@ -6733,13 +6772,19 @@ function Case4Rookie() {
   )
 }
 
-function Case5EvidenceVisual({ item, reveal = false }) {
+function Case5EvidenceVisual({ item, magnified = false, reveal = false }) {
+  const showHotspots = magnified || reveal
   return (
-    <div className={`case5-evidence-visual case5-visual-${item.visual}`}>
+    <div
+      className={`case5-evidence-visual case5-visual-${item.visual} ${
+        magnified ? 'magnified' : ''
+      }`}
+    >
       <div className="case5-scanline" aria-hidden="true" />
       <div className="case5-photo-frame">
         {item.visual === 'street' && (
           <>
+            <div className="case5-skyline-glow" />
             <div className="case5-street-road" />
             <div className="case5-city-blocks">
               <span />
@@ -6747,15 +6792,17 @@ function Case5EvidenceVisual({ item, reveal = false }) {
               <span />
             </div>
             <div className="case5-crowd">
-              {Array.from({ length: 10 }).map((_, index) => (
+              {Array.from({ length: 12 }).map((_, index) => (
                 <span key={index} />
               ))}
             </div>
+            <div className="case5-consistent-shadows" />
           </>
         )}
         {item.visual === 'handshake' && (
           <>
             <div className="case5-office-window" />
+            <div className="case5-office-desk" />
             <div className="case5-person case5-person-left" />
             <div className="case5-person case5-person-right" />
             <div className="case5-handshake-glitch" />
@@ -6775,11 +6822,14 @@ function Case5EvidenceVisual({ item, reveal = false }) {
                 <span key={index} />
               ))}
             </div>
+            <div className="case5-plate" />
+            <div className="case5-warm-shadow" />
             <div className="case5-photo-noise" />
           </>
         )}
         {item.visual === 'meeting' && (
           <>
+            <div className="case5-boardroom-window" />
             <div className="case5-glass-table" />
             <div className="case5-person case5-person-left" />
             <div className="case5-person case5-person-center" />
@@ -6790,6 +6840,7 @@ function Case5EvidenceVisual({ item, reveal = false }) {
         )}
         {item.visual === 'outdoor' && (
           <>
+            <div className="case5-sun-source" />
             <div className="case5-outdoor-path" />
             <div className="case5-person case5-person-left" />
             <div className="case5-person case5-motion-person" />
@@ -6802,6 +6853,7 @@ function Case5EvidenceVisual({ item, reveal = false }) {
         {item.visual === 'portrait' && (
           <>
             <div className="case5-portrait-head">
+              <span className="case5-portrait-light-source" />
               <span className="case5-portrait-eye case5-portrait-eye-left" />
               <span className="case5-portrait-eye case5-portrait-eye-right" />
               <span className="case5-portrait-teeth" />
@@ -6809,7 +6861,7 @@ function Case5EvidenceVisual({ item, reveal = false }) {
             </div>
           </>
         )}
-        {reveal && item.correct === 'fake' && (
+        {showHotspots && item.correct === 'fake' && (
           <div className="case5-hotspot-layer">
             {(item.tells || []).map((tell, index) => (
               <span key={tell} className={`case5-hotspot case5-hotspot-${index + 1}`}>
@@ -7029,7 +7081,7 @@ function Case5Rookie() {
               <span>DOCUMENT DUMP</span>
               <strong>6 IMAGE EXHIBITS</strong>
             </div>
-            <div className="case-bubble case-bubble-jane case3-dialogue-bubble">
+            <div className="case-bubble case-bubble-jane case3-dialogue-bubble case5-dialogue-bubble">
               <span className="text-sw-yellow">Agent Ricky</span>
               <p>{CASE5_INTRO_DIALOGUE[introStep]}</p>
             </div>
@@ -7084,6 +7136,7 @@ function Case5Rookie() {
                     onClick={() => openEvidence(index)}
                   >
                     <span>{item.exhibit}</span>
+                    <em>{item.title}</em>
                     <strong>{answered ? 'CLASSIFIED' : 'UNREVIEWED'}</strong>
                   </button>
                 )
@@ -7093,23 +7146,36 @@ function Case5Rookie() {
             <div className="case5-active-file">
               <div className="case4-analysis-header">
                 <span>{activeEvidence.exhibit}</span>
-                <strong>ANALYSING IMAGE...</strong>
+                <strong>{zoomed ? 'MAGNIFIER ACTIVE' : 'IMAGE READY'}</strong>
               </div>
-              <Case5EvidenceVisual item={activeEvidence} />
-              <div className="case5-file-copy">
-                <h3>{activeEvidence.title}</h3>
-                <p>{activeEvidence.context}</p>
-              </div>
-              {zoomed && (
-                <div className="case5-zoom-panel">
-                  <span>MAGNIFIER MODE</span>
-                  <p>
-                    Inspect edges, reflections, hands, hairlines, light
-                    sources, and normal camera imperfections before classifying.
-                  </p>
+              <div className="case5-investigation-panel">
+                <Case5EvidenceVisual item={activeEvidence} magnified={zoomed} />
+                <div className="case5-file-copy">
+                  <h3>{activeEvidence.title}</h3>
+                  <p>{activeEvidence.context}</p>
+                  <div className="case5-current-answer">
+                    <span>Current classification</span>
+                    <strong>
+                      {decisions[activeEvidence.id]
+                        ? decisions[activeEvidence.id] === 'fake'
+                          ? 'Deepfake / Manipulated'
+                          : 'Real'
+                        : 'Not selected'}
+                    </strong>
+                  </div>
                 </div>
-              )}
-              <div className="case2-decision-row">
+                {zoomed && (
+                  <div className="case5-zoom-panel">
+                    <span>MAGNIFIER NOTES</span>
+                    <ul>
+                      {activeEvidence.zoomNotes.map((note) => (
+                        <li key={note}>{note}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              <div className="case5-answer-bar">
                 <button
                   type="button"
                   className={`case2-decision-btn ${
@@ -7136,7 +7202,7 @@ function Case5Rookie() {
                     playSfx('click')
                   }}
                 >
-                  {zoomed ? 'Close Zoom' : 'Magnify'}
+                  {zoomed ? 'Close Magnifier' : 'Open Magnifier'}
                 </button>
               </div>
               {decisions[activeEvidence.id] && (
@@ -7158,18 +7224,20 @@ function Case5Rookie() {
                 </div>
               )}
               <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  type="button"
-                  className="ss-btn ss-btn-cyan"
-                  onClick={nextEvidence}
-                  disabled={!decisions[activeEvidence.id]}
-                >
-                  {activeIndex === CASE5_EVIDENCE.length - 1 && allReviewed
-                    ? 'Submit Evidence Report'
-                    : 'Next Exhibit'}{' '}
-                  <IconArrowRight size={16} />
-                </button>
-                {allReviewed && activeIndex !== CASE5_EVIDENCE.length - 1 && (
+                {!allReviewed && (
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-cyan"
+                    onClick={nextEvidence}
+                    disabled={!decisions[activeEvidence.id]}
+                  >
+                    {activeIndex < CASE5_EVIDENCE.length - 1
+                      ? 'Next Exhibit'
+                      : 'Find Missing Exhibit'}{' '}
+                    <IconArrowRight size={16} />
+                  </button>
+                )}
+                {allReviewed && (
                   <button
                     type="button"
                     className="ss-btn ss-btn-pink"
@@ -7210,10 +7278,8 @@ function Case5Rookie() {
                 </p>
               ) : (
                 <p>
-                  You caught some of them. But you missed one, and the one you
-                  missed could have been the image used as the primary exhibit
-                  in a fraud trial. If this report goes forward as it is, an
-                  innocent person could be convicted on fabricated evidence.
+                  You caught some of them, but in evidence review, one missed
+                  fake can change a real person's life.
                 </p>
               )}
               {!passed && missedReflection && (
@@ -7236,40 +7302,32 @@ function Case5Rookie() {
               </p>
             </div>
 
-            <div className="case5-report-grid">
+            <div className="case5-review-table">
+              <div className="case5-review-row case5-review-head">
+                <span>Exhibit</span>
+                <span>Your answer</span>
+                <span>Correct answer</span>
+                <span>Key forensic note</span>
+              </div>
               {CASE5_EVIDENCE.map((item, index) => {
                 const correct = decisions[item.id] === item.correct
                 return (
-                  <article
+                  <div
                     key={item.id}
-                    className={`case5-report-card ${correct ? 'correct' : 'wrong'}`}
+                    className={`case5-review-row ${correct ? 'correct' : 'wrong'}`}
                   >
-                    <div>
-                      <span>{item.exhibit}</span>
-                      <strong>{correct ? 'MATCH' : 'REVIEW'}</strong>
-                    </div>
-                    <Case5EvidenceVisual item={item} reveal />
-                    <p>
-                      Your call:{' '}
-                      <strong>
-                        {decisions[item.id] === 'fake'
-                          ? 'Manipulated'
-                          : 'Real'}
-                      </strong>
-                    </p>
-                    <p>
-                      Forensic answer:{' '}
-                      <strong>
-                        {item.correct === 'fake' ? 'Manipulated' : 'Real'}
-                      </strong>
-                    </p>
-                    {item.tells?.map((tell) => (
-                      <p key={tell} className="text-sw-text3">
-                        {tell}
-                      </p>
-                    ))}
-                    <p className="text-sw-text2">{item.teaching}</p>
-                  </article>
+                    <span>
+                      <strong>{item.exhibit}</strong>
+                      <em>{item.title}</em>
+                    </span>
+                    <span>
+                      {decisions[item.id] === 'fake'
+                        ? 'Deepfake'
+                        : 'Real'}
+                    </span>
+                    <span>{item.correct === 'fake' ? 'Deepfake' : 'Real'}</span>
+                    <span>{item.keyNote}</span>
+                  </div>
                 )
               })}
             </div>
