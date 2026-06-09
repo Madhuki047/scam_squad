@@ -1216,6 +1216,144 @@ const CASE4_KNOWLEDGE_CHECK = [
   },
 ]
 
+const CASE5_INTRO_DIALOGUE = [
+  "This last case is different. Every threat you've studied so far had a tell: a bad domain, fake urgency, a too-friendly stranger.",
+  'This one has none of that.',
+  'The threat looks exactly like someone you trust. It sounds like them. It moves like them.',
+  'And it will ask you for something real.',
+  'Unit Zero intercepted a leaked document dump from a corporate whistleblower case. Six photographs are being used as evidence in a legal dispute.',
+  'Look through the evidence images. Flag any you believe are manipulated.',
+]
+
+const CASE5_EVIDENCE = [
+  {
+    id: 'street',
+    exhibit: 'Exhibit A',
+    title: 'Crowded street scene',
+    context: 'Street-level surveillance still near the company office.',
+    correct: 'real',
+    visual: 'street',
+    tags: ['natural clutter', 'background noise', 'crowd density'],
+    zoomNotes: [
+      'No fused body parts.',
+      'Lighting direction is consistent.',
+      'Background clutter is natural, not automatically suspicious.',
+    ],
+    keyNote:
+      'Real photos can be messy. Visual clutter alone is not evidence of AI manipulation.',
+    teaching:
+      'Natural clutter and background noise do not automatically mean AI manipulation.',
+  },
+  {
+    id: 'handshake',
+    exhibit: 'Exhibit B',
+    title: 'Handshake photo',
+    context: 'Two men in an office, allegedly during a private introduction.',
+    correct: 'fake',
+    visual: 'handshake',
+    tags: ['fused hands', 'ear/collar edge', 'clothing boundary'],
+    tells: [
+      'Hands are slightly fused where they meet.',
+      "One man's ear is partly buried into his collar.",
+    ],
+    zoomNotes: [
+      'Handshake area: fingers overlap unnaturally.',
+      'Collar edge: ear boundary is unclear.',
+    ],
+    keyNote:
+      'Hands, ears, collars, and edges are common weak points in manipulated images.',
+    teaching:
+      'Hands, fingers, ears, and clothing edges are common weak points in generated or manipulated images.',
+  },
+  {
+    id: 'restaurant',
+    exhibit: 'Exhibit C',
+    title: 'Candid restaurant shot',
+    context: 'Noisy restaurant photo with uneven natural lighting.',
+    correct: 'real',
+    visual: 'restaurant',
+    tags: ['noise', 'uneven lighting', 'handheld camera'],
+    zoomNotes: [
+      'Noise is consistent across the image.',
+      'Uneven lighting matches indoor restaurant conditions.',
+      'No impossible geometry or distorted body parts.',
+    ],
+    keyNote:
+      'Noise and uneven lighting can happen in genuine photos. Imperfection is not automatically fake.',
+    teaching:
+      'Real photos can have noise, blur, uneven lighting, and imperfect shadows. Imperfection alone is not proof of AI.',
+  },
+  {
+    id: 'meeting',
+    exhibit: 'Exhibit D',
+    title: 'Formal meeting room',
+    context: 'Glass table meeting photo submitted as a primary exhibit.',
+    correct: 'fake',
+    visual: 'meeting',
+    tags: ['reflection mismatch', 'glass table', 'spatial consistency'],
+    tells: [
+      'The reflection in the glass table does not match the people present.',
+    ],
+    zoomNotes: [
+      'Glass table: reflection does not match people seated at the table.',
+      'Reflective surfaces must stay spatially consistent.',
+    ],
+    keyNote:
+      'AI often struggles with reflections because it must model the full environment, not just faces.',
+    teaching:
+      'AI can struggle with reflective surfaces because reflections require spatial consistency.',
+    critical: true,
+  },
+  {
+    id: 'outdoor',
+    exhibit: 'Exhibit E',
+    title: 'Outdoor candid photo',
+    context: 'Outdoor walkway image with one blurred moving figure.',
+    correct: 'real',
+    visual: 'outdoor',
+    tags: ['motion blur', 'moving subject', 'handheld camera'],
+    zoomNotes: [
+      'Motion blur follows the moving subject.',
+      'Shadows and light direction stay consistent.',
+      'Blur alone does not prove manipulation.',
+    ],
+    keyNote: 'Real candid photos often contain motion blur.',
+    teaching:
+      'Motion blur can be normal if people are moving or the camera is handheld.',
+  },
+  {
+    id: 'portrait',
+    exhibit: 'Exhibit F',
+    title: 'Executive portrait',
+    context: 'Close-up image of the executive distributed with the document dump.',
+    correct: 'fake',
+    visual: 'portrait',
+    tags: ['teeth', 'hairline', 'eye reflections'],
+    tells: [
+      'Teeth are unnaturally uniform.',
+      'Hair near the temple looks soft or painted.',
+      'Eyes do not reflect the visible light source correctly.',
+    ],
+    zoomNotes: [
+      'Mouth: teeth are too uniform.',
+      'Temple: hairline has a soft painted edge.',
+      'Eyes: reflection does not match the visible light source.',
+    ],
+    keyNote:
+      'Teeth, hairlines, eyes, and light reflections are common deepfake tells.',
+    teaching:
+      'Teeth, hairlines, eyes, and light reflections are common deepfake indicators.',
+  },
+]
+
+const CASE5_TEACHING_POINTS = [
+  'Check hands, fingers, ears, teeth, hairlines, and eye reflections.',
+  'Compare shadows, reflections, and light sources.',
+  'Real photos can have blur, grain, noise, and uneven lighting.',
+  'Do not over-flag normal photography imperfections.',
+  'Deepfake evidence can have serious legal and political consequences.',
+]
+
 const CASE4_VETERAN_PASS_SCORE = 5
 
 const CASE4_VETERAN_INTRO = [
@@ -6634,6 +6772,638 @@ function Case4Rookie() {
   )
 }
 
+function Case5EvidenceVisual({ item, magnified = false, reveal = false }) {
+  const showHotspots = magnified || reveal
+  return (
+    <div
+      className={`case5-evidence-visual case5-visual-${item.visual} ${
+        magnified ? 'magnified' : ''
+      }`}
+    >
+      <div className="case5-scanline" aria-hidden="true" />
+      <div className="case5-photo-frame">
+        {item.visual === 'street' && (
+          <>
+            <div className="case5-skyline-glow" />
+            <div className="case5-street-road" />
+            <div className="case5-city-blocks">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="case5-crowd">
+              {Array.from({ length: 12 }).map((_, index) => (
+                <span key={index} />
+              ))}
+            </div>
+            <div className="case5-consistent-shadows" />
+          </>
+        )}
+        {item.visual === 'handshake' && (
+          <>
+            <div className="case5-office-window" />
+            <div className="case5-office-desk" />
+            <div className="case5-person case5-person-left" />
+            <div className="case5-person case5-person-right" />
+            <div className="case5-handshake-glitch" />
+            <div className="case5-ear-glitch" />
+          </>
+        )}
+        {item.visual === 'restaurant' && (
+          <>
+            <div className="case5-table" />
+            <div className="case5-restaurant-lights">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="case5-crowd">
+              {Array.from({ length: 7 }).map((_, index) => (
+                <span key={index} />
+              ))}
+            </div>
+            <div className="case5-plate" />
+            <div className="case5-warm-shadow" />
+            <div className="case5-photo-noise" />
+          </>
+        )}
+        {item.visual === 'meeting' && (
+          <>
+            <div className="case5-boardroom-window" />
+            <div className="case5-glass-table" />
+            <div className="case5-person case5-person-left" />
+            <div className="case5-person case5-person-center" />
+            <div className="case5-person case5-person-right" />
+            <div className="case5-reflection case5-reflection-one" />
+            <div className="case5-reflection case5-reflection-mismatch" />
+          </>
+        )}
+        {item.visual === 'outdoor' && (
+          <>
+            <div className="case5-sun-source" />
+            <div className="case5-outdoor-path" />
+            <div className="case5-person case5-person-left" />
+            <div className="case5-person case5-motion-person" />
+            <div className="case5-city-blocks">
+              <span />
+              <span />
+            </div>
+          </>
+        )}
+        {item.visual === 'portrait' && (
+          <>
+            <div className="case5-portrait-head">
+              <span className="case5-portrait-light-source" />
+              <span className="case5-portrait-eye case5-portrait-eye-left" />
+              <span className="case5-portrait-eye case5-portrait-eye-right" />
+              <span className="case5-portrait-teeth" />
+              <span className="case5-portrait-hair" />
+            </div>
+          </>
+        )}
+        {showHotspots && item.correct === 'fake' && (
+          <div className="case5-hotspot-layer">
+            {(item.tells || []).map((tell, index) => (
+              <span key={tell} className={`case5-hotspot case5-hotspot-${index + 1}`}>
+                {index + 1}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function Case5Rookie() {
+  const navigate = useNavigate()
+  const { user, token, setUser } = useAuth()
+  const [phase, setPhase] = useState('intro')
+  const [introStep, setIntroStep] = useState(0)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [decisions, setDecisions] = useState({})
+  const [reasonTags, setReasonTags] = useState({})
+  const [zoomed, setZoomed] = useState(false)
+  const [badge, setBadge] = useState(null)
+  const [pointsAwarded, setPointsAwarded] = useState(0)
+  const [progressError, setProgressError] = useState('')
+  const [resolvingDebrief, setResolvingDebrief] = useState(false)
+  const resolvingRef = useRef(false)
+  const internName = user?.username || 'Nova'
+  const activeEvidence = CASE5_EVIDENCE[activeIndex]
+  const reviewedCount = CASE5_EVIDENCE.filter((item) => decisions[item.id]).length
+  const allReviewed = reviewedCount === CASE5_EVIDENCE.length
+  const correctCount = CASE5_EVIDENCE.reduce(
+    (count, item) => count + (decisions[item.id] === item.correct ? 1 : 0),
+    0,
+  )
+  const passed = allReviewed && correctCount === CASE5_EVIDENCE.length
+  const missedReflection = decisions.meeting && decisions.meeting !== 'fake'
+  const overFlaggedRestaurant =
+    decisions.restaurant && decisions.restaurant !== 'real'
+
+  function restart() {
+    setPhase('intro')
+    setIntroStep(0)
+    setActiveIndex(0)
+    setDecisions({})
+    setReasonTags({})
+    setZoomed(false)
+    setBadge(null)
+    setPointsAwarded(0)
+    setProgressError('')
+    setResolvingDebrief(false)
+    resolvingRef.current = false
+  }
+
+  function chooseClassification(value) {
+    setDecisions((current) => ({ ...current, [activeEvidence.id]: value }))
+    setZoomed(false)
+    playSfx('click')
+  }
+
+  function toggleReason(tag) {
+    setReasonTags((current) => {
+      const existing = current[activeEvidence.id] || []
+      const next = existing.includes(tag)
+        ? existing.filter((item) => item !== tag)
+        : [...existing, tag]
+      return { ...current, [activeEvidence.id]: next }
+    })
+    playSfx('click')
+  }
+
+  function openEvidence(index) {
+    setActiveIndex(index)
+    setZoomed(false)
+    playSfx('click')
+  }
+
+  function nextEvidence() {
+    if (!decisions[activeEvidence.id]) return
+    if (activeIndex < CASE5_EVIDENCE.length - 1) {
+      setActiveIndex((value) => value + 1)
+      setZoomed(false)
+      playSfx('click')
+      return
+    }
+    if (!allReviewed) {
+      const firstMissing = CASE5_EVIDENCE.findIndex((item) => !decisions[item.id])
+      if (firstMissing >= 0) setActiveIndex(firstMissing)
+      return
+    }
+    playSfx(passed ? 'correct' : 'wrong')
+    setPhase('debrief')
+  }
+
+  async function spendFailureLife(nextAction) {
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const data = await api.failAttempt(token, {
+        caseId: 5,
+        difficulty: 'rookie',
+      })
+      setUser(data.user)
+      playSfx('lifeLost')
+      playSfx('caseFailed')
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      navigate('/play')
+    } catch (error) {
+      console.error('[progress] Case 5 failed attempt update failed', {
+        endpoint: '/progress/fail-attempt',
+        caseId: 5,
+        difficulty: 'rookie',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update lives.')
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  async function finishRookie(nextAction = 'end') {
+    if (!passed) {
+      spendFailureLife(nextAction === 'replay' ? 'replay' : 'continue')
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const unlockedBadge = BADGES.eyesOpenBeginner
+      const data = await api.completeCase(token, {
+        caseId: 5,
+        difficulty: 'rookie',
+        result: 'success',
+        badge: unlockedBadge,
+      })
+      setUser(data.user)
+      setBadge(unlockedBadge)
+      setPointsAwarded(data.pointsAwarded)
+      if (data.pointsAwarded > 0) {
+        playSfx('coins')
+        playSfx('badge')
+      }
+      playSfx('caseComplete')
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      setPhase('end')
+    } catch (error) {
+      console.error('[progress] Case 5 completion update failed', {
+        endpoint: '/progress/complete-case',
+        caseId: 5,
+        difficulty: 'rookie',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update case progress.')
+    } finally {
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  return (
+    <div className="case-shell max-w-5xl mx-auto">
+      <div className="case-title-row">
+        <div>
+          <span className="font-pixel text-sw-pink text-xs">CASE 05 ROOKIE</span>
+          <h2 className="font-pixel text-sw-cyan text-sm md:text-base">
+            The Mirage: The Evidence
+          </h2>
+        </div>
+      </div>
+      {progressError && (
+        <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
+      )}
+
+      {phase === 'intro' && (
+        <section className="case-scene scene-transition">
+          <div className="case-scene-top">
+            <span>UNIT ZERO EVIDENCE LAB</span>
+            <span>AI MANIPULATION BRIEFING</span>
+          </div>
+          <div className="case-office case5-evidence-lab">
+            <div className="case-window case-window-left">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="case-window case-window-right">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="unit-poster unit-poster-left">
+              CASE 05
+              <br />
+              MIRAGE
+            </div>
+            <div className="case4-ricky-station">
+              <PixelPerson role="jane" label="AGENT RICKY" />
+            </div>
+            <PixelPerson
+              role="intern"
+              label={`${internName} - YOU`}
+              position="pixel-intern-left"
+            />
+            <div className="case3-monitor-wall" aria-hidden="true">
+              <span>DOCUMENT DUMP</span>
+              <strong>6 IMAGE EXHIBITS</strong>
+            </div>
+            <div className="case-bubble case-bubble-jane case3-dialogue-bubble case5-dialogue-bubble">
+              <span className="text-sw-yellow">Agent Ricky</span>
+              <p>{CASE5_INTRO_DIALOGUE[introStep]}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan self-end"
+            onClick={() => {
+              if (introStep < CASE5_INTRO_DIALOGUE.length - 1) {
+                setIntroStep((value) => value + 1)
+                playSfx('click')
+                return
+              }
+              setPhase('review')
+            }}
+          >
+            {introStep === CASE5_INTRO_DIALOGUE.length - 1
+              ? 'Open Evidence Lab'
+              : 'Continue'}{' '}
+            <IconArrowRight size={16} />
+          </button>
+        </section>
+      )}
+
+      {phase === 'review' && (
+        <section className="case2-board scene-transition">
+          <div className="case2-board-header">
+            <div>
+              <span className="font-pixel text-sw-pink text-xs">
+                UNIT ZERO EVIDENCE LAB
+              </span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                AI Manipulation Review
+              </h2>
+            </div>
+            <div className="case2-progress-chip">
+              Evidence reviewed: {reviewedCount} / {CASE5_EVIDENCE.length}
+            </div>
+          </div>
+          <article className="case2-file case5-review-grid">
+            <aside className="case5-exhibit-list">
+              {CASE5_EVIDENCE.map((item, index) => {
+                const selected = index === activeIndex
+                const answered = Boolean(decisions[item.id])
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`case5-exhibit-tab ${selected ? 'selected' : ''} ${
+                      answered ? 'answered' : ''
+                    }`}
+                    onClick={() => openEvidence(index)}
+                  >
+                    <span>{item.exhibit}</span>
+                    <em>{item.title}</em>
+                    <strong>{answered ? 'CLASSIFIED' : 'UNREVIEWED'}</strong>
+                  </button>
+                )
+              })}
+            </aside>
+
+            <div className="case5-active-file">
+              <div className="case4-analysis-header">
+                <span>{activeEvidence.exhibit}</span>
+                <strong>{zoomed ? 'MAGNIFIER ACTIVE' : 'IMAGE READY'}</strong>
+              </div>
+              <div className="case5-investigation-panel">
+                <Case5EvidenceVisual item={activeEvidence} magnified={zoomed} />
+                <div className="case5-file-copy">
+                  <h3>{activeEvidence.title}</h3>
+                  <p>{activeEvidence.context}</p>
+                  <div className="case5-current-answer">
+                    <span>Current classification</span>
+                    <strong>
+                      {decisions[activeEvidence.id]
+                        ? decisions[activeEvidence.id] === 'fake'
+                          ? 'Deepfake / Manipulated'
+                          : 'Real'
+                        : 'Not selected'}
+                    </strong>
+                  </div>
+                </div>
+                {zoomed && (
+                  <div className="case5-zoom-panel">
+                    <span>MAGNIFIER NOTES</span>
+                    <ul>
+                      {activeEvidence.zoomNotes.map((note) => (
+                        <li key={note}>{note}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              <div className="case5-answer-bar">
+                <button
+                  type="button"
+                  className={`case2-decision-btn ${
+                    decisions[activeEvidence.id] === 'real' ? 'case5-choice-on' : ''
+                  }`}
+                  onClick={() => chooseClassification('real')}
+                >
+                  Real
+                </button>
+                <button
+                  type="button"
+                  className={`case2-decision-btn case2-flag-btn ${
+                    decisions[activeEvidence.id] === 'fake' ? 'case5-choice-on' : ''
+                  }`}
+                  onClick={() => chooseClassification('fake')}
+                >
+                  Deepfake / Manipulated
+                </button>
+                <button
+                  type="button"
+                  className="case2-decision-btn case2-dismiss-btn"
+                  onClick={() => {
+                    setZoomed((value) => !value)
+                    playSfx('click')
+                  }}
+                >
+                  {zoomed ? 'Close Magnifier' : 'Open Magnifier'}
+                </button>
+              </div>
+              {decisions[activeEvidence.id] && (
+                <div className="case5-reason-tags">
+                  <span>Why? Select evidence notes:</span>
+                  {activeEvidence.tags.map((tag) => {
+                    const selected = (reasonTags[activeEvidence.id] || []).includes(tag)
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        className={selected ? 'selected' : ''}
+                        onClick={() => toggleReason(tag)}
+                      >
+                        {tag}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+              <div className="flex flex-col sm:flex-row gap-3">
+                {!allReviewed && (
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-cyan"
+                    onClick={nextEvidence}
+                    disabled={!decisions[activeEvidence.id]}
+                  >
+                    {activeIndex < CASE5_EVIDENCE.length - 1
+                      ? 'Next Exhibit'
+                      : 'Find Missing Exhibit'}{' '}
+                    <IconArrowRight size={16} />
+                  </button>
+                )}
+                {allReviewed && (
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-pink"
+                    onClick={() => {
+                      playSfx(passed ? 'correct' : 'wrong')
+                      setPhase('debrief')
+                    }}
+                  >
+                    Submit Evidence Report
+                  </button>
+                )}
+              </div>
+            </div>
+          </article>
+        </section>
+      )}
+
+      {phase === 'debrief' && (
+        <section className="case-debrief scene-transition">
+          <div className={passed ? 'success-banner' : 'breach-banner'}>
+            {passed
+              ? 'REPORT ACCEPTED'
+              : 'REPORT REJECTED - FORENSIC REVIEW FAILED'}
+          </div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                The Evidence Debrief
+              </h2>
+              {passed ? (
+                <p>
+                  Good work. You checked the obvious details, but you also
+                  looked at the environment around the subject. That is what
+                  makes the difference. Deepfakes are not always caught by
+                  staring at faces. Sometimes the truth is hiding in the
+                  reflection.
+                </p>
+              ) : (
+                <p>
+                  You caught some of them, but in evidence review, one missed
+                  fake can change a real person's life.
+                </p>
+              )}
+              {!passed && missedReflection && (
+                <p className="text-sw-red">
+                  Image 4 was the dangerous one. The tell was the reflection. In
+                  a real photo, every surface that can reflect will reflect
+                  consistently. AI does not always model that correctly.
+                </p>
+              )}
+              {!passed && overFlaggedRestaurant && (
+                <p className="text-sw-yellow">
+                  Image 3 was real. Noise and uneven lighting can happen in
+                  genuine photographs. Over-flagging real evidence can be just
+                  as harmful as missing fake evidence.
+                </p>
+              )}
+              <p className="text-sw-text2">
+                Evidence score: {correctCount} / {CASE5_EVIDENCE.length}.
+                Rookie completion requires all six classifications correct.
+              </p>
+            </div>
+
+            <div className="case5-review-table">
+              <div className="case5-review-row case5-review-head">
+                <span>Exhibit</span>
+                <span>Your answer</span>
+                <span>Correct answer</span>
+                <span>Key forensic note</span>
+              </div>
+              {CASE5_EVIDENCE.map((item, index) => {
+                const correct = decisions[item.id] === item.correct
+                return (
+                  <div
+                    key={item.id}
+                    className={`case5-review-row ${correct ? 'correct' : 'wrong'}`}
+                  >
+                    <span>
+                      <strong>{item.exhibit}</strong>
+                      <em>{item.title}</em>
+                    </span>
+                    <span>
+                      {decisions[item.id] === 'fake'
+                        ? 'Deepfake'
+                        : 'Real'}
+                    </span>
+                    <span>{item.correct === 'fake' ? 'Deepfake' : 'Real'}</span>
+                    <span>{item.keyNote}</span>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {CASE5_TEACHING_POINTS.map((point) => (
+                <article key={point} className="red-flag-card">
+                  <IconFlag size={18} />
+                  <div>
+                    <h3>Forensic note</h3>
+                    <p>{point}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            {passed && (
+              <div className="badge-card">
+                <span>Badge unlocked</span>
+                <strong>EYES OPEN - BEGINNER</strong>
+              </div>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                className="ss-btn ss-btn-pink"
+                onClick={
+                  passed
+                    ? () => finishRookie('replay')
+                    : () => spendFailureLife('replay')
+                }
+                disabled={resolvingDebrief}
+              >
+                Replay Scene
+              </button>
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan"
+                onClick={
+                  passed
+                    ? () => finishRookie('end')
+                    : () => spendFailureLife('continue')
+                }
+                disabled={resolvingDebrief}
+              >
+                {passed ? 'Complete Rookie' : 'Return to Case Files'}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {phase === 'end' && (
+        <section className="ss-card p-6 flex flex-col gap-4">
+          <h2 className="font-pixel text-sw-cyan text-sm">Case 05 Rookie Complete</h2>
+          <p className="text-sw-text2">
+            The Mirage evidence file closed. Rookie reward secured.
+          </p>
+          <PixelBadgeCard badge={badge} pointsAwarded={pointsAwarded} />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button type="button" className="ss-btn ss-btn-cyan" onClick={() => navigate('/play')}>
+              Return to Case Files
+            </button>
+            <button
+              type="button"
+              className="ss-btn ss-btn-pink"
+              onClick={() => navigate('/case/5/veteran')}
+            >
+              Continue to Veteran Mode
+            </button>
+          </div>
+        </section>
+      )}
+    </div>
+  )
+}
+
 function Case4Veteran() {
   const navigate = useNavigate()
   const { user, token, setUser } = useAuth()
@@ -7790,6 +8560,8 @@ export default function Case() {
   if (numericCaseId === 3 && difficulty === 'veteran') return <Case3Veteran />
   if (numericCaseId === 4 && difficulty === 'rookie') return <Case4Rookie />
   if (numericCaseId === 4 && difficulty === 'veteran') return <Case4Veteran />
+  if (numericCaseId === 5 && difficulty === 'rookie') return <Case5Rookie />
+  if (numericCaseId === 5) return <FutureCase caseId={numericCaseId} />
   if (numericCaseId !== 1) return <FutureCase caseId={numericCaseId} />
   if (difficulty === 'veteran') return <VeteranCase />
 

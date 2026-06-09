@@ -22,6 +22,7 @@ const VALID_BADGES = new Set([
   'human-firewall-beginner',
   'human-firewall',
   'network-navigator',
+  'eyes-open-beginner',
 ])
 
 function fullCaseCount(completedCases = []) {
