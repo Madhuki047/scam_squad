@@ -46,15 +46,29 @@ function generatePin() {
   return String(crypto.randomInt(100000, 1000000))
 }
 
-function clearVerification(user) {
-  user.verificationCodeHash = null
-  user.verificationCodeExpires = null
-  user.verificationCodeSentAt = null
-  user.verificationCodeAttempts = 0
-  user.pendingEmail = null
+function clearVerificationFields(includePendingEmail = true) {
+  const fields = {
+    verificationCodeHash: null,
+    verificationCodeExpires: null,
+    verificationCodeSentAt: null,
+    verificationCodeAttempts: 0,
+  }
+  if (includePendingEmail) fields.pendingEmail = null
+  return fields
 }
 
-async function issueVerificationPin(user, { force = false, email } = {}) {
+async function persistVerificationPin(user, fields) {
+  if (user.isNew) {
+    Object.assign(user, fields)
+    await user.save()
+    return
+  }
+
+  await User.updateOne({ _id: user._id }, { $set: fields }, { runValidators: false })
+  Object.assign(user, fields)
+}
+
+async function issueVerificationPin(user, { force = false, email, set = {} } = {}) {
   const targetEmail = email || user.email
   if (!targetEmail) {
     const error = new Error('Add an email address before email verification can be used.')
@@ -72,12 +86,14 @@ async function issueVerificationPin(user, { force = false, email } = {}) {
   }
 
   const pin = generatePin()
-  user.verificationCodeHash = hashPin(pin)
-  user.verificationCodeExpires = new Date(now + PIN_TTL_MS)
-  user.verificationCodeSentAt = new Date(now)
-  user.verificationCodeAttempts = 0
   await sendOtpEmail(targetEmail, pin)
-  await user.save()
+  await persistVerificationPin(user, {
+    ...set,
+    verificationCodeHash: hashPin(pin),
+    verificationCodeExpires: new Date(now + PIN_TTL_MS),
+    verificationCodeSentAt: new Date(now),
+    verificationCodeAttempts: 0,
+  })
 }
 
 function pendingResponse(user, purpose, email = user.email) {
@@ -199,7 +215,16 @@ export async function login(req, res, next) {
     user.lastLogin = new Date()
     if (user.emailVerified == null) user.emailVerified = false
     if (user.twoFactorEnabled == null) user.twoFactorEnabled = true
-    await issueVerificationPin(user, { force: true })
+    await issueVerificationPin(user, {
+      force: true,
+      set: {
+        lastLogin: user.lastLogin,
+        emailVerified: user.emailVerified,
+        twoFactorEnabled: user.twoFactorEnabled,
+        livesRemaining: user.livesRemaining,
+        lastLifeRegen: user.lastLifeRegen,
+      },
+    })
 
     res.json(pendingResponse(user, 'login'))
   } catch (error) {
@@ -237,8 +262,11 @@ export async function addEmailForVerification(req, res, next) {
       })
     }
     await dropLegacyEmailUniqueIndex()
-    user.pendingEmail = normalizedEmail
-    await issueVerificationPin(user, { force: true, email: normalizedEmail })
+    await issueVerificationPin(user, {
+      force: true,
+      email: normalizedEmail,
+      set: { pendingEmail: normalizedEmail },
+    })
     res.json(pendingResponse(user, 'add_email', normalizedEmail))
   } catch (error) {
     next(error)
@@ -276,8 +304,12 @@ export async function verifyOtp(req, res, next) {
       return res.status(400).json({ message: 'No verification PIN is active.' })
     }
     if (user.verificationCodeExpires.getTime() < Date.now()) {
-      clearVerification(user)
-      await user.save()
+      const clearFields = clearVerificationFields()
+      await User.updateOne(
+        { _id: user._id },
+        { $set: clearFields },
+        { runValidators: false },
+      )
       return res
         .status(401)
         .json({ message: 'That PIN has expired. Request a new one.' })
@@ -286,27 +318,42 @@ export async function verifyOtp(req, res, next) {
     if (user.verificationCodeHash !== hashPin(pin)) {
       user.verificationCodeAttempts = (user.verificationCodeAttempts || 0) + 1
       if (user.verificationCodeAttempts >= PIN_MAX_ATTEMPTS) {
-        clearVerification(user)
-        await user.save()
+        const clearFields = clearVerificationFields()
+        await User.updateOne(
+          { _id: user._id },
+          { $set: clearFields },
+          { runValidators: false },
+        )
         return res
           .status(401)
           .json({ message: 'Too many incorrect PIN attempts. Request a new PIN.' })
       }
-      await user.save()
+      await User.updateOne(
+        { _id: user._id },
+        { $set: { verificationCodeAttempts: user.verificationCodeAttempts } },
+        { runValidators: false },
+      )
       return res.status(401).json({ message: 'Invalid verification PIN.' })
     }
 
+    const successFields = {
+      emailVerified: true,
+      twoFactorEnabled: user.twoFactorEnabled ?? true,
+      ...clearVerificationFields(),
+    }
     if (payload.purpose === 'add_email') {
       await dropLegacyEmailUniqueIndex()
-      user.email = targetEmail
+      successFields.email = targetEmail
     }
-    user.emailVerified = true
-    user.twoFactorEnabled = user.twoFactorEnabled ?? true
-    clearVerification(user)
     if (applyRegen(user)) {
-      // applyRegen mutates the user; save below covers it.
+      successFields.livesRemaining = user.livesRemaining
+      successFields.lastLifeRegen = user.lastLifeRegen
     }
-    await user.save()
+    await User.updateOne(
+      { _id: user._id },
+      { $set: successFields },
+      { runValidators: false },
+    )
     res.json(sessionResponse(user))
   } catch (error) {
     next(error)

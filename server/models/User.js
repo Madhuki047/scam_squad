@@ -61,10 +61,13 @@ const userSchema = new mongoose.Schema(
     completedCases: [
       {
         _id: false,
-        caseId: { type: Number, required: true, min: 1 },
+        // Legacy accounts may contain incomplete progress rows from early
+        // schemas. Controllers validate new completions before pushing them,
+        // so these fields stay optional to avoid unrelated auth/profile saves
+        // failing on old data.
+        caseId: { type: Number, min: 1 },
         difficulty: {
           type: String,
-          required: true,
           enum: ['rookie', 'veteran'],
         },
         completedAt: { type: Date, default: Date.now },
