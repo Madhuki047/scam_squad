@@ -1360,22 +1360,22 @@ const CASE5_VETERAN_INTRO = [
   {
     speaker: 'Agent Ricky',
     text:
-      'Two days after the evidence review, Meridian Capital flagged a wire transfer for seven hundred and forty thousand pounds.',
+      'Two days after the evidence review, Meridian Capital flagged a GBP 740,000 wire transfer.',
   },
   {
     speaker: 'Agent Ricky',
     text:
-      'Their CFO saw the CEO, heard his voice, and watched him explain the emergency on video.',
+      'The CFO approved it after a video call from her CEO.',
   },
   {
     speaker: 'Agent Ricky',
     text:
-      'The video was fake. But the deepfake was not the only weapon.',
+      'The face looked real. The voice sounded real. But the money is gone.',
   },
   {
     speaker: 'Agent Ricky',
     text:
-      'Reconstruct the incident. Find where the attack should have been stopped.',
+      'Your job is to reconstruct what failed.',
   },
 ]
 
@@ -1464,6 +1464,128 @@ const CASE5_VETERAN_TIMELINE = [
       'Correct - the process existed exactly for this situation. The urgency made Helen skip it.',
     wrongFeedback:
       'Wrong - the clearest stop point was the missing second authorization and separate verification for a transfer over £50,000.',
+  },
+]
+
+const CASE5_VETERAN_INVESTIGATION = [
+  {
+    id: 'email',
+    time: '9:14',
+    title: 'Email Request',
+    status: 'Red Flag Found',
+    kicker: 'Marcus Webb - CEO',
+    prompt: 'Inspect the email. What stands out?',
+    visual: 'email',
+    taskType: 'checklist',
+    chips: ['REAL ACCOUNT != SAFE', 'PAYMENT REQUEST', 'URGENCY PRESSURE'],
+    fields: [
+      ['From', 'Marcus Webb <marcus.webb@meridiancapital.co.uk>'],
+      ['To', 'Helen Smith'],
+      ['Subject', 'Urgent supplier payment before EOB'],
+      ['Body', 'Travelling today. Need this handled before close. I will explain on call.'],
+    ],
+    findings: [
+      { value: 'legitimate-account', label: 'Sender account is legitimate', correct: true },
+      { value: 'urgency-pressure', label: 'Urgency pressure', correct: true },
+      { value: 'payment-request', label: 'Request involves payment', correct: true },
+      { value: 'spelling', label: 'Obvious spelling mistakes', correct: false },
+      { value: 'strange-domain', label: 'Strange unknown domain', correct: false },
+    ],
+    required: ['legitimate-account', 'urgency-pressure', 'payment-request'],
+    correctFeedback:
+      'REAL ACCOUNT != SAFE. The email was hard to catch, but pressure plus payment should raise caution.',
+    wrongFeedback:
+      'Review the sender and request. The account is real, but the pressure and payment ask still matter.',
+  },
+  {
+    id: 'reply',
+    time: '9:41',
+    title: 'CFO Reply',
+    status: 'Reviewed',
+    kicker: 'Helen Smith - CFO',
+    prompt: 'Was Helen careless here?',
+    visual: 'reply',
+    taskType: 'choice',
+    fields: [
+      ['Helen reply', 'Marcus, can you confirm the supplier details and why this has to clear today?'],
+      ['Status', 'Cautious, but still inside the pressure loop'],
+    ],
+    options: [
+      { value: 'careless', label: 'Yes, she immediately approved it' },
+      {
+        value: 'verify',
+        label: 'No, she asked for details, but still needed independent verification',
+      },
+      { value: 'ignored', label: 'Yes, because she ignored the email' },
+      { value: 'video-safe', label: 'No, because video calls are always safe' },
+    ],
+    answer: 'verify',
+    correctFeedback:
+      'Correct. Helen was cautious. The attack escalated through a convincing call.',
+    wrongFeedback:
+      'Not quite. Helen asked for details; the failure came later when verification was skipped.',
+  },
+  {
+    id: 'video',
+    time: '9:58',
+    title: 'CEO Video Call',
+    status: 'Red Flag Found',
+    kicker: 'Forensic scan',
+    prompt: 'Scan the video call and mark suspicious frames.',
+    visual: 'video',
+    taskType: 'checklist',
+    chips: ['FRAME SCAN', 'AUDIO WAVEFORM', 'CALL TIMER 11:03'],
+    findings: [
+      { value: 'lip-sync', label: 'Lip-sync delay on sharp head turn', correct: true },
+      { value: 'collar-edge', label: 'Collar edge flicker', correct: true },
+      { value: 'jaw-mismatch', label: 'Jaw movement mismatch', correct: true },
+      { value: 'plant', label: 'Background plant', correct: false },
+      { value: 'familiar-voice', label: 'Familiar voice', correct: false },
+      { value: 'low-signal', label: 'Low signal warning alone', correct: false },
+    ],
+    required: ['lip-sync', 'collar-edge', 'jaw-mismatch'],
+    correctFeedback:
+      'ANOMALY DETECTED. The call should trigger verification, not replace it.',
+    wrongFeedback:
+      'Some items are likely connection noise. Focus on movement mismatches and edge artifacts.',
+  },
+  {
+    id: 'transfer',
+    time: '10:09',
+    title: 'Transfer Approved',
+    status: 'Process Failure Found',
+    kicker: 'Bank + protocol review',
+    prompt: 'Identify account red flags and bypassed safeguards.',
+    visual: 'bank',
+    taskType: 'dual-checklist',
+    fields: [
+      ['Amount', 'GBP 740,000'],
+      ['Account age', '48 hours'],
+      ['History', '0 previous transactions'],
+      ['Destination', 'Overseas jurisdiction'],
+      ['Protocol', 'BYPASSED'],
+    ],
+    accountFindings: [
+      { value: 'new-account', label: 'Account registered 48 hours earlier', correct: true },
+      { value: 'no-history', label: 'No previous transaction history', correct: true },
+      { value: 'overseas', label: 'Overseas destination', correct: true },
+      { value: 'first-large', label: 'GBP 740,000 first payment', correct: true },
+      { value: 'account-number', label: 'Has an account number', correct: false },
+      { value: 'business-hours', label: 'Payment happened during business hours', correct: false },
+    ],
+    protocolFindings: [
+      { value: 'second-officer', label: 'Second senior officer authorization', correct: true },
+      { value: 'trusted-channel', label: 'Separate trusted-channel verification', correct: true },
+      { value: 'account-history', label: 'Receiving account history check', correct: true },
+      { value: 'email-opened', label: 'Email was opened', correct: false },
+      { value: 'helen-replied', label: 'Helen replied at 9:41', correct: false },
+    ],
+    requiredAccount: ['new-account', 'no-history', 'overseas', 'first-large'],
+    requiredProtocol: ['second-officer', 'trusted-channel', 'account-history'],
+    correctFeedback:
+      'PROTOCOL BREACH CONFIRMED. Account risk is critical and safeguards were bypassed.',
+    wrongFeedback:
+      'The strongest evidence is the account risk plus missing authorization and trusted-channel verification.',
   },
 ]
 
@@ -7772,8 +7894,8 @@ function Case5Veteran() {
   const internName = user?.username || 'Nova'
   const intro = CASE5_VETERAN_INTRO[introStep]
   const activeEvidence =
-    CASE5_VETERAN_TIMELINE.find((item) => item.id === activeTimeline) ||
-    CASE5_VETERAN_TIMELINE[0]
+    CASE5_VETERAN_INVESTIGATION.find((item) => item.id === activeTimeline) ||
+    CASE5_VETERAN_INVESTIGATION[0]
   const analysisPassed = analysisAnswer === 'bank-protocol'
   const quizCorrect = quizAnswers.reduce(
     (count, answer, index) =>
@@ -7789,6 +7911,59 @@ function Case5Veteran() {
   const lastQuizQuestion =
     currentQuizQuestion === CASE5_VETERAN_QUIZ.length - 1
   const quickChecksComplete = quickAnswers.every((answer) => answer !== null)
+  const reviewedEvidenceCount = CASE5_VETERAN_INVESTIGATION.filter((item) =>
+    isEvidenceReviewed(item),
+  ).length
+  const allEvidenceReviewed =
+    reviewedEvidenceCount === CASE5_VETERAN_INVESTIGATION.length
+
+  function getEvidenceSelection(item, group = 'main') {
+    const current = timelineAnswers[item.id]
+    if (item.taskType === 'dual-checklist') return current?.[group] || []
+    return current || (item.taskType === 'choice' ? null : [])
+  }
+
+  function hasExactFindings(selected, required, options) {
+    const selectedSet = new Set(selected)
+    return (
+      required.every((value) => selectedSet.has(value)) &&
+      options.every((option) => option.correct || !selectedSet.has(option.value))
+    )
+  }
+
+  function isEvidenceReviewed(item) {
+    if (item.taskType === 'choice') return Boolean(timelineAnswers[item.id])
+    if (item.taskType === 'dual-checklist') {
+      const account = getEvidenceSelection(item, 'account')
+      const protocol = getEvidenceSelection(item, 'protocol')
+      return account.length > 0 && protocol.length > 0
+    }
+    return getEvidenceSelection(item).length > 0
+  }
+
+  function isEvidencePerfect(item) {
+    if (!isEvidenceReviewed(item)) return false
+    if (item.taskType === 'choice') return timelineAnswers[item.id] === item.answer
+    if (item.taskType === 'dual-checklist') {
+      return (
+        hasExactFindings(
+          getEvidenceSelection(item, 'account'),
+          item.requiredAccount,
+          item.accountFindings,
+        ) &&
+        hasExactFindings(
+          getEvidenceSelection(item, 'protocol'),
+          item.requiredProtocol,
+          item.protocolFindings,
+        )
+      )
+    }
+    return hasExactFindings(
+      getEvidenceSelection(item),
+      item.required,
+      item.findings,
+    )
+  }
 
   function restart() {
     setPhase('intro')
@@ -7907,6 +8082,44 @@ function Case5Veteran() {
     playSfx(value === item.answer ? 'correct' : 'wrong')
   }
 
+  function toggleEvidenceFinding(item, value, group = 'main') {
+    setTimelineAnswers((current) => {
+      if (item.taskType === 'dual-checklist') {
+        const existing = current[item.id] || { account: [], protocol: [] }
+        const currentGroup = existing[group] || []
+        const nextGroup = currentGroup.includes(value)
+          ? currentGroup.filter((entry) => entry !== value)
+          : [...currentGroup, value]
+        return {
+          ...current,
+          [item.id]: {
+            ...existing,
+            [group]: nextGroup,
+          },
+        }
+      }
+      const existing = current[item.id] || []
+      const next = existing.includes(value)
+        ? existing.filter((entry) => entry !== value)
+        : [...existing, value]
+      return { ...current, [item.id]: next }
+    })
+    const options =
+      group === 'account'
+        ? item.accountFindings
+        : group === 'protocol'
+          ? item.protocolFindings
+          : item.findings
+    const selectedOption = options.find((option) => option.value === value)
+    playSfx(selectedOption?.correct ? 'correct' : 'click')
+  }
+
+  function chooseEvidenceAnswer(item, value) {
+    if (timelineAnswers[item.id]) return
+    setTimelineAnswers((current) => ({ ...current, [item.id]: value }))
+    playSfx(value === item.answer ? 'correct' : 'wrong')
+  }
+
   function submitAnalysis() {
     playSfx(analysisPassed ? 'correct' : 'wrong')
     setRoute(analysisPassed ? null : 'analysisFailed')
@@ -8021,10 +8234,10 @@ function Case5Veteran() {
               <strong>£740,000 WIRE TRANSFER FLAGGED</strong>
               <em>CEO VIDEO CALL SUSPECTED</em>
             </div>
-            <div className="case-bubble case-bubble-jane case3-dialogue-bubble case5-dialogue-bubble">
-              <span className="text-sw-yellow">{intro.speaker}</span>
-              <p>{intro.text}</p>
-            </div>
+          </div>
+          <div className="case5-veteran-comms-panel">
+            <span>{intro.speaker} // SECURE COMMS</span>
+            <p>{intro.text}</p>
           </div>
           <button
             type="button"
@@ -8039,7 +8252,7 @@ function Case5Veteran() {
             }}
           >
             {introStep === CASE5_VETERAN_INTRO.length - 1
-              ? 'Reconstruct Timeline'
+              ? 'Start Reconstruction'
               : 'Continue'}{' '}
             <IconArrowRight size={16} />
           </button>
@@ -8054,30 +8267,40 @@ function Case5Veteran() {
                 MERIDIAN INCIDENT RECONSTRUCTION
               </span>
               <h2 className="font-pixel text-sw-cyan text-sm">
-                Interactive Timeline
+                Fraud Monitoring Dashboard
               </h2>
             </div>
             <div className="case2-progress-chip">
-              {Object.keys(timelineAnswers).length} / {CASE5_VETERAN_TIMELINE.length} reviewed
+              Evidence Reviewed: {reviewedEvidenceCount} / {CASE5_VETERAN_INVESTIGATION.length}
             </div>
           </div>
           <article className="case2-file case5-veteran-timeline-grid">
             <aside className="case5-veteran-timeline-list">
-              {CASE5_VETERAN_TIMELINE.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={activeTimeline === item.id ? 'selected' : ''}
-                  onClick={() => {
-                    setActiveTimeline(item.id)
-                    playSfx('click')
-                  }}
-                >
-                  <span>{item.time}am</span>
-                  <strong>{item.title}</strong>
-                  <em>{timelineAnswers[item.id] ? 'REVIEWED' : item.kicker}</em>
-                </button>
-              ))}
+              {CASE5_VETERAN_INVESTIGATION.map((item) => {
+                const reviewed = isEvidenceReviewed(item)
+                const flagged = reviewed && isEvidencePerfect(item)
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={activeTimeline === item.id ? 'selected' : ''}
+                    onClick={() => {
+                      setActiveTimeline(item.id)
+                      playSfx('click')
+                    }}
+                  >
+                    <span>{item.time}am</span>
+                    <strong>{item.title}</strong>
+                    <em>
+                      {flagged
+                        ? item.status
+                        : reviewed
+                          ? 'Reviewed'
+                          : 'Unreviewed'}
+                    </em>
+                  </button>
+                )
+              })}
             </aside>
             <div className="case5-veteran-evidence-panel">
               <div className="case4-analysis-header">
@@ -8088,8 +8311,25 @@ function Case5Veteran() {
                 <Case5VeteranVisual type={activeEvidence.visual} />
                 <div className="case5-file-copy">
                   <h3>{activeEvidence.title}</h3>
-                  <p>{activeEvidence.body}</p>
-                  {activeEvidence.id === 'bank' && (
+                  <p>{activeEvidence.prompt}</p>
+                  {activeEvidence.chips && (
+                    <div className="case5-veteran-chip-row">
+                      {activeEvidence.chips.map((chip) => (
+                        <span key={chip}>{chip}</span>
+                      ))}
+                    </div>
+                  )}
+                  {activeEvidence.fields && (
+                    <div className="case5-veteran-fact-grid">
+                      {activeEvidence.fields.map(([label, value]) => (
+                        <div key={label}>
+                          <span>{label}</span>
+                          <strong>{value}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {activeEvidence.id === 'transfer' && (
                     <div className="case5-policy-panel">
                       <span>MERIDIAN PAYMENT POLICY</span>
                       <strong>
@@ -8104,51 +8344,188 @@ function Case5Veteran() {
                   )}
                 </div>
               </div>
-              <article
-                className={`veteran-quiz-card veteran-quiz-focus ${
-                  timelineAnswers[activeEvidence.id] &&
-                  timelineAnswers[activeEvidence.id] !== activeEvidence.answer
-                    ? 'veteran-quiz-shake'
-                    : ''
-                }`}
-              >
-                <h3>{activeEvidence.question}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {activeEvidence.options.map((option) => {
-                    const selected =
-                      timelineAnswers[activeEvidence.id] === option.value
-                    const answered = Boolean(timelineAnswers[activeEvidence.id])
-                    const correct = option.value === activeEvidence.answer
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        className={`veteran-answer-btn ${
-                          selected ? 'veteran-answer-selected' : ''
-                        } ${answered && correct ? 'veteran-answer-correct' : ''} ${
-                          answered && selected && !correct
-                            ? 'veteran-answer-wrong'
-                            : ''
-                        }`}
-                        onClick={() =>
-                          answerTimeline(activeEvidence.id, option.value)
-                        }
-                        disabled={answered}
-                      >
-                        {option.label}
-                      </button>
-                    )
-                  })}
+              <article className="case5-veteran-task-card">
+                <div className="case4-analysis-header">
+                  <span>PLAYER TASK</span>
+                  <strong>{activeEvidence.question}</strong>
                 </div>
-                {timelineAnswers[activeEvidence.id] && (
+                {activeEvidence.taskType === 'choice' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {activeEvidence.options.map((option) => {
+                      const selected =
+                        timelineAnswers[activeEvidence.id] === option.value
+                      const answered = Boolean(timelineAnswers[activeEvidence.id])
+                      const correct = option.value === activeEvidence.answer
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          className={`veteran-answer-btn ${
+                            selected ? 'veteran-answer-selected' : ''
+                          } ${answered && correct ? 'veteran-answer-correct' : ''} ${
+                            answered && selected && !correct
+                              ? 'veteran-answer-wrong'
+                              : ''
+                          }`}
+                          onClick={() => chooseEvidenceAnswer(activeEvidence, option.value)}
+                          disabled={answered}
+                        >
+                          {option.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+                {activeEvidence.taskType === 'checklist' && (
+                  <div className="case5-veteran-finding-grid">
+                    {activeEvidence.findings.map((finding) => {
+                      const selected = getEvidenceSelection(activeEvidence).includes(
+                        finding.value,
+                      )
+                      return (
+                        <button
+                          key={finding.value}
+                          type="button"
+                          className={`case5-veteran-finding ${
+                            selected ? 'selected' : ''
+                          } ${selected && finding.correct ? 'correct' : ''} ${
+                            selected && !finding.correct ? 'decoy' : ''
+                          }`}
+                          onClick={() =>
+                            toggleEvidenceFinding(activeEvidence, finding.value)
+                          }
+                        >
+                          <span>{selected ? 'FLAGGED' : 'SCAN'}</span>
+                          <strong>{finding.label}</strong>
+                          {selected && (
+                            <em>
+                              {finding.correct
+                                ? activeEvidence.id === 'video'
+                                  ? 'ANOMALY DETECTED'
+                                  : 'RED FLAG'
+                                : 'LIKELY NOISE'}
+                            </em>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+                {activeEvidence.taskType === 'dual-checklist' && (
+                  <div className="case5-veteran-dual-grid">
+                    <div>
+                      <div className="case5-risk-meter">
+                        <span>ACCOUNT RISK</span>
+                        <strong>
+                          {getEvidenceSelection(activeEvidence, 'account').length >= 4
+                            ? 'CRITICAL'
+                            : 'BUILDING'}
+                        </strong>
+                        <div>
+                          <i
+                            style={{
+                              width: `${Math.min(
+                                getEvidenceSelection(activeEvidence, 'account').length *
+                                  25,
+                                100,
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <h3>Account red flags</h3>
+                      <div className="case5-veteran-finding-grid">
+                        {activeEvidence.accountFindings.map((finding) => {
+                          const selected = getEvidenceSelection(
+                            activeEvidence,
+                            'account',
+                          ).includes(finding.value)
+                          return (
+                            <button
+                              key={finding.value}
+                              type="button"
+                              className={`case5-veteran-finding ${
+                                selected ? 'selected' : ''
+                              } ${selected && finding.correct ? 'correct' : ''} ${
+                                selected && !finding.correct ? 'decoy' : ''
+                              }`}
+                              onClick={() =>
+                                toggleEvidenceFinding(
+                                  activeEvidence,
+                                  finding.value,
+                                  'account',
+                                )
+                              }
+                            >
+                              <span>{selected ? 'MARKED' : 'CHECK'}</span>
+                              <strong>{finding.label}</strong>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="case5-risk-meter protocol">
+                        <span>PROTOCOL STATUS</span>
+                        <strong>
+                          {getEvidenceSelection(activeEvidence, 'protocol').length >= 3
+                            ? 'BREACH CONFIRMED'
+                            : 'VERIFYING'}
+                        </strong>
+                        <div>
+                          <i
+                            style={{
+                              width: `${Math.min(
+                                getEvidenceSelection(activeEvidence, 'protocol').length *
+                                  34,
+                                100,
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <h3>Safeguards bypassed</h3>
+                      <div className="case5-veteran-finding-grid">
+                        {activeEvidence.protocolFindings.map((finding) => {
+                          const selected = getEvidenceSelection(
+                            activeEvidence,
+                            'protocol',
+                          ).includes(finding.value)
+                          return (
+                            <button
+                              key={finding.value}
+                              type="button"
+                              className={`case5-veteran-finding ${
+                                selected ? 'selected' : ''
+                              } ${selected && finding.correct ? 'correct' : ''} ${
+                                selected && !finding.correct ? 'decoy' : ''
+                              }`}
+                              onClick={() =>
+                                toggleEvidenceFinding(
+                                  activeEvidence,
+                                  finding.value,
+                                  'protocol',
+                                )
+                              }
+                            >
+                              <span>{selected ? 'MARKED' : 'CHECK'}</span>
+                              <strong>{finding.label}</strong>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {isEvidenceReviewed(activeEvidence) && (
                   <div
                     className={
-                      timelineAnswers[activeEvidence.id] === activeEvidence.answer
+                      isEvidencePerfect(activeEvidence)
                         ? 'success-banner'
-                        : 'breach-banner'
+                        : 'case4-caution-banner'
                     }
                   >
-                    {timelineAnswers[activeEvidence.id] === activeEvidence.answer
+                    {isEvidencePerfect(activeEvidence)
                       ? activeEvidence.correctFeedback
                       : activeEvidence.wrongFeedback}
                   </div>
@@ -8159,20 +8536,19 @@ function Case5Veteran() {
                   type="button"
                   className="ss-btn ss-btn-cyan"
                   onClick={() => {
-                    const index = CASE5_VETERAN_TIMELINE.findIndex(
+                    const index = CASE5_VETERAN_INVESTIGATION.findIndex(
                       (item) => item.id === activeTimeline,
                     )
                     const next =
-                      CASE5_VETERAN_TIMELINE[index + 1] ||
-                      CASE5_VETERAN_TIMELINE[0]
+                      CASE5_VETERAN_INVESTIGATION[index + 1] ||
+                      CASE5_VETERAN_INVESTIGATION[0]
                     setActiveTimeline(next.id)
                     playSfx('click')
                   }}
                 >
                   Next Timeline Item <IconArrowRight size={16} />
                 </button>
-                {Object.keys(timelineAnswers).length ===
-                  CASE5_VETERAN_TIMELINE.length && (
+                {allEvidenceReviewed && (
                   <button
                     type="button"
                     className="ss-btn ss-btn-pink"
@@ -8255,7 +8631,34 @@ function Case5Veteran() {
             {analysisPassed ? 'ANALYSIS LOCKED' : 'ANALYSIS NEEDS REVIEW'}
           </div>
           <div className="ss-card p-5 flex flex-col gap-4">
-            <div className="case2-ricky-panel">
+            <div className="case5-reveal-grid">
+              <article className="case5-reveal-card">
+                <span>THE DEEPFAKE</span>
+                <Case5VeteranVisual type="video" />
+                <strong>Video call stamped: DEEPFAKE CONFIRMED</strong>
+                <p>Ricky: "The video was fake. But it was not the real weapon."</p>
+              </article>
+              <article className="case5-reveal-card">
+                <span>THE PRESSURE</span>
+                <div className="case5-mini-visual timer">
+                  <strong>EOB DEADLINE</strong>
+                  <em>URGENT PAYMENT</em>
+                </div>
+                <p>Ricky: "The urgency made stopping feel like failing the CEO."</p>
+              </article>
+              <article className="case5-reveal-card">
+                <span>THE PROCESS</span>
+                <div className="case5-mini-visual policy">
+                  <strong>MISSING AUTHORIZATION</strong>
+                  <em>TRUSTED CHANNEL: NOT COMPLETED</em>
+                </div>
+                <p>
+                  Ricky: "The protocol existed for this exact moment. It was
+                  bypassed."
+                </p>
+              </article>
+            </div>
+            <div className="case2-ricky-panel case5-legacy-ricky-copy">
               <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
               <p>
                 The video was a deepfake, yes. But here’s what I want you to
@@ -8375,10 +8778,10 @@ function Case5Veteran() {
 
       {phase === 'quiz' && (
         <section className="case-debrief scene-transition">
-          <div className="success-banner">FINAL CERTIFICATION - THE MIRAGE</div>
+          <div className="success-banner">FINAL FIELD ASSESSMENT</div>
           <div className="ss-card p-5 flex flex-col gap-4">
             <h2 className="font-pixel text-sw-cyan text-sm">
-              Transfer fraud certification
+              AI Manipulation & Deepfake Fraud
             </h2>
             <p className="text-sw-text2">
               Each correct answer is worth 10 coins. Passing requires at least
