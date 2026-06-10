@@ -53,6 +53,12 @@ export const BADGES = {
     message: 'You reviewed AI-manipulated evidence without over-trusting the image.',
     icon: 'eye',
   },
+  mirageBroken: {
+    id: 'the-mirage-broken',
+    name: 'The Mirage Broken',
+    message: 'You stopped a deepfake CEO fraud transfer by following verification protocol.',
+    icon: 'shield',
+  },
 }
 
 export const BADGE_CATALOG = [
@@ -71,6 +77,7 @@ export const BADGE_CATALOG = [
   BADGES.humanFirewall,
   BADGES.networkNavigator,
   BADGES.eyesOpenBeginner,
+  BADGES.mirageBroken,
   { id: 'night-owl', name: 'Night Owl' },
   { id: 'perfect-run', name: 'Perfect Run' },
   { id: 'mentor', name: 'Mentor' },

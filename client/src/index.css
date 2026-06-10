@@ -4675,6 +4675,383 @@ html.ss-high-contrast {
   font-size: 0.82rem;
 }
 
+.case5-veteran-control-room {
+  min-height: 520px;
+  overflow: visible;
+  background:
+    radial-gradient(circle at 72% 24%, rgba(255, 0, 170, 0.16), transparent 22%),
+    radial-gradient(circle at 22% 14%, rgba(0, 255, 255, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(9, 15, 39, 0.96), rgba(5, 8, 22, 0.98));
+}
+
+.case5-incident-headline {
+  position: absolute;
+  top: 12%;
+  left: 34%;
+  width: min(44%, 430px);
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 43, 91, 0.45);
+  background: rgba(5, 8, 22, 0.88);
+  box-shadow: 0 0 26px rgba(255, 43, 91, 0.16);
+  z-index: 2;
+}
+
+.case5-incident-headline span,
+.case5-incident-headline em,
+.case5-clearance-card span,
+.case5-clearance-card em,
+.case5-policy-panel span,
+.case5-holo-briefing > span,
+.case5-veteran-second-reveal span {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.case5-incident-headline span { color: var(--pink); }
+.case5-incident-headline strong {
+  color: var(--yellow);
+  font-family: var(--mono);
+}
+.case5-incident-headline em { color: var(--cyan); }
+
+.case5-veteran-timeline-grid {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.case5-veteran-timeline-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.case5-veteran-timeline-list button {
+  display: grid;
+  gap: 0.25rem;
+  text-align: left;
+  border: 1px solid rgba(0, 255, 255, 0.24);
+  background: rgba(5, 10, 28, 0.76);
+  color: var(--text2);
+  padding: 0.85rem;
+}
+
+.case5-veteran-timeline-list button.selected {
+  border-color: var(--yellow);
+  box-shadow: 0 0 18px rgba(255, 230, 107, 0.18);
+}
+
+.case5-veteran-timeline-list span {
+  color: var(--cyan);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+
+.case5-veteran-timeline-list strong { color: var(--text); }
+.case5-veteran-timeline-list em {
+  color: var(--text3);
+  font-style: normal;
+  font-size: 0.8rem;
+}
+
+.case5-veteran-evidence-panel,
+.case5-veteran-evidence-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.case5-veteran-evidence-grid,
+.case5-veteran-second-reveal,
+.case5-graduation-grid {
+  grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr);
+  align-items: start;
+}
+
+.case5-veteran-visual {
+  position: relative;
+  min-height: 280px;
+  overflow: hidden;
+  border: 2px solid rgba(0, 255, 255, 0.3);
+  background:
+    radial-gradient(circle at 28% 18%, rgba(0, 255, 255, 0.16), transparent 26%),
+    linear-gradient(180deg, #071025, #050816);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 0 24px rgba(0, 255, 255, 0.12);
+}
+
+.case5-veteran-scanline {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent, rgba(0, 255, 255, 0.16), transparent);
+  transform: translateY(-100%);
+  animation: case5-scan 3s linear infinite;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.case5-veteran-email-card,
+.case5-veteran-chat,
+.case5-bank-panel,
+.case5-clearance-card {
+  position: absolute;
+  inset: 12%;
+  display: grid;
+  gap: 0.65rem;
+  align-content: center;
+  padding: 1rem;
+  border: 1px solid rgba(0, 255, 255, 0.28);
+  background: rgba(5, 10, 28, 0.84);
+}
+
+.case5-veteran-email-card span,
+.case5-veteran-chat span,
+.case5-bank-panel span {
+  color: var(--cyan);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+}
+
+.case5-veteran-email-card strong,
+.case5-veteran-chat strong,
+.case5-bank-panel strong {
+  color: var(--yellow);
+  font-family: var(--mono);
+}
+
+.case5-veteran-email-card p,
+.case5-veteran-chat p,
+.case5-bank-panel p {
+  margin: 0;
+  color: var(--text2);
+}
+
+.case5-veteran-email-card em,
+.case5-bank-panel em {
+  color: var(--green);
+  font-style: normal;
+}
+
+.case5-video-call {
+  position: absolute;
+  inset: 9%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 0.8rem;
+}
+
+.case5-video-window {
+  position: relative;
+  border: 1px solid rgba(0, 255, 255, 0.32);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 9px, rgba(0, 255, 255, 0.06) 9px 10px),
+    radial-gradient(circle at 50% 24%, rgba(255, 230, 107, 0.12), transparent 24%),
+    #071025;
+}
+
+.case5-video-head {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  width: 104px;
+  height: 122px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffd29a, #d49a68);
+  box-shadow: 0 0 22px rgba(255, 230, 107, 0.12);
+}
+
+.case5-video-head i {
+  position: absolute;
+  top: 42%;
+  width: 12px;
+  height: 10px;
+  background: #061023;
+}
+
+.case5-video-head i:first-child { left: 24px; }
+.case5-video-head i:nth-child(2) { right: 24px; }
+
+.case5-video-head b {
+  position: absolute;
+  left: 38px;
+  bottom: 28px;
+  width: 30px;
+  height: 8px;
+  background: var(--pink);
+  animation: case5-lip-glitch 1.8s steps(2) infinite;
+}
+
+.case5-video-collar {
+  position: absolute;
+  left: calc(50% - 76px);
+  bottom: 11%;
+  width: 152px;
+  height: 48px;
+  background: linear-gradient(90deg, #0e1536, var(--cyan), #0e1536);
+  opacity: 0.72;
+  animation: case5-collar-flicker 1.6s steps(2) infinite;
+}
+
+.case5-lip-delay,
+.case5-collar-flicker {
+  position: absolute;
+  right: 7%;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid rgba(255, 230, 107, 0.38);
+  background: rgba(5, 8, 22, 0.82);
+  color: var(--yellow);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+}
+
+.case5-lip-delay { top: 22%; }
+.case5-collar-flicker { bottom: 19%; color: var(--pink); }
+
+.case5-waveform {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
+  align-items: end;
+  min-height: 42px;
+}
+
+.case5-waveform span {
+  display: block;
+  background: var(--cyan);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.42);
+  animation: case5-wave 900ms ease-in-out infinite alternate;
+}
+
+.case5-waveform span:nth-child(1) { height: 35%; }
+.case5-waveform span:nth-child(2) { height: 72%; animation-delay: 120ms; }
+.case5-waveform span:nth-child(3) { height: 48%; animation-delay: 240ms; }
+.case5-waveform span:nth-child(4) { height: 86%; animation-delay: 360ms; }
+.case5-waveform span:nth-child(5) { height: 54%; animation-delay: 480ms; }
+
+.case5-policy-panel,
+.case5-holo-briefing,
+.case5-veteran-second-reveal {
+  border: 1px solid rgba(255, 230, 107, 0.32);
+  background: rgba(255, 230, 107, 0.07);
+  padding: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.case5-policy-panel span,
+.case5-holo-briefing > span,
+.case5-veteran-second-reveal span {
+  color: var(--yellow);
+}
+
+.case5-policy-panel strong,
+.case5-veteran-second-reveal strong {
+  color: var(--text);
+}
+
+.case5-veteran-second-reveal,
+.case5-graduation-grid {
+  display: grid;
+}
+
+.case5-quick-checks {
+  display: grid;
+  gap: 1rem;
+}
+
+.case5-graduation {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+}
+
+.case5-confetti {
+  position: absolute;
+  inset: -1rem 0 auto;
+  height: 220px;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.case5-confetti span {
+  position: absolute;
+  top: -24px;
+  left: calc(var(--i, 1) * 5%);
+  width: 8px;
+  height: 18px;
+  background: var(--cyan);
+  box-shadow: 0 0 12px currentColor;
+  animation: case5-confetti-fall 3s linear infinite;
+}
+
+.case5-confetti span:nth-child(3n) { background: var(--pink); }
+.case5-confetti span:nth-child(4n) { background: var(--yellow); }
+.case5-confetti span:nth-child(1) { --i: 1; animation-delay: 0ms; }
+.case5-confetti span:nth-child(2) { --i: 3; animation-delay: 160ms; }
+.case5-confetti span:nth-child(3) { --i: 5; animation-delay: 320ms; }
+.case5-confetti span:nth-child(4) { --i: 7; animation-delay: 480ms; }
+.case5-confetti span:nth-child(5) { --i: 9; animation-delay: 640ms; }
+.case5-confetti span:nth-child(6) { --i: 11; animation-delay: 800ms; }
+.case5-confetti span:nth-child(7) { --i: 13; animation-delay: 960ms; }
+.case5-confetti span:nth-child(8) { --i: 15; animation-delay: 1120ms; }
+.case5-confetti span:nth-child(9) { --i: 17; animation-delay: 1280ms; }
+.case5-confetti span:nth-child(10) { --i: 19; animation-delay: 1440ms; }
+.case5-confetti span:nth-child(n + 11) { animation-delay: 1.8s; }
+
+.case5-clearance-card {
+  place-items: center;
+  text-align: center;
+  border-color: rgba(0, 255, 136, 0.5);
+  box-shadow: 0 0 30px rgba(0, 255, 136, 0.18);
+}
+
+.case5-clearance-card strong {
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: clamp(1rem, 2vw, 1.45rem);
+  text-shadow: 0 0 16px rgba(0, 255, 136, 0.44);
+}
+
+.case5-clearance-card em { color: var(--yellow); }
+
+.case5-clearance-stamp {
+  justify-self: start;
+  border: 2px solid rgba(0, 255, 136, 0.6);
+  color: var(--green);
+  font-family: var(--mono);
+  padding: 0.75rem 1rem;
+  transform: rotate(-2deg);
+  text-shadow: 0 0 12px rgba(0, 255, 136, 0.42);
+  animation: case5-stamp-pop 600ms steps(4);
+}
+
+@keyframes case5-lip-glitch {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
+@keyframes case5-collar-flicker {
+  0%, 100% { filter: none; }
+  50% { filter: hue-rotate(120deg); opacity: 0.44; }
+}
+
+@keyframes case5-wave {
+  from { transform: scaleY(0.65); opacity: 0.65; }
+  to { transform: scaleY(1.1); opacity: 1; }
+}
+
+@keyframes case5-confetti-fall {
+  from { transform: translateY(0) rotate(0deg); opacity: 1; }
+  to { transform: translateY(230px) rotate(240deg); opacity: 0; }
+}
+
+@keyframes case5-stamp-pop {
+  from { transform: scale(0.72) rotate(-8deg); opacity: 0; }
+  to { transform: scale(1) rotate(-2deg); opacity: 1; }
+}
+
 @keyframes case5-scan {
   from { transform: translateY(-110%); }
   to { transform: translateY(300%); }
@@ -4688,6 +5065,20 @@ html.ss-high-contrast {
 @media (max-width: 768px) {
   .case5-review-grid {
     grid-template-columns: 1fr;
+  }
+
+  .case5-veteran-timeline-grid,
+  .case5-veteran-evidence-grid,
+  .case5-veteran-second-reveal,
+  .case5-graduation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .case5-incident-headline {
+    left: 8%;
+    right: 8%;
+    width: auto;
+    top: 10%;
   }
 
   .case5-investigation-panel,
