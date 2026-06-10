@@ -2,7 +2,7 @@
 
 ![Scam Squad banner](docs/images/banner.png)
 
-> A story-driven co-op web game that teaches cyber security to ages 10–18 through interactive cases.
+> A story-driven co-op web game that teaches cyber security to ages 13–18 through interactive cases.
 
 **Module:** 503IT — Communication and Collaboration
 **Team:** Scam Squad
