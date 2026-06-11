@@ -41,3 +41,8 @@ export function isCaseModeUnlocked(user, caseId, difficulty) {
   if (difficulty === 'veteran') return isCaseModeComplete(user, caseId, 'rookie')
   return false
 }
+
+export function hasFullAgentClearance(user) {
+  if (isCaseModeComplete(user, 5, 'veteran')) return true
+  return [1, 2, 3, 4, 5].every((caseId) => isCaseComplete(user, caseId))
+}

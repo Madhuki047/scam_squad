@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
+import FullClearanceCelebration from '../components/FullClearanceCelebration.jsx'
 import { api } from '../lib/api.js'
 import { BADGE_CATALOG } from '../lib/badges.js'
+import { hasFullAgentClearance, isCaseComplete } from '../lib/caseProgress.js'
 
 function relativeTime(iso) {
   const diff = Date.now() - new Date(iso).getTime()
@@ -42,6 +44,10 @@ export default function Profile() {
   if (!user) return null
 
   const earned = new Set((user.badges || []).map((b) => b.id))
+  const fullAgentClearance = hasFullAgentClearance(user)
+  const casesCleared = [1, 2, 3, 4, 5].filter((caseId) =>
+    isCaseComplete(user, caseId),
+  ).length
 
   const level = user.level || 1
   const coins = user.points ?? user.totalScore ?? 0
@@ -76,6 +82,19 @@ export default function Profile() {
           <p className="text-sw-text2 mt-2">Level {level} Agent</p>
         </div>
       </div>
+
+      {fullAgentClearance && (
+        <div className="ss-card p-5 profile-clearance-panel">
+          <FullClearanceCelebration compact showMessage={false} showConfetti />
+          <div className="profile-clearance-stats">
+            <span>AGENT STATUS: FULL CLEARANCE</span>
+            <strong>Internship: Passed</strong>
+            <p>Cases cleared: {casesCleared} / 5</p>
+            <p>Final badge: The Mirage Broken</p>
+            <em>Await new assignments. Unit Zero will call again.</em>
+          </div>
+        </div>
+      )}
 
       <div className="ss-card p-5">
         <div className="flex justify-between text-sw-text3 mb-2">

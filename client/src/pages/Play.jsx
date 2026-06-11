@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import { IconCheck, IconLock } from '@tabler/icons-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import FullClearanceCelebration from '../components/FullClearanceCelebration.jsx'
 import {
   getCaseProgress,
+  hasFullAgentClearance,
   isCaseComplete,
   isCaseModeComplete,
   isCaseModeUnlocked,
@@ -49,6 +51,7 @@ export default function Play() {
   const navigate = useNavigate()
   const progress = getCaseProgress(user)
   const completedCount = CASES.filter((c) => isCaseComplete(user, c.id)).length
+  const fullAgentClearance = hasFullAgentClearance(user)
   const hasLives = (user?.livesRemaining ?? 0) > 0
 
   function openCase(caseId, difficulty) {
@@ -70,6 +73,10 @@ export default function Play() {
         )}
       </div>
 
+      {fullAgentClearance && (
+        <FullClearanceCelebration compact actions={false} />
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {CASES.map((c) => {
           const locked = !isCaseUnlocked(user, c.id)
@@ -89,7 +96,9 @@ export default function Play() {
                 <span className="font-pixel text-sw-pink text-xs">
                   CASE 0{c.id}
                 </span>
-                {locked ? (
+                {fullAgentClearance && c.id === 5 ? (
+                  <span className="text-sw-yellow text-sm">FINAL CASE CLEARED</span>
+                ) : locked ? (
                   <IconLock size={18} className="text-sw-text3" stroke={1.5} />
                 ) : complete ? (
                   <IconCheck size={18} className="text-sw-green" stroke={1.8} />

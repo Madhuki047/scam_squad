@@ -591,6 +591,170 @@ html.ss-high-contrast {
   text-transform: uppercase;
 }
 
+.full-clearance-card {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1.25rem;
+  border: 1.5px solid rgba(0, 255, 136, 0.42);
+  border-radius: 0.5rem;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(0, 255, 136, 0.18), transparent 24%),
+    radial-gradient(circle at 82% 18%, rgba(255, 0, 170, 0.14), transparent 24%),
+    rgba(5, 10, 28, 0.9);
+  box-shadow: 0 0 28px rgba(0, 255, 136, 0.14);
+}
+
+.full-clearance-compact {
+  padding: 1rem;
+}
+
+.full-clearance-agent {
+  position: relative;
+  width: 72px;
+  height: 94px;
+  animation: full-agent-bounce 1.7s ease-in-out infinite;
+}
+
+.full-clearance-agent span {
+  position: absolute;
+  left: 20px;
+  top: 4px;
+  width: 32px;
+  height: 32px;
+  background: var(--yellow);
+  box-shadow: 0 0 14px rgba(255, 217, 61, 0.44);
+}
+
+.full-clearance-agent i {
+  position: absolute;
+  left: 12px;
+  top: 40px;
+  width: 48px;
+  height: 48px;
+  background:
+    linear-gradient(90deg, transparent 0 16px, var(--cyan) 16px 32px, transparent 32px),
+    var(--pink);
+  box-shadow: 0 0 16px rgba(255, 0, 170, 0.28);
+}
+
+.full-clearance-copy {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.full-clearance-copy h3,
+.full-clearance-copy p {
+  margin: 0;
+}
+
+.full-clearance-copy p {
+  color: var(--text2);
+  line-height: 1.55;
+}
+
+.full-clearance-stamp {
+  justify-self: start;
+  border: 2px solid rgba(0, 255, 136, 0.58);
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  padding: 0.45rem 0.65rem;
+  transform: rotate(-2deg);
+  text-shadow: 0 0 12px rgba(0, 255, 136, 0.42);
+  animation: full-clearance-pulse 1.9s ease-in-out infinite;
+}
+
+.full-clearance-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.full-clearance-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.full-clearance-confetti span {
+  position: absolute;
+  top: -18px;
+  left: calc((var(--i, 1) * 7%) - 2%);
+  width: 6px;
+  height: 14px;
+  background: var(--cyan);
+  box-shadow: 0 0 10px currentColor;
+  animation: full-confetti-fall 3.4s linear infinite;
+}
+
+.full-clearance-confetti span:nth-child(3n) { background: var(--pink); }
+.full-clearance-confetti span:nth-child(4n) { background: var(--yellow); }
+.full-clearance-confetti span:nth-child(5n) { background: var(--green); }
+.full-clearance-confetti span:nth-child(1) { --i: 1; animation-delay: 0ms; }
+.full-clearance-confetti span:nth-child(2) { --i: 3; animation-delay: 180ms; }
+.full-clearance-confetti span:nth-child(3) { --i: 5; animation-delay: 360ms; }
+.full-clearance-confetti span:nth-child(4) { --i: 7; animation-delay: 540ms; }
+.full-clearance-confetti span:nth-child(5) { --i: 9; animation-delay: 720ms; }
+.full-clearance-confetti span:nth-child(6) { --i: 11; animation-delay: 900ms; }
+.full-clearance-confetti span:nth-child(7) { --i: 13; animation-delay: 1080ms; }
+.full-clearance-confetti span:nth-child(8) { --i: 15; animation-delay: 1260ms; }
+.full-clearance-confetti span:nth-child(n + 9) { animation-delay: 1.6s; }
+
+.profile-clearance-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.profile-clearance-panel .full-clearance-card {
+  box-shadow: none;
+}
+
+.profile-clearance-stats {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.profile-clearance-stats span,
+.profile-clearance-stats em {
+  color: var(--yellow);
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 0.78rem;
+}
+
+.profile-clearance-stats strong {
+  color: var(--cyan);
+  font-family: var(--mono);
+}
+
+.profile-clearance-stats p {
+  margin: 0;
+  color: var(--text2);
+}
+
+@keyframes full-agent-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes full-clearance-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 255, 136, 0.18); }
+  50% { box-shadow: 0 0 22px rgba(0, 255, 136, 0.42); }
+}
+
+@keyframes full-confetti-fall {
+  from { transform: translateY(-10px) rotate(0deg); opacity: 0.95; }
+  to { transform: translateY(220px) rotate(220deg); opacity: 0; }
+}
+
 @keyframes phone-ring {
   0%,
   100% {
@@ -631,6 +795,10 @@ html.ss-high-contrast {
   }
 
   .home-assignment-card {
+    grid-template-columns: 1fr;
+  }
+
+  .full-clearance-card {
     grid-template-columns: 1fr;
   }
 

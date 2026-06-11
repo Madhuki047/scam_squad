@@ -1664,31 +1664,27 @@ const CASE5_VETERAN_QUIZ = [
   {
     question: 'What type of fraud happened at Meridian Capital?',
     options: [
-      'CEO fraud / Business Email Compromise',
       'Random malware infection',
+      'CEO fraud / Business Email Compromise',
       'Password guessing',
       'Fake antivirus scam',
     ],
-    answer: 0,
-    explanation:
-      'CEO fraud and Business Email Compromise attacks often use trusted accounts, authority, and urgency to convince victims to transfer money.',
+    answer: 1,
   },
   {
     question: 'Why was the first email difficult for Helen to detect?',
     options: [
-      'It came from Marcus’s real compromised account',
       'It had spelling mistakes',
       'It came from a strange domain',
+      'It came from Marcus\'s real compromised account',
       'It had no subject line',
     ],
-    answer: 0,
-    explanation:
-      'The email came from Marcus\'s real account, which had been compromised. A real sender address does not guarantee a legitimate request.',
+    answer: 2,
   },
   {
     question: 'What made the video call convincing?',
     options: [
-      'It showed Marcus’s face, voice, and mannerisms',
+      'It showed Marcus\'s face, voice, and mannerisms',
       'It had no audio',
       'It was sent as a PDF',
       'It came from an unknown caller',
@@ -1698,22 +1694,22 @@ const CASE5_VETERAN_QUIZ = [
   {
     question: 'Which video detail could suggest a deepfake?',
     options: [
-      'Slight lip-sync delay during sharp head movement',
       'A normal office background',
       'A familiar voice',
       'A short call duration',
+      'Slight lip-sync delay during sharp head movement',
     ],
-    answer: 0,
+    answer: 3,
   },
   {
     question: 'What was the strongest process failure?',
     options: [
-      'No secondary authorization for a transfer above £50,000',
       'Helen replied to the email',
+      'No secondary authorization for a transfer above GBP 50,000',
       'Marcus was travelling',
       'The call happened in the morning',
     ],
-    answer: 0,
+    answer: 1,
   },
   {
     question: 'What does out-of-band verification mean?',
@@ -1728,47 +1724,44 @@ const CASE5_VETERAN_QUIZ = [
   {
     question: 'Which receiving account detail was suspicious?',
     options: [
-      'Newly registered overseas account with no transaction history',
       'It had a bank name',
       'It had an account number',
+      'Newly registered overseas account with no transaction history',
       'It was used during business hours',
     ],
-    answer: 0,
+    answer: 2,
   },
   {
     question: 'Why did the urgency matter?',
     options: [
-      'It pressured Helen to skip normal checks',
       'It made the bank faster',
       'It made the video clearer',
       'It proved Marcus was real',
+      'It pressured Helen to skip normal checks',
     ],
-    answer: 0,
+    answer: 3,
   },
   {
     question: 'What is the best response to an urgent payment request from a senior person?',
     options: [
-      'Follow payment protocol and verify separately',
       'Approve it immediately',
+      'Follow payment protocol and verify separately',
       'Ask no questions',
       'Trust it if the face looks real',
     ],
-    answer: 0,
+    answer: 1,
   },
   {
     question: 'What is the main lesson from the incident?',
     options: [
-      'Deepfake attacks combine technology with human manipulation',
       'Video calls are always safe',
       'Real email accounts cannot be hacked',
+      'Deepfake attacks combine technology with human manipulation',
       'Wire transfers are always reversible',
     ],
-    answer: 0,
-    explanation:
-      'Deepfake attacks succeed when technology is combined with social engineering techniques such as urgency, trust, and authority.',
+    answer: 2,
   },
 ]
-
 const CASE5_VETERAN_QUIZ_FEEDBACK = [
   'CEO fraud and Business Email Compromise attacks often use trusted accounts, authority, and urgency to convince victims to transfer money.',
   'The email came from Marcus\'s real account, which had been compromised. A real sender address does not guarantee a legitimate request.',
