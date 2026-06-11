@@ -1027,6 +1027,8 @@ const CASE3_VETERAN_QUIZ = [
       'Network segmentation',
     ],
     answer: 0,
+    explanation:
+      'Authorization procedures exist specifically to prevent fraud during high-pressure situations. Skipping them removes a key safeguard.',
   },
   {
     question: 'Why do attackers add urgency like "ASAP"?',
@@ -1057,6 +1059,8 @@ const CASE3_VETERAN_QUIZ = [
       'Trust anyone from the same department',
     ],
     answer: 0,
+    explanation:
+      'Out-of-band verification uses a separate trusted communication channel, such as calling a known phone number instead of replying to the same message.',
   },
   {
     question: 'Which profile clue is suspicious?',
@@ -1077,6 +1081,8 @@ const CASE3_VETERAN_QUIZ = [
       'It deletes the evidence',
     ],
     answer: 0,
+    explanation:
+      'New accounts with no transaction history are common warning signs in payment fraud schemes.',
   },
   {
     question: 'What should you report after receiving a suspicious access request?',
@@ -1664,6 +1670,8 @@ const CASE5_VETERAN_QUIZ = [
       'Fake antivirus scam',
     ],
     answer: 0,
+    explanation:
+      'CEO fraud and Business Email Compromise attacks often use trusted accounts, authority, and urgency to convince victims to transfer money.',
   },
   {
     question: 'Why was the first email difficult for Helen to detect?',
@@ -1674,6 +1682,8 @@ const CASE5_VETERAN_QUIZ = [
       'It had no subject line',
     ],
     answer: 0,
+    explanation:
+      'The email came from Marcus\'s real account, which had been compromised. A real sender address does not guarantee a legitimate request.',
   },
   {
     question: 'What made the video call convincing?',
@@ -1754,7 +1764,22 @@ const CASE5_VETERAN_QUIZ = [
       'Wire transfers are always reversible',
     ],
     answer: 0,
+    explanation:
+      'Deepfake attacks succeed when technology is combined with social engineering techniques such as urgency, trust, and authority.',
   },
+]
+
+const CASE5_VETERAN_QUIZ_FEEDBACK = [
+  'CEO fraud and Business Email Compromise attacks often use trusted accounts, authority, and urgency to convince victims to transfer money.',
+  'The email came from Marcus\'s real account, which had been compromised. A real sender address does not guarantee a legitimate request.',
+  'Deepfake attacks are more believable when they mimic a person\'s face, voice, and familiar behaviour.',
+  'Lip-sync issues during rapid movement can happen when AI-generated video struggles to keep facial animation synchronized.',
+  'Authorization procedures exist specifically to prevent fraud during high-pressure situations. Skipping them removes a key safeguard.',
+  'Out-of-band verification uses a separate trusted communication channel, such as calling a known phone number instead of replying to the same message.',
+  'New accounts with no transaction history are common warning signs in payment fraud schemes.',
+  'Urgency reduces critical thinking and encourages people to bypass normal security procedures.',
+  'Verification should always occur through approved procedures, even when the request appears to come from a trusted leader.',
+  'Deepfake attacks succeed when technology is combined with social engineering techniques such as urgency, trust, and authority.',
 ]
 
 const CASE4_VETERAN_PASS_SCORE = 5
@@ -8920,11 +8945,15 @@ function Case5Veteran() {
                 </article>
                 {quizAnswered && (
                   <div className={quizSelectedCorrect ? 'success-banner' : 'breach-banner'}>
-                    {quizSelectedCorrect
-                      ? 'Correct. +10 quiz coins secured.'
-                      : `Correct answer: ${
-                          activeQuizQuestion.options[activeQuizQuestion.answer]
-                        }`}
+                    <strong>{quizSelectedCorrect ? 'CORRECT' : 'INCORRECT'}</strong>
+                    {!quizSelectedCorrect && (
+                      <p>
+                        Correct Answer:{' '}
+                        {activeQuizQuestion.options[activeQuizQuestion.answer]}
+                      </p>
+                    )}
+                    <p>{CASE5_VETERAN_QUIZ_FEEDBACK[currentQuizQuestion]}</p>
+                    {quizSelectedCorrect && <p>+10 Quiz Coins Secured</p>}
                   </div>
                 )}
                 {quizAnswered && (
