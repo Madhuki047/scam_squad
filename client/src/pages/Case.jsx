@@ -1493,7 +1493,7 @@ const CASE5_VETERAN_INVESTIGATION = [
     ],
     required: ['legitimate-account', 'urgency-pressure', 'payment-request'],
     correctFeedback:
-      'REAL ACCOUNT != SAFE. The email was hard to catch, but pressure plus payment should raise caution.',
+      'The sender account being real does not make the request safe. Compromised accounts can send authentic-looking messages. The pressure and payment request are the warning signs.',
     wrongFeedback:
       'Review the sender and request. The account is real, but the pressure and payment ask still matter.',
   },
@@ -1521,7 +1521,7 @@ const CASE5_VETERAN_INVESTIGATION = [
     ],
     answer: 'verify',
     correctFeedback:
-      'Correct. Helen was cautious. The attack escalated through a convincing call.',
+      'Helen did ask questions. The failure was not simple carelessness. The attacker used trust, video, and urgency to pull her away from the verification process.',
     wrongFeedback:
       'Not quite. Helen asked for details; the failure came later when verification was skipped.',
   },
@@ -1545,7 +1545,7 @@ const CASE5_VETERAN_INVESTIGATION = [
     ],
     required: ['lip-sync', 'collar-edge', 'jaw-mismatch'],
     correctFeedback:
-      'ANOMALY DETECTED. The call should trigger verification, not replace it.',
+      'The call had deepfake indicators, but the call itself was not enough. A convincing video should trigger verification, not replace it.',
     wrongFeedback:
       'Some items are likely connection noise. Focus on movement mismatches and edge artifacts.',
   },
@@ -1583,7 +1583,7 @@ const CASE5_VETERAN_INVESTIGATION = [
     requiredAccount: ['new-account', 'no-history', 'overseas', 'first-large'],
     requiredProtocol: ['second-officer', 'trusted-channel', 'account-history'],
     correctFeedback:
-      'PROTOCOL BREACH CONFIRMED. Account risk is critical and safeguards were bypassed.',
+      'A new overseas account with no transaction history is a major fraud red flag, especially for a large first payment. The protocol existed for exactly this situation; urgency made it feel optional.',
     wrongFeedback:
       'The strongest evidence is the account risk plus missing authorization and trusted-channel verification.',
   },
@@ -7874,6 +7874,7 @@ function Case5Veteran() {
   const [introStep, setIntroStep] = useState(0)
   const [activeTimeline, setActiveTimeline] = useState('email')
   const [timelineAnswers, setTimelineAnswers] = useState({})
+  const [evidenceSubmissions, setEvidenceSubmissions] = useState({})
   const [analysisAnswer, setAnalysisAnswer] = useState(null)
   const [quickAnswers, setQuickAnswers] = useState(
     () => CASE5_VETERAN_QUICK_CHECKS.map(() => null),
@@ -7932,6 +7933,10 @@ function Case5Veteran() {
   }
 
   function isEvidenceReviewed(item) {
+    return Boolean(evidenceSubmissions[item.id])
+  }
+
+  function hasEvidenceSelection(item) {
     if (item.taskType === 'choice') return Boolean(timelineAnswers[item.id])
     if (item.taskType === 'dual-checklist') {
       const account = getEvidenceSelection(item, 'account')
@@ -7943,6 +7948,10 @@ function Case5Veteran() {
 
   function isEvidencePerfect(item) {
     if (!isEvidenceReviewed(item)) return false
+    return isEvidenceCorrect(item)
+  }
+
+  function isEvidenceCorrect(item) {
     if (item.taskType === 'choice') return timelineAnswers[item.id] === item.answer
     if (item.taskType === 'dual-checklist') {
       return (
@@ -7970,6 +7979,7 @@ function Case5Veteran() {
     setIntroStep(0)
     setActiveTimeline('email')
     setTimelineAnswers({})
+    setEvidenceSubmissions({})
     setAnalysisAnswer(null)
     setQuickAnswers(CASE5_VETERAN_QUICK_CHECKS.map(() => null))
     setQuizAnswers(CASE5_VETERAN_QUIZ.map(() => null))
@@ -8083,6 +8093,7 @@ function Case5Veteran() {
   }
 
   function toggleEvidenceFinding(item, value, group = 'main') {
+    if (evidenceSubmissions[item.id]) return
     setTimelineAnswers((current) => {
       if (item.taskType === 'dual-checklist') {
         const existing = current[item.id] || { account: [], protocol: [] }
@@ -8110,14 +8121,19 @@ function Case5Veteran() {
         : group === 'protocol'
           ? item.protocolFindings
           : item.findings
-    const selectedOption = options.find((option) => option.value === value)
-    playSfx(selectedOption?.correct ? 'correct' : 'click')
+    playSfx('click')
   }
 
   function chooseEvidenceAnswer(item, value) {
-    if (timelineAnswers[item.id]) return
+    if (evidenceSubmissions[item.id]) return
     setTimelineAnswers((current) => ({ ...current, [item.id]: value }))
-    playSfx(value === item.answer ? 'correct' : 'wrong')
+    playSfx('click')
+  }
+
+  function submitEvidenceFindings(item) {
+    if (!hasEvidenceSelection(item)) return
+    setEvidenceSubmissions((current) => ({ ...current, [item.id]: true }))
+    playSfx(isEvidenceCorrect(item) ? 'correct' : 'wrong')
   }
 
   function submitAnalysis() {
@@ -8235,7 +8251,7 @@ function Case5Veteran() {
               <em>CEO VIDEO CALL SUSPECTED</em>
             </div>
           </div>
-          <div className="case5-veteran-comms-panel">
+          <div className="case5-veteran-speech-bubble">
             <span>{intro.speaker} // SECURE COMMS</span>
             <p>{intro.text}</p>
           </div>
@@ -8319,7 +8335,7 @@ function Case5Veteran() {
                       ))}
                     </div>
                   )}
-                  {activeEvidence.fields && (
+                  {activeEvidence.id !== 'email' && activeEvidence.fields && (
                     <div className="case5-veteran-fact-grid">
                       {activeEvidence.fields.map(([label, value]) => (
                         <div key={label}>
@@ -8354,7 +8370,7 @@ function Case5Veteran() {
                     {activeEvidence.options.map((option) => {
                       const selected =
                         timelineAnswers[activeEvidence.id] === option.value
-                      const answered = Boolean(timelineAnswers[activeEvidence.id])
+                      const submitted = isEvidenceReviewed(activeEvidence)
                       const correct = option.value === activeEvidence.answer
                       return (
                         <button
@@ -8362,13 +8378,13 @@ function Case5Veteran() {
                           type="button"
                           className={`veteran-answer-btn ${
                             selected ? 'veteran-answer-selected' : ''
-                          } ${answered && correct ? 'veteran-answer-correct' : ''} ${
-                            answered && selected && !correct
+                          } ${submitted && correct ? 'veteran-answer-correct' : ''} ${
+                            submitted && selected && !correct
                               ? 'veteran-answer-wrong'
                               : ''
                           }`}
                           onClick={() => chooseEvidenceAnswer(activeEvidence, option.value)}
-                          disabled={answered}
+                          disabled={submitted}
                         >
                           {option.label}
                         </button>
@@ -8382,30 +8398,42 @@ function Case5Veteran() {
                       const selected = getEvidenceSelection(activeEvidence).includes(
                         finding.value,
                       )
+                      const submitted = isEvidenceReviewed(activeEvidence)
+                      const missed = submitted && finding.correct && !selected
                       return (
                         <button
                           key={finding.value}
                           type="button"
                           className={`case5-veteran-finding ${
                             selected ? 'selected' : ''
-                          } ${selected && finding.correct ? 'correct' : ''} ${
-                            selected && !finding.correct ? 'decoy' : ''
-                          }`}
+                          } ${
+                            submitted && selected && finding.correct
+                              ? 'correct'
+                              : ''
+                          } ${
+                            submitted && selected && !finding.correct
+                              ? 'decoy'
+                              : ''
+                          } ${missed ? 'missed' : ''}`}
                           onClick={() =>
                             toggleEvidenceFinding(activeEvidence, finding.value)
                           }
+                          disabled={submitted}
                         >
-                          <span>{selected ? 'FLAGGED' : 'SCAN'}</span>
+                          <span>
+                            {submitted
+                              ? selected && finding.correct
+                                ? 'CONFIRMED RED FLAG'
+                                : selected
+                                  ? 'NOT A VALID FINDING'
+                                  : missed
+                                    ? 'MISSED RED FLAG'
+                                    : 'REVIEWED'
+                              : selected
+                                ? 'SELECTED'
+                                : 'SCAN'}
+                          </span>
                           <strong>{finding.label}</strong>
-                          {selected && (
-                            <em>
-                              {finding.correct
-                                ? activeEvidence.id === 'video'
-                                  ? 'ANOMALY DETECTED'
-                                  : 'RED FLAG'
-                                : 'LIKELY NOISE'}
-                            </em>
-                          )}
                         </button>
                       )
                     })}
@@ -8417,9 +8445,10 @@ function Case5Veteran() {
                       <div className="case5-risk-meter">
                         <span>ACCOUNT RISK</span>
                         <strong>
-                          {getEvidenceSelection(activeEvidence, 'account').length >= 4
+                          {isEvidenceReviewed(activeEvidence) &&
+                          getEvidenceSelection(activeEvidence, 'account').length >= 4
                             ? 'CRITICAL'
-                            : 'BUILDING'}
+                            : 'PENDING SUBMISSION'}
                         </strong>
                         <div>
                           <i
@@ -8440,15 +8469,23 @@ function Case5Veteran() {
                             activeEvidence,
                             'account',
                           ).includes(finding.value)
+                          const submitted = isEvidenceReviewed(activeEvidence)
+                          const missed = submitted && finding.correct && !selected
                           return (
                             <button
                               key={finding.value}
                               type="button"
                               className={`case5-veteran-finding ${
                                 selected ? 'selected' : ''
-                              } ${selected && finding.correct ? 'correct' : ''} ${
-                                selected && !finding.correct ? 'decoy' : ''
-                              }`}
+                              } ${
+                                submitted && selected && finding.correct
+                                  ? 'correct'
+                                  : ''
+                              } ${
+                                submitted && selected && !finding.correct
+                                  ? 'decoy'
+                                  : ''
+                              } ${missed ? 'missed' : ''}`}
                               onClick={() =>
                                 toggleEvidenceFinding(
                                   activeEvidence,
@@ -8456,8 +8493,21 @@ function Case5Veteran() {
                                   'account',
                                 )
                               }
+                              disabled={submitted}
                             >
-                              <span>{selected ? 'MARKED' : 'CHECK'}</span>
+                              <span>
+                                {submitted
+                                  ? selected && finding.correct
+                                    ? 'CONFIRMED RED FLAG'
+                                    : selected
+                                      ? 'NOT A VALID FINDING'
+                                      : missed
+                                        ? 'MISSED RED FLAG'
+                                        : 'REVIEWED'
+                                  : selected
+                                    ? 'SELECTED'
+                                    : 'CHECK'}
+                              </span>
                               <strong>{finding.label}</strong>
                             </button>
                           )
@@ -8468,9 +8518,10 @@ function Case5Veteran() {
                       <div className="case5-risk-meter protocol">
                         <span>PROTOCOL STATUS</span>
                         <strong>
-                          {getEvidenceSelection(activeEvidence, 'protocol').length >= 3
+                          {isEvidenceReviewed(activeEvidence) &&
+                          getEvidenceSelection(activeEvidence, 'protocol').length >= 3
                             ? 'BREACH CONFIRMED'
-                            : 'VERIFYING'}
+                            : 'PENDING SUBMISSION'}
                         </strong>
                         <div>
                           <i
@@ -8491,15 +8542,23 @@ function Case5Veteran() {
                             activeEvidence,
                             'protocol',
                           ).includes(finding.value)
+                          const submitted = isEvidenceReviewed(activeEvidence)
+                          const missed = submitted && finding.correct && !selected
                           return (
                             <button
                               key={finding.value}
                               type="button"
                               className={`case5-veteran-finding ${
                                 selected ? 'selected' : ''
-                              } ${selected && finding.correct ? 'correct' : ''} ${
-                                selected && !finding.correct ? 'decoy' : ''
-                              }`}
+                              } ${
+                                submitted && selected && finding.correct
+                                  ? 'correct'
+                                  : ''
+                              } ${
+                                submitted && selected && !finding.correct
+                                  ? 'decoy'
+                                  : ''
+                              } ${missed ? 'missed' : ''}`}
                               onClick={() =>
                                 toggleEvidenceFinding(
                                   activeEvidence,
@@ -8507,8 +8566,21 @@ function Case5Veteran() {
                                   'protocol',
                                 )
                               }
+                              disabled={submitted}
                             >
-                              <span>{selected ? 'MARKED' : 'CHECK'}</span>
+                              <span>
+                                {submitted
+                                  ? selected && finding.correct
+                                    ? 'CONFIRMED SAFEGUARD'
+                                    : selected
+                                      ? 'NOT A VALID FINDING'
+                                      : missed
+                                        ? 'MISSED SAFEGUARD'
+                                        : 'REVIEWED'
+                                  : selected
+                                    ? 'SELECTED'
+                                    : 'CHECK'}
+                              </span>
                               <strong>{finding.label}</strong>
                             </button>
                           )
@@ -8532,22 +8604,34 @@ function Case5Veteran() {
                 )}
               </article>
               <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  type="button"
-                  className="ss-btn ss-btn-cyan"
-                  onClick={() => {
-                    const index = CASE5_VETERAN_INVESTIGATION.findIndex(
-                      (item) => item.id === activeTimeline,
-                    )
-                    const next =
-                      CASE5_VETERAN_INVESTIGATION[index + 1] ||
-                      CASE5_VETERAN_INVESTIGATION[0]
-                    setActiveTimeline(next.id)
-                    playSfx('click')
-                  }}
-                >
-                  Next Timeline Item <IconArrowRight size={16} />
-                </button>
+                {!isEvidenceReviewed(activeEvidence) && (
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-pink"
+                    onClick={() => submitEvidenceFindings(activeEvidence)}
+                    disabled={!hasEvidenceSelection(activeEvidence)}
+                  >
+                    Submit Findings
+                  </button>
+                )}
+                {isEvidenceReviewed(activeEvidence) && (
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-cyan"
+                    onClick={() => {
+                      const index = CASE5_VETERAN_INVESTIGATION.findIndex(
+                        (item) => item.id === activeTimeline,
+                      )
+                      const next =
+                        CASE5_VETERAN_INVESTIGATION[index + 1] ||
+                        CASE5_VETERAN_INVESTIGATION[0]
+                      setActiveTimeline(next.id)
+                      playSfx('click')
+                    }}
+                  >
+                    Next Timeline Item <IconArrowRight size={16} />
+                  </button>
+                )}
                 {allEvidenceReviewed && (
                   <button
                     type="button"
@@ -8580,25 +8664,17 @@ function Case5Veteran() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {CASE5_VETERAN_ANALYSIS_OPTIONS.map((option) => {
                 const selected = analysisAnswer === option.value
-                const answered = Boolean(analysisAnswer)
-                const correct = option.value === 'bank-protocol'
                 return (
                   <button
                     key={option.value}
                     type="button"
                     className={`veteran-answer-btn ${
                       selected ? 'veteran-answer-selected' : ''
-                    } ${answered && correct ? 'veteran-answer-correct' : ''} ${
-                      answered && selected && !correct
-                        ? 'veteran-answer-wrong'
-                        : ''
                     }`}
                     onClick={() => {
-                      if (analysisAnswer) return
                       setAnalysisAnswer(option.value)
-                      playSfx(correct ? 'correct' : 'wrong')
+                      playSfx('click')
                     }}
-                    disabled={answered}
                   >
                     {option.label}
                   </button>
@@ -8606,19 +8682,12 @@ function Case5Veteran() {
               })}
             </div>
             {analysisAnswer && (
-              <div className={analysisPassed ? 'success-banner' : 'breach-banner'}>
-                {analysisPassed
-                  ? 'Correct - the receiving account and missing authorization protocol were the clearest stop point.'
-                  : 'Review required - focusing only on the video misses the bank account and bypassed payment protocol.'}
-              </div>
-            )}
-            {analysisAnswer && (
               <button
                 type="button"
                 className="ss-btn ss-btn-cyan self-start"
                 onClick={submitAnalysis}
               >
-                Open Ricky Debrief <IconArrowRight size={16} />
+                Submit Incident Analysis <IconArrowRight size={16} />
               </button>
             )}
           </div>
@@ -8636,7 +8705,9 @@ function Case5Veteran() {
                 <span>THE DEEPFAKE</span>
                 <Case5VeteranVisual type="video" />
                 <strong>Video call stamped: DEEPFAKE CONFIRMED</strong>
-                <p>Ricky: "The video was fake. But it was not the real weapon."</p>
+                <p className="case5-reveal-bubble">
+                  Ricky: "The video was fake. But it was not the real weapon."
+                </p>
               </article>
               <article className="case5-reveal-card">
                 <span>THE PRESSURE</span>
@@ -8644,7 +8715,9 @@ function Case5Veteran() {
                   <strong>EOB DEADLINE</strong>
                   <em>URGENT PAYMENT</em>
                 </div>
-                <p>Ricky: "The urgency made stopping feel like failing the CEO."</p>
+                <p className="case5-reveal-bubble">
+                  Ricky: "The urgency made stopping feel like failing the CEO."
+                </p>
               </article>
               <article className="case5-reveal-card">
                 <span>THE PROCESS</span>
@@ -8652,7 +8725,7 @@ function Case5Veteran() {
                   <strong>MISSING AUTHORIZATION</strong>
                   <em>TRUSTED CHANNEL: NOT COMPLETED</em>
                 </div>
-                <p>
+                <p className="case5-reveal-bubble">
                   Ricky: "The protocol existed for this exact moment. It was
                   bypassed."
                 </p>
@@ -8675,7 +8748,11 @@ function Case5Veteran() {
             <div className="case5-veteran-second-reveal">
               <Case5VeteranVisual type="bank" />
               <div>
-                <span>SECOND REVEAL</span>
+                <span>BANK RISK CARD</span>
+                <p className="case5-reveal-bubble">
+                  Ricky: "The deepfake got Helen on the call. The urgency got
+                  her to skip the protocol. Nobody checked the account."
+                </p>
                 <strong>
                   Registered 48 hours earlier. No transaction history. Overseas
                   account. £740,000 first payment.
@@ -8690,6 +8767,19 @@ function Case5Veteran() {
                   real for eleven minutes.
                 </p>
               </div>
+            </div>
+            <div className="case5-consequence-dialogue">
+              <p className="case5-reveal-bubble intern">
+                Intern: "Can the money be recovered?"
+              </p>
+              <p className="case5-reveal-bubble">
+                Ricky: "Sometimes. Not always."
+              </p>
+            </div>
+            <div className="case5-loss-panel">
+              <span>MERIDIAN CAPITAL LOSS</span>
+              <strong>GBP 740,000</strong>
+              <em>Cause: Deepfake + urgency + bypassed process</em>
             </div>
             <div className="case5-holo-briefing">
               <span>WHAT ARE DEEPFAKES & AI MANIPULATION?</span>

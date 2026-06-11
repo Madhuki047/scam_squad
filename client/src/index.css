@@ -4718,23 +4718,40 @@ html.ss-high-contrast {
 }
 .case5-incident-headline em { color: var(--cyan); }
 
-.case5-veteran-comms-panel {
+.case5-veteran-speech-bubble {
+  position: relative;
   display: grid;
   gap: 0.55rem;
+  width: min(640px, 92%);
+  margin: -1.5rem 0 0 auto;
   padding: 1rem 1.15rem;
   border: 1px solid rgba(0, 255, 255, 0.34);
   background: rgba(5, 10, 28, 0.9);
-  box-shadow: 0 0 22px rgba(0, 255, 255, 0.12);
+  box-shadow: 0 0 22px rgba(0, 255, 255, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  z-index: 4;
 }
 
-.case5-veteran-comms-panel span {
+.case5-veteran-speech-bubble::before {
+  content: "";
+  position: absolute;
+  left: 58px;
+  top: -12px;
+  width: 22px;
+  height: 22px;
+  border-left: 1px solid rgba(0, 255, 255, 0.34);
+  border-top: 1px solid rgba(0, 255, 255, 0.34);
+  background: rgba(5, 10, 28, 0.9);
+  transform: rotate(45deg);
+}
+
+.case5-veteran-speech-bubble span {
   color: var(--yellow);
   font-family: var(--mono);
   font-size: 0.72rem;
   letter-spacing: 0.04em;
 }
 
-.case5-veteran-comms-panel p {
+.case5-veteran-speech-bubble p {
   margin: 0;
   color: var(--text);
   line-height: 1.55;
@@ -4876,8 +4893,9 @@ html.ss-high-contrast {
 }
 
 .case5-veteran-finding.selected {
-  border-color: var(--yellow);
-  box-shadow: 0 0 16px rgba(255, 230, 107, 0.14);
+  border-color: var(--cyan);
+  background: rgba(0, 255, 255, 0.08);
+  box-shadow: 0 0 16px rgba(0, 255, 255, 0.14);
 }
 
 .case5-veteran-finding.selected.correct {
@@ -4888,6 +4906,17 @@ html.ss-high-contrast {
 .case5-veteran-finding.selected.decoy {
   border-color: rgba(255, 43, 91, 0.45);
   background: rgba(255, 43, 91, 0.07);
+}
+
+.case5-veteran-finding.missed {
+  border-color: rgba(255, 230, 107, 0.55);
+  background: rgba(255, 230, 107, 0.08);
+  box-shadow: 0 0 16px rgba(255, 230, 107, 0.12);
+}
+
+.case5-veteran-finding:disabled {
+  cursor: default;
+  transform: none;
 }
 
 .case5-veteran-dual-grid,
@@ -5155,6 +5184,43 @@ html.ss-high-contrast {
   line-height: 1.45;
 }
 
+.case5-reveal-bubble {
+  position: relative;
+  border: 1px solid rgba(0, 255, 255, 0.34);
+  background: rgba(5, 10, 28, 0.9);
+  padding: 0.75rem 0.9rem;
+  color: var(--text) !important;
+  box-shadow: 0 0 16px rgba(0, 255, 255, 0.12);
+}
+
+.case5-reveal-bubble::before {
+  content: "";
+  position: absolute;
+  left: 24px;
+  top: -8px;
+  width: 14px;
+  height: 14px;
+  border-left: 1px solid rgba(0, 255, 255, 0.34);
+  border-top: 1px solid rgba(0, 255, 255, 0.34);
+  background: rgba(5, 10, 28, 0.9);
+  transform: rotate(45deg);
+}
+
+.case5-reveal-bubble.intern {
+  border-color: rgba(255, 230, 107, 0.36);
+  background: rgba(255, 230, 107, 0.08);
+}
+
+.case5-veteran-second-reveal p:not(.case5-reveal-bubble) {
+  display: none;
+}
+
+.case5-consequence-dialogue {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
 .case5-mini-visual {
   min-height: 170px;
   display: grid;
@@ -5313,9 +5379,15 @@ html.ss-high-contrast {
   .case5-veteran-evidence-grid,
   .case5-veteran-dual-grid,
   .case5-reveal-grid,
+  .case5-consequence-dialogue,
   .case5-veteran-second-reveal,
   .case5-graduation-grid {
     grid-template-columns: 1fr;
+  }
+
+  .case5-veteran-speech-bubble {
+    width: 100%;
+    margin: -0.5rem 0 0;
   }
 
   .case5-incident-headline {
