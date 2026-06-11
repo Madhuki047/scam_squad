@@ -1027,6 +1027,8 @@ const CASE3_VETERAN_QUIZ = [
       'Network segmentation',
     ],
     answer: 0,
+    explanation:
+      'Authorization procedures exist specifically to prevent fraud during high-pressure situations. Skipping them removes a key safeguard.',
   },
   {
     question: 'Why do attackers add urgency like "ASAP"?',
@@ -1057,6 +1059,8 @@ const CASE3_VETERAN_QUIZ = [
       'Trust anyone from the same department',
     ],
     answer: 0,
+    explanation:
+      'Out-of-band verification uses a separate trusted communication channel, such as calling a known phone number instead of replying to the same message.',
   },
   {
     question: 'Which profile clue is suspicious?',
@@ -1077,6 +1081,8 @@ const CASE3_VETERAN_QUIZ = [
       'It deletes the evidence',
     ],
     answer: 0,
+    explanation:
+      'New accounts with no transaction history are common warning signs in payment fraud schemes.',
   },
   {
     question: 'What should you report after receiving a suspicious access request?',
@@ -1352,6 +1358,421 @@ const CASE5_TEACHING_POINTS = [
   'Real photos can have blur, grain, noise, and uneven lighting.',
   'Do not over-flag normal photography imperfections.',
   'Deepfake evidence can have serious legal and political consequences.',
+]
+
+const CASE5_VETERAN_PASS_SCORE = 5
+
+const CASE5_VETERAN_INTRO = [
+  {
+    speaker: 'Agent Ricky',
+    text:
+      'Two days after the evidence review, Meridian Capital flagged a GBP 740,000 wire transfer.',
+  },
+  {
+    speaker: 'Agent Ricky',
+    text:
+      'The CFO approved it after a video call from her CEO.',
+  },
+  {
+    speaker: 'Agent Ricky',
+    text:
+      'The face looked real. The voice sounded real. But the money is gone.',
+  },
+  {
+    speaker: 'Agent Ricky',
+    text:
+      'Your job is to reconstruct what failed.',
+  },
+]
+
+const CASE5_VETERAN_TIMELINE = [
+  {
+    id: 'email',
+    time: '9:14',
+    title: 'Email Request',
+    kicker: 'Marcus Webb - CEO',
+    body:
+      'Helen receives an email from Marcus. He says he is travelling and needs an urgent supplier payment completed before end of business.',
+    visual: 'email',
+    question: 'Was the email alone the strongest detection point?',
+    options: [
+      { value: 'yes', label: 'Yes - urgent email equals fraud' },
+      { value: 'no', label: 'No - the real account was compromised' },
+    ],
+    answer: 'no',
+    correctFeedback:
+      'Correct - a real account can still be compromised. Authentic sender address does not guarantee authentic intent.',
+    wrongFeedback:
+      'Wrong - the email looked legitimate because Marcus Webb’s real account had been compromised overnight.',
+  },
+  {
+    id: 'reply',
+    time: '9:41',
+    title: 'CFO Reply',
+    kicker: 'Helen Smith - CFO',
+    body:
+      'Helen replies asking for more details. She is cautious and does not approve the transfer from the email alone.',
+    visual: 'reply',
+    question: 'What does Helen’s reply show?',
+    options: [
+      { value: 'cautious', label: 'She was cautious and asked for details' },
+      { value: 'failure', label: 'She had already failed the process' },
+    ],
+    answer: 'cautious',
+    correctFeedback:
+      'Correct - the reply shows caution. The attack escalated because the next step looked more trustworthy.',
+    wrongFeedback:
+      'Wrong - Helen had not failed yet. Asking for detail was reasonable before the video pressure arrived.',
+  },
+  {
+    id: 'video',
+    time: '9:58',
+    title: 'CEO Video Call',
+    kicker: 'Deepfake suspected',
+    body:
+      'Marcus appears on video. His face, voice, mannerisms, and stressed jaw rub all look familiar. Two frames show a slight lip-sync delay and collar edge flicker.',
+    visual: 'video',
+    question: 'What did the video call reveal?',
+    options: [
+      {
+        value: 'verify',
+        label:
+          'Possible deepfake indicators, enough to trigger separate verification',
+      },
+      { value: 'proof', label: 'The video proved Marcus was real' },
+      { value: 'alone', label: 'The video alone was the whole attack' },
+    ],
+    answer: 'verify',
+    correctFeedback:
+      'Correct - the call had possible deepfake indicators, but the right response was verification through another channel.',
+    wrongFeedback:
+      'Wrong - deepfake tells can be subtle and easy to rationalize as bad connection. Process still matters.',
+  },
+  {
+    id: 'transfer',
+    time: '10:09',
+    title: 'Transfer Approved',
+    kicker: 'Payment protocol bypassed',
+    body:
+      'Helen authorizes the £740,000 transfer. The receiving account is new, overseas, and has no transaction history with Meridian.',
+    visual: 'bank',
+    question: 'Where was the clearest point Helen could have stopped the attack?',
+    options: [
+      { value: 'video', label: 'The slight lip-sync delay on the call' },
+      {
+        value: 'protocol',
+        label: 'The missing secondary authorization / out-of-band verification',
+      },
+      { value: 'reply', label: 'The 9:41 reply asking for more details' },
+    ],
+    answer: 'protocol',
+    correctFeedback:
+      'Correct - the process existed exactly for this situation. The urgency made Helen skip it.',
+    wrongFeedback:
+      'Wrong - the clearest stop point was the missing second authorization and separate verification for a transfer over £50,000.',
+  },
+]
+
+const CASE5_VETERAN_INVESTIGATION = [
+  {
+    id: 'email',
+    time: '9:14',
+    title: 'Email Request',
+    status: 'Red Flag Found',
+    kicker: 'Marcus Webb - CEO',
+    prompt: 'Inspect the email. What stands out?',
+    visual: 'email',
+    taskType: 'checklist',
+    chips: ['REAL ACCOUNT != SAFE', 'PAYMENT REQUEST', 'URGENCY PRESSURE'],
+    fields: [
+      ['From', 'Marcus Webb <marcus.webb@meridiancapital.co.uk>'],
+      ['To', 'Helen Smith'],
+      ['Subject', 'Urgent supplier payment before EOB'],
+      ['Body', 'Travelling today. Need this handled before close. I will explain on call.'],
+    ],
+    findings: [
+      { value: 'legitimate-account', label: 'Sender account is legitimate', correct: true },
+      { value: 'urgency-pressure', label: 'Urgency pressure', correct: true },
+      { value: 'payment-request', label: 'Request involves payment', correct: true },
+      { value: 'spelling', label: 'Obvious spelling mistakes', correct: false },
+      { value: 'strange-domain', label: 'Strange unknown domain', correct: false },
+    ],
+    required: ['legitimate-account', 'urgency-pressure', 'payment-request'],
+    correctFeedback:
+      'The sender account being real does not make the request safe. Compromised accounts can send authentic-looking messages. The pressure and payment request are the warning signs.',
+    wrongFeedback:
+      'Review the sender and request. The account is real, but the pressure and payment ask still matter.',
+  },
+  {
+    id: 'reply',
+    time: '9:41',
+    title: 'CFO Reply',
+    status: 'Reviewed',
+    kicker: 'Helen Smith - CFO',
+    prompt: 'Was Helen careless here?',
+    visual: 'reply',
+    taskType: 'choice',
+    fields: [
+      ['Helen reply', 'Marcus, can you confirm the supplier details and why this has to clear today?'],
+      ['Status', 'Cautious, but still inside the pressure loop'],
+    ],
+    options: [
+      { value: 'careless', label: 'Yes, she immediately approved it' },
+      {
+        value: 'verify',
+        label: 'No, she asked for details, but still needed independent verification',
+      },
+      { value: 'ignored', label: 'Yes, because she ignored the email' },
+      { value: 'video-safe', label: 'No, because video calls are always safe' },
+    ],
+    answer: 'verify',
+    correctFeedback:
+      'Helen did ask questions. The failure was not simple carelessness. The attacker used trust, video, and urgency to pull her away from the verification process.',
+    wrongFeedback:
+      'Not quite. Helen asked for details; the failure came later when verification was skipped.',
+  },
+  {
+    id: 'video',
+    time: '9:58',
+    title: 'CEO Video Call',
+    status: 'Red Flag Found',
+    kicker: 'Forensic scan',
+    prompt: 'Scan the video call and mark suspicious frames.',
+    visual: 'video',
+    taskType: 'checklist',
+    chips: ['FRAME SCAN', 'AUDIO WAVEFORM', 'CALL TIMER 11:03'],
+    findings: [
+      { value: 'lip-sync', label: 'Lip-sync delay on sharp head turn', correct: true },
+      { value: 'collar-edge', label: 'Collar edge flicker', correct: true },
+      { value: 'jaw-mismatch', label: 'Jaw movement mismatch', correct: true },
+      { value: 'plant', label: 'Background plant', correct: false },
+      { value: 'familiar-voice', label: 'Familiar voice', correct: false },
+      { value: 'low-signal', label: 'Low signal warning alone', correct: false },
+    ],
+    required: ['lip-sync', 'collar-edge', 'jaw-mismatch'],
+    correctFeedback:
+      'The call had deepfake indicators, but the call itself was not enough. A convincing video should trigger verification, not replace it.',
+    wrongFeedback:
+      'Some items are likely connection noise. Focus on movement mismatches and edge artifacts.',
+  },
+  {
+    id: 'transfer',
+    time: '10:09',
+    title: 'Transfer Approved',
+    status: 'Process Failure Found',
+    kicker: 'Bank + protocol review',
+    prompt: 'Identify account red flags and bypassed safeguards.',
+    visual: 'bank',
+    taskType: 'dual-checklist',
+    fields: [
+      ['Amount', 'GBP 740,000'],
+      ['Account age', '48 hours'],
+      ['History', '0 previous transactions'],
+      ['Destination', 'Overseas jurisdiction'],
+      ['Protocol', 'BYPASSED'],
+    ],
+    accountFindings: [
+      { value: 'new-account', label: 'Account registered 48 hours earlier', correct: true },
+      { value: 'no-history', label: 'No previous transaction history', correct: true },
+      { value: 'overseas', label: 'Overseas destination', correct: true },
+      { value: 'first-large', label: 'GBP 740,000 first payment', correct: true },
+      { value: 'account-number', label: 'Has an account number', correct: false },
+      { value: 'business-hours', label: 'Payment happened during business hours', correct: false },
+    ],
+    protocolFindings: [
+      { value: 'second-officer', label: 'Second senior officer authorization', correct: true },
+      { value: 'trusted-channel', label: 'Separate trusted-channel verification', correct: true },
+      { value: 'account-history', label: 'Receiving account history check', correct: true },
+      { value: 'email-opened', label: 'Email was opened', correct: false },
+      { value: 'helen-replied', label: 'Helen replied at 9:41', correct: false },
+    ],
+    requiredAccount: ['new-account', 'no-history', 'overseas', 'first-large'],
+    requiredProtocol: ['second-officer', 'trusted-channel', 'account-history'],
+    correctFeedback:
+      'A new overseas account with no transaction history is a major fraud red flag, especially for a large first payment. The protocol existed for exactly this situation; urgency made it feel optional.',
+    wrongFeedback:
+      'The strongest evidence is the account risk plus missing authorization and trusted-channel verification.',
+  },
+]
+
+const CASE5_VETERAN_ANALYSIS_OPTIONS = [
+  {
+    value: 'email',
+    label: 'The original email, because the request was urgent',
+  },
+  {
+    value: 'video',
+    label: 'The video call, because Marcus had slight lip-sync delay',
+  },
+  {
+    value: 'bank-protocol',
+    label: 'The receiving bank account and missing authorization protocol',
+  },
+  {
+    value: 'reply',
+    label: 'Helen’s reply at 9:41am',
+  },
+]
+
+const CASE5_VETERAN_TEACHING_POINTS = [
+  {
+    title: 'Deepfakes Combine With Social Engineering',
+    text:
+      'The face was fake, but the attack also used authority, urgency, and trust.',
+  },
+  {
+    title: 'BEC Uses Real-Looking Authority',
+    text:
+      'CEO fraud and Business Email Compromise make a risky request feel like normal work.',
+  },
+  {
+    title: 'Verify Out Of Band',
+    text:
+      'Hang up and call back on a known number, or use a separate trusted channel.',
+  },
+  {
+    title: 'Protocols Resist Pressure',
+    text:
+      'Payment authorization rules exist for the exact moment a trusted request feels urgent.',
+  },
+  {
+    title: 'New Receiving Accounts Are Red Flags',
+    text:
+      'A new overseas account with no transaction history should trigger review before funds move.',
+  },
+  {
+    title: 'Wire Transfers May Not Come Back',
+    text:
+      'Once funds leave, recovery can be difficult or impossible.',
+  },
+]
+
+const CASE5_VETERAN_QUICK_CHECKS = [
+  {
+    question: 'A video of your supervisor asks for your password. What do you do?',
+    options: ['Send it', 'Verify through another channel', 'Ignore it'],
+    answer: 1,
+  },
+  {
+    question: 'Which of these is a sign of a deepfake?',
+    options: ['Slightly unnatural blinking', 'Perfect audio quality', 'Familiar background'],
+    answer: 0,
+  },
+]
+
+const CASE5_VETERAN_QUIZ = [
+  {
+    question: 'What type of fraud happened at Meridian Capital?',
+    options: [
+      'Random malware infection',
+      'CEO fraud / Business Email Compromise',
+      'Password guessing',
+      'Fake antivirus scam',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'Why was the first email difficult for Helen to detect?',
+    options: [
+      'It had spelling mistakes',
+      'It came from a strange domain',
+      'It came from Marcus\'s real compromised account',
+      'It had no subject line',
+    ],
+    answer: 2,
+  },
+  {
+    question: 'What made the video call convincing?',
+    options: [
+      'It showed Marcus\'s face, voice, and mannerisms',
+      'It had no audio',
+      'It was sent as a PDF',
+      'It came from an unknown caller',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'Which video detail could suggest a deepfake?',
+    options: [
+      'A normal office background',
+      'A familiar voice',
+      'A short call duration',
+      'Slight lip-sync delay during sharp head movement',
+    ],
+    answer: 3,
+  },
+  {
+    question: 'What was the strongest process failure?',
+    options: [
+      'Helen replied to the email',
+      'No secondary authorization for a transfer above GBP 50,000',
+      'Marcus was travelling',
+      'The call happened in the morning',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'What does out-of-band verification mean?',
+    options: [
+      'Verifying through a separate trusted channel',
+      'Replying to the same email thread',
+      'Trusting the video call',
+      'Sending the money first',
+    ],
+    answer: 0,
+  },
+  {
+    question: 'Which receiving account detail was suspicious?',
+    options: [
+      'It had a bank name',
+      'It had an account number',
+      'Newly registered overseas account with no transaction history',
+      'It was used during business hours',
+    ],
+    answer: 2,
+  },
+  {
+    question: 'Why did the urgency matter?',
+    options: [
+      'It made the bank faster',
+      'It made the video clearer',
+      'It proved Marcus was real',
+      'It pressured Helen to skip normal checks',
+    ],
+    answer: 3,
+  },
+  {
+    question: 'What is the best response to an urgent payment request from a senior person?',
+    options: [
+      'Approve it immediately',
+      'Follow payment protocol and verify separately',
+      'Ask no questions',
+      'Trust it if the face looks real',
+    ],
+    answer: 1,
+  },
+  {
+    question: 'What is the main lesson from the incident?',
+    options: [
+      'Video calls are always safe',
+      'Real email accounts cannot be hacked',
+      'Deepfake attacks combine technology with human manipulation',
+      'Wire transfers are always reversible',
+    ],
+    answer: 2,
+  },
+]
+const CASE5_VETERAN_QUIZ_FEEDBACK = [
+  'CEO fraud and Business Email Compromise attacks often use trusted accounts, authority, and urgency to convince victims to transfer money.',
+  'The email came from Marcus\'s real account, which had been compromised. A real sender address does not guarantee a legitimate request.',
+  'Deepfake attacks are more believable when they mimic a person\'s face, voice, and familiar behaviour.',
+  'Lip-sync issues during rapid movement can happen when AI-generated video struggles to keep facial animation synchronized.',
+  'Authorization procedures exist specifically to prevent fraud during high-pressure situations. Skipping them removes a key safeguard.',
+  'Out-of-band verification uses a separate trusted communication channel, such as calling a known phone number instead of replying to the same message.',
+  'New accounts with no transaction history are common warning signs in payment fraud schemes.',
+  'Urgency reduces critical thinking and encourages people to bypass normal security procedures.',
+  'Verification should always occur through approved procedures, even when the request appears to come from a trusted leader.',
+  'Deepfake attacks succeed when technology is combined with social engineering techniques such as urgency, trust, and authority.',
 ]
 
 const CASE4_VETERAN_PASS_SCORE = 5
@@ -7404,6 +7825,1320 @@ function Case5Rookie() {
   )
 }
 
+function Case5VeteranVisual({ type }) {
+  return (
+    <div className={`case5-veteran-visual case5-veteran-visual-${type}`}>
+      <div className="case5-veteran-scanline" aria-hidden="true" />
+      {type === 'email' && (
+        <div className="case5-veteran-email-card">
+          <span>FROM: marcus.webb@meridian-capital.co.uk</span>
+          <strong>Urgent supplier payment</strong>
+          <p>Travelling today. Need this cleared before EOB.</p>
+          <em>Sender account: legitimate</em>
+        </div>
+      )}
+      {type === 'reply' && (
+        <div className="case5-veteran-chat">
+          <span>Helen Smith</span>
+          <p>Marcus, send supplier details and the payment reference.</p>
+          <strong>CAUTION LOGGED</strong>
+        </div>
+      )}
+      {type === 'video' && (
+        <div className="case5-video-call">
+          <div className="case5-video-window">
+            <span className="case5-video-head">
+              <i />
+              <i />
+              <b />
+            </span>
+            <span className="case5-video-collar" />
+            <span className="case5-lip-delay">LIP SYNC +180MS</span>
+            <span className="case5-collar-flicker">EDGE FLICKER</span>
+          </div>
+          <div className="case5-waveform" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
+      )}
+      {type === 'bank' && (
+        <div className="case5-bank-panel">
+          <span>OVERSEAS SUPPLIER ACCOUNT</span>
+          <strong>Registered 48 hours earlier</strong>
+          <p>No prior transaction history with Meridian</p>
+          <p>Large first payment: £740,000</p>
+          <em>Secondary authorization: MISSING</em>
+        </div>
+      )}
+      {type === 'clearance' && (
+        <div className="case5-clearance-card" aria-hidden="true">
+          <span>UNIT ZERO</span>
+          <strong>FULL AGENT CLEARANCE</strong>
+          <em>The Mirage Broken</em>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function Case5Veteran() {
+  const navigate = useNavigate()
+  const { user, token, setUser } = useAuth()
+  const [phase, setPhase] = useState('intro')
+  const [introStep, setIntroStep] = useState(0)
+  const [activeTimeline, setActiveTimeline] = useState('email')
+  const [timelineAnswers, setTimelineAnswers] = useState({})
+  const [evidenceSubmissions, setEvidenceSubmissions] = useState({})
+  const [analysisAnswer, setAnalysisAnswer] = useState(null)
+  const [quickAnswers, setQuickAnswers] = useState(
+    () => CASE5_VETERAN_QUICK_CHECKS.map(() => null),
+  )
+  const [quizAnswers, setQuizAnswers] = useState(
+    () => CASE5_VETERAN_QUIZ.map(() => null),
+  )
+  const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0)
+  const [quizSubmitted, setQuizSubmitted] = useState(false)
+  const [route, setRoute] = useState(null)
+  const [badge, setBadge] = useState(null)
+  const [pointsAwarded, setPointsAwarded] = useState(0)
+  const [progressError, setProgressError] = useState('')
+  const [resolvingDebrief, setResolvingDebrief] = useState(false)
+  const [failureLifeSpent, setFailureLifeSpent] = useState(false)
+  const resolvingRef = useRef(false)
+  const failureLifeSpentRef = useRef(false)
+  const internName = user?.username || 'Nova'
+  const intro = CASE5_VETERAN_INTRO[introStep]
+  const activeEvidence =
+    CASE5_VETERAN_INVESTIGATION.find((item) => item.id === activeTimeline) ||
+    CASE5_VETERAN_INVESTIGATION[0]
+  const analysisPassed = analysisAnswer === 'bank-protocol'
+  const quizCorrect = quizAnswers.reduce(
+    (count, answer, index) =>
+      count + (answer === CASE5_VETERAN_QUIZ[index].answer ? 1 : 0),
+    0,
+  )
+  const quizPassed = quizSubmitted && quizCorrect >= CASE5_VETERAN_PASS_SCORE
+  const passedVeteran = analysisPassed && quizPassed
+  const activeQuizQuestion = CASE5_VETERAN_QUIZ[currentQuizQuestion]
+  const selectedQuizAnswer = quizAnswers[currentQuizQuestion]
+  const quizAnswered = selectedQuizAnswer !== null
+  const quizSelectedCorrect = selectedQuizAnswer === activeQuizQuestion.answer
+  const lastQuizQuestion =
+    currentQuizQuestion === CASE5_VETERAN_QUIZ.length - 1
+  const quickChecksComplete = quickAnswers.every((answer) => answer !== null)
+  const reviewedEvidenceCount = CASE5_VETERAN_INVESTIGATION.filter((item) =>
+    isEvidenceReviewed(item),
+  ).length
+  const allEvidenceReviewed =
+    reviewedEvidenceCount === CASE5_VETERAN_INVESTIGATION.length
+
+  function getEvidenceSelection(item, group = 'main') {
+    const current = timelineAnswers[item.id]
+    if (item.taskType === 'dual-checklist') return current?.[group] || []
+    return current || (item.taskType === 'choice' ? null : [])
+  }
+
+  function hasExactFindings(selected, required, options) {
+    const selectedSet = new Set(selected)
+    return (
+      required.every((value) => selectedSet.has(value)) &&
+      options.every((option) => option.correct || !selectedSet.has(option.value))
+    )
+  }
+
+  function isEvidenceReviewed(item) {
+    return Boolean(evidenceSubmissions[item.id])
+  }
+
+  function hasEvidenceSelection(item) {
+    if (item.taskType === 'choice') return Boolean(timelineAnswers[item.id])
+    if (item.taskType === 'dual-checklist') {
+      const account = getEvidenceSelection(item, 'account')
+      const protocol = getEvidenceSelection(item, 'protocol')
+      return account.length > 0 && protocol.length > 0
+    }
+    return getEvidenceSelection(item).length > 0
+  }
+
+  function isEvidencePerfect(item) {
+    if (!isEvidenceReviewed(item)) return false
+    return isEvidenceCorrect(item)
+  }
+
+  function isEvidenceCorrect(item) {
+    if (item.taskType === 'choice') return timelineAnswers[item.id] === item.answer
+    if (item.taskType === 'dual-checklist') {
+      return (
+        hasExactFindings(
+          getEvidenceSelection(item, 'account'),
+          item.requiredAccount,
+          item.accountFindings,
+        ) &&
+        hasExactFindings(
+          getEvidenceSelection(item, 'protocol'),
+          item.requiredProtocol,
+          item.protocolFindings,
+        )
+      )
+    }
+    return hasExactFindings(
+      getEvidenceSelection(item),
+      item.required,
+      item.findings,
+    )
+  }
+
+  function restart() {
+    setPhase('intro')
+    setIntroStep(0)
+    setActiveTimeline('email')
+    setTimelineAnswers({})
+    setEvidenceSubmissions({})
+    setAnalysisAnswer(null)
+    setQuickAnswers(CASE5_VETERAN_QUICK_CHECKS.map(() => null))
+    setQuizAnswers(CASE5_VETERAN_QUIZ.map(() => null))
+    setCurrentQuizQuestion(0)
+    setQuizSubmitted(false)
+    setRoute(null)
+    setBadge(null)
+    setPointsAwarded(0)
+    setProgressError('')
+    setResolvingDebrief(false)
+    setFailureLifeSpent(false)
+    resolvingRef.current = false
+    failureLifeSpentRef.current = false
+  }
+
+  async function spendFailureLife(nextAction) {
+    if (failureLifeSpentRef.current || failureLifeSpent) {
+      if (nextAction === 'replay') restart()
+      if (nextAction === 'continue') navigate('/play')
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    failureLifeSpentRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const data = await api.failAttempt(token, {
+        caseId: 5,
+        difficulty: 'veteran',
+      })
+      setUser(data.user)
+      setFailureLifeSpent(true)
+      playSfx('lifeLost')
+      playSfx('caseFailed')
+      if (nextAction === 'replay') {
+        restart()
+        return
+      }
+      if (nextAction === 'debrief') {
+        resolvingRef.current = false
+        setResolvingDebrief(false)
+        return
+      }
+      navigate('/play')
+    } catch (error) {
+      failureLifeSpentRef.current = false
+      setFailureLifeSpent(false)
+      console.error('[progress] Case 5 Veteran failed attempt update failed', {
+        endpoint: '/progress/fail-attempt',
+        caseId: 5,
+        difficulty: 'veteran',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update lives.')
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  async function finishVeteran(nextAction = 'graduation') {
+    if (!passedVeteran) {
+      spendFailureLife(nextAction === 'replay' ? 'replay' : 'continue')
+      return
+    }
+    if (resolvingRef.current) return
+    resolvingRef.current = true
+    setResolvingDebrief(true)
+    setProgressError('')
+    try {
+      const unlockedBadge = BADGES.mirageBroken
+      const data = await api.completeCase(token, {
+        caseId: 5,
+        difficulty: 'veteran',
+        result: 'success',
+        badge: unlockedBadge,
+        bonusPoints: quizCorrect * 10,
+      })
+      setUser(data.user)
+      setBadge(unlockedBadge)
+      setPointsAwarded(data.pointsAwarded)
+      if (data.pointsAwarded > 0) {
+        playSfx('coins')
+        playSfx('badge')
+      }
+      playSfx('caseComplete')
+      if (nextAction === 'caseFiles') {
+        navigate('/play')
+        return
+      }
+      setPhase('graduation')
+    } catch (error) {
+      console.error('[progress] Case 5 Veteran completion update failed', {
+        endpoint: '/progress/complete-case',
+        caseId: 5,
+        difficulty: 'veteran',
+        message: error.message,
+      })
+      setProgressError(error.message || 'Could not update case progress.')
+    } finally {
+      resolvingRef.current = false
+      setResolvingDebrief(false)
+    }
+  }
+
+  function answerTimeline(itemId, value) {
+    if (timelineAnswers[itemId]) return
+    const item = CASE5_VETERAN_TIMELINE.find((entry) => entry.id === itemId)
+    setTimelineAnswers((current) => ({ ...current, [itemId]: value }))
+    playSfx(value === item.answer ? 'correct' : 'wrong')
+  }
+
+  function toggleEvidenceFinding(item, value, group = 'main') {
+    if (evidenceSubmissions[item.id]) return
+    setTimelineAnswers((current) => {
+      if (item.taskType === 'dual-checklist') {
+        const existing = current[item.id] || { account: [], protocol: [] }
+        const currentGroup = existing[group] || []
+        const nextGroup = currentGroup.includes(value)
+          ? currentGroup.filter((entry) => entry !== value)
+          : [...currentGroup, value]
+        return {
+          ...current,
+          [item.id]: {
+            ...existing,
+            [group]: nextGroup,
+          },
+        }
+      }
+      const existing = current[item.id] || []
+      const next = existing.includes(value)
+        ? existing.filter((entry) => entry !== value)
+        : [...existing, value]
+      return { ...current, [item.id]: next }
+    })
+    const options =
+      group === 'account'
+        ? item.accountFindings
+        : group === 'protocol'
+          ? item.protocolFindings
+          : item.findings
+    playSfx('click')
+  }
+
+  function chooseEvidenceAnswer(item, value) {
+    if (evidenceSubmissions[item.id]) return
+    setTimelineAnswers((current) => ({ ...current, [item.id]: value }))
+    playSfx('click')
+  }
+
+  function submitEvidenceFindings(item) {
+    if (!hasEvidenceSelection(item)) return
+    setEvidenceSubmissions((current) => ({ ...current, [item.id]: true }))
+    playSfx(isEvidenceCorrect(item) ? 'correct' : 'wrong')
+  }
+
+  function submitAnalysis() {
+    playSfx(analysisPassed ? 'correct' : 'wrong')
+    setRoute(analysisPassed ? null : 'analysisFailed')
+    setPhase('teaching')
+  }
+
+  function answerQuickCheck(index, optionIndex) {
+    if (quickAnswers[index] !== null) return
+    setQuickAnswers((current) =>
+      current.map((answer, answerIndex) =>
+        answerIndex === index ? optionIndex : answer,
+      ),
+    )
+    playSfx(
+      optionIndex === CASE5_VETERAN_QUICK_CHECKS[index].answer
+        ? 'correct'
+        : 'wrong',
+    )
+  }
+
+  async function continueFromTeaching() {
+    if (!analysisPassed) {
+      setPhase('debrief')
+      await spendFailureLife('debrief')
+      return
+    }
+    setPhase('quiz')
+  }
+
+  function answerQuiz(questionIndex, optionIndex) {
+    if (quizAnswers[questionIndex] !== null) return
+    setQuizAnswers((current) =>
+      current.map((answer, index) =>
+        index === questionIndex ? optionIndex : answer,
+      ),
+    )
+    playSfx(
+      optionIndex === CASE5_VETERAN_QUIZ[questionIndex].answer
+        ? 'correct'
+        : 'wrong',
+    )
+  }
+
+  function nextQuizQuestion() {
+    setCurrentQuizQuestion((value) =>
+      Math.min(value + 1, CASE5_VETERAN_QUIZ.length - 1),
+    )
+  }
+
+  async function submitQuiz() {
+    if (!quizSubmitted) {
+      setQuizSubmitted(true)
+      return
+    }
+    if (quizCorrect < CASE5_VETERAN_PASS_SCORE) {
+      setRoute('quizFailed')
+      setPhase('debrief')
+      await spendFailureLife('debrief')
+      return
+    }
+    setPhase('debrief')
+  }
+
+  return (
+    <div className="case-shell max-w-5xl mx-auto">
+      <div className="case-title-row">
+        <div>
+          <span className="font-pixel text-sw-pink text-xs">CASE 05 VETERAN</span>
+          <h2 className="font-pixel text-sw-cyan text-sm md:text-base">
+            The Mirage: The Transfer
+          </h2>
+        </div>
+      </div>
+      {progressError && (
+        <div className="ss-card p-3 text-sw-red text-sm">{progressError}</div>
+      )}
+
+      {phase === 'intro' && (
+        <section className="case-scene scene-transition">
+          <div className="case-scene-top">
+            <span>UNIT ZERO INCIDENT RESPONSE</span>
+            <span>MERIDIAN CAPITAL ALERT</span>
+          </div>
+          <div className="case-office case5-veteran-control-room">
+            <div className="case-window case-window-left">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="case-window case-window-right">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="unit-poster unit-poster-left">
+              CASE 05
+              <br />
+              VETERAN
+            </div>
+            <div className="case4-ricky-station active-speaker">
+              <PixelPerson role="jane" label="AGENT RICKY" />
+            </div>
+            <PixelPerson
+              role="intern"
+              label={`${internName} - YOU`}
+              position="pixel-intern-left"
+            />
+            <div className="case5-incident-headline">
+              <span>MERIDIAN CAPITAL INCIDENT</span>
+              <strong>£740,000 WIRE TRANSFER FLAGGED</strong>
+              <em>CEO VIDEO CALL SUSPECTED</em>
+            </div>
+          </div>
+          <div className="case5-veteran-speech-bubble">
+            <span>{intro.speaker} // SECURE COMMS</span>
+            <p>{intro.text}</p>
+          </div>
+          <button
+            type="button"
+            className="ss-btn ss-btn-cyan self-end"
+            onClick={() => {
+              if (introStep < CASE5_VETERAN_INTRO.length - 1) {
+                setIntroStep((value) => value + 1)
+                playSfx('click')
+                return
+              }
+              setPhase('timeline')
+            }}
+          >
+            {introStep === CASE5_VETERAN_INTRO.length - 1
+              ? 'Start Reconstruction'
+              : 'Continue'}{' '}
+            <IconArrowRight size={16} />
+          </button>
+        </section>
+      )}
+
+      {phase === 'timeline' && (
+        <section className="case2-board scene-transition">
+          <div className="case2-board-header">
+            <div>
+              <span className="font-pixel text-sw-pink text-xs">
+                MERIDIAN INCIDENT RECONSTRUCTION
+              </span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                Fraud Monitoring Dashboard
+              </h2>
+            </div>
+            <div className="case2-progress-chip">
+              Evidence Reviewed: {reviewedEvidenceCount} / {CASE5_VETERAN_INVESTIGATION.length}
+            </div>
+          </div>
+          <article className="case2-file case5-veteran-timeline-grid">
+            <aside className="case5-veteran-timeline-list">
+              {CASE5_VETERAN_INVESTIGATION.map((item) => {
+                const reviewed = isEvidenceReviewed(item)
+                const flagged = reviewed && isEvidencePerfect(item)
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={activeTimeline === item.id ? 'selected' : ''}
+                    onClick={() => {
+                      setActiveTimeline(item.id)
+                      playSfx('click')
+                    }}
+                  >
+                    <span>{item.time}am</span>
+                    <strong>{item.title}</strong>
+                    <em>
+                      {flagged
+                        ? item.status
+                        : reviewed
+                          ? 'Reviewed'
+                          : 'Unreviewed'}
+                    </em>
+                  </button>
+                )
+              })}
+            </aside>
+            <div className="case5-veteran-evidence-panel">
+              <div className="case4-analysis-header">
+                <span>{activeEvidence.time}am - {activeEvidence.title}</span>
+                <strong>{activeEvidence.kicker}</strong>
+              </div>
+              <div className="case5-veteran-evidence-grid">
+                <Case5VeteranVisual type={activeEvidence.visual} />
+                <div className="case5-file-copy">
+                  <h3>{activeEvidence.title}</h3>
+                  <p>{activeEvidence.prompt}</p>
+                  {activeEvidence.chips && (
+                    <div className="case5-veteran-chip-row">
+                      {activeEvidence.chips.map((chip) => (
+                        <span key={chip}>{chip}</span>
+                      ))}
+                    </div>
+                  )}
+                  {activeEvidence.id !== 'email' && activeEvidence.fields && (
+                    <div className="case5-veteran-fact-grid">
+                      {activeEvidence.fields.map(([label, value]) => (
+                        <div key={label}>
+                          <span>{label}</span>
+                          <strong>{value}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {activeEvidence.id === 'transfer' && (
+                    <div className="case5-policy-panel">
+                      <span>MERIDIAN PAYMENT POLICY</span>
+                      <strong>
+                        Any transfer above £50,000 requires secondary
+                        authorization from a second senior officer through a
+                        separate communication channel.
+                      </strong>
+                      <p>Transaction amount: £740,000</p>
+                      <p>Secondary authorization: Missing</p>
+                      <p>Out-of-band verification: Not completed</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <article className="case5-veteran-task-card">
+                <div className="case4-analysis-header">
+                  <span>PLAYER TASK</span>
+                  <strong>{activeEvidence.question}</strong>
+                </div>
+                {activeEvidence.taskType === 'choice' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {activeEvidence.options.map((option) => {
+                      const selected =
+                        timelineAnswers[activeEvidence.id] === option.value
+                      const submitted = isEvidenceReviewed(activeEvidence)
+                      const correct = option.value === activeEvidence.answer
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          className={`veteran-answer-btn ${
+                            selected ? 'veteran-answer-selected' : ''
+                          } ${submitted && correct ? 'veteran-answer-correct' : ''} ${
+                            submitted && selected && !correct
+                              ? 'veteran-answer-wrong'
+                              : ''
+                          }`}
+                          onClick={() => chooseEvidenceAnswer(activeEvidence, option.value)}
+                          disabled={submitted}
+                        >
+                          {option.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+                {activeEvidence.taskType === 'checklist' && (
+                  <div className="case5-veteran-finding-grid">
+                    {activeEvidence.findings.map((finding) => {
+                      const selected = getEvidenceSelection(activeEvidence).includes(
+                        finding.value,
+                      )
+                      const submitted = isEvidenceReviewed(activeEvidence)
+                      const missed = submitted && finding.correct && !selected
+                      return (
+                        <button
+                          key={finding.value}
+                          type="button"
+                          className={`case5-veteran-finding ${
+                            selected ? 'selected' : ''
+                          } ${
+                            submitted && selected && finding.correct
+                              ? 'correct'
+                              : ''
+                          } ${
+                            submitted && selected && !finding.correct
+                              ? 'decoy'
+                              : ''
+                          } ${missed ? 'missed' : ''}`}
+                          onClick={() =>
+                            toggleEvidenceFinding(activeEvidence, finding.value)
+                          }
+                          disabled={submitted}
+                        >
+                          <span>
+                            {submitted
+                              ? selected && finding.correct
+                                ? 'CONFIRMED RED FLAG'
+                                : selected
+                                  ? 'NOT A VALID FINDING'
+                                  : missed
+                                    ? 'MISSED RED FLAG'
+                                    : 'REVIEWED'
+                              : selected
+                                ? 'SELECTED'
+                                : 'SCAN'}
+                          </span>
+                          <strong>{finding.label}</strong>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+                {activeEvidence.taskType === 'dual-checklist' && (
+                  <div className="case5-veteran-dual-grid">
+                    <div>
+                      <div className="case5-risk-meter">
+                        <span>ACCOUNT RISK</span>
+                        <strong>
+                          {isEvidenceReviewed(activeEvidence) &&
+                          getEvidenceSelection(activeEvidence, 'account').length >= 4
+                            ? 'CRITICAL'
+                            : 'PENDING SUBMISSION'}
+                        </strong>
+                        <div>
+                          <i
+                            style={{
+                              width: `${Math.min(
+                                getEvidenceSelection(activeEvidence, 'account').length *
+                                  25,
+                                100,
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <h3>Account red flags</h3>
+                      <div className="case5-veteran-finding-grid">
+                        {activeEvidence.accountFindings.map((finding) => {
+                          const selected = getEvidenceSelection(
+                            activeEvidence,
+                            'account',
+                          ).includes(finding.value)
+                          const submitted = isEvidenceReviewed(activeEvidence)
+                          const missed = submitted && finding.correct && !selected
+                          return (
+                            <button
+                              key={finding.value}
+                              type="button"
+                              className={`case5-veteran-finding ${
+                                selected ? 'selected' : ''
+                              } ${
+                                submitted && selected && finding.correct
+                                  ? 'correct'
+                                  : ''
+                              } ${
+                                submitted && selected && !finding.correct
+                                  ? 'decoy'
+                                  : ''
+                              } ${missed ? 'missed' : ''}`}
+                              onClick={() =>
+                                toggleEvidenceFinding(
+                                  activeEvidence,
+                                  finding.value,
+                                  'account',
+                                )
+                              }
+                              disabled={submitted}
+                            >
+                              <span>
+                                {submitted
+                                  ? selected && finding.correct
+                                    ? 'CONFIRMED RED FLAG'
+                                    : selected
+                                      ? 'NOT A VALID FINDING'
+                                      : missed
+                                        ? 'MISSED RED FLAG'
+                                        : 'REVIEWED'
+                                  : selected
+                                    ? 'SELECTED'
+                                    : 'CHECK'}
+                              </span>
+                              <strong>{finding.label}</strong>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="case5-risk-meter protocol">
+                        <span>PROTOCOL STATUS</span>
+                        <strong>
+                          {isEvidenceReviewed(activeEvidence) &&
+                          getEvidenceSelection(activeEvidence, 'protocol').length >= 3
+                            ? 'BREACH CONFIRMED'
+                            : 'PENDING SUBMISSION'}
+                        </strong>
+                        <div>
+                          <i
+                            style={{
+                              width: `${Math.min(
+                                getEvidenceSelection(activeEvidence, 'protocol').length *
+                                  34,
+                                100,
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <h3>Safeguards bypassed</h3>
+                      <div className="case5-veteran-finding-grid">
+                        {activeEvidence.protocolFindings.map((finding) => {
+                          const selected = getEvidenceSelection(
+                            activeEvidence,
+                            'protocol',
+                          ).includes(finding.value)
+                          const submitted = isEvidenceReviewed(activeEvidence)
+                          const missed = submitted && finding.correct && !selected
+                          return (
+                            <button
+                              key={finding.value}
+                              type="button"
+                              className={`case5-veteran-finding ${
+                                selected ? 'selected' : ''
+                              } ${
+                                submitted && selected && finding.correct
+                                  ? 'correct'
+                                  : ''
+                              } ${
+                                submitted && selected && !finding.correct
+                                  ? 'decoy'
+                                  : ''
+                              } ${missed ? 'missed' : ''}`}
+                              onClick={() =>
+                                toggleEvidenceFinding(
+                                  activeEvidence,
+                                  finding.value,
+                                  'protocol',
+                                )
+                              }
+                              disabled={submitted}
+                            >
+                              <span>
+                                {submitted
+                                  ? selected && finding.correct
+                                    ? 'CONFIRMED SAFEGUARD'
+                                    : selected
+                                      ? 'NOT A VALID FINDING'
+                                      : missed
+                                        ? 'MISSED SAFEGUARD'
+                                        : 'REVIEWED'
+                                  : selected
+                                    ? 'SELECTED'
+                                    : 'CHECK'}
+                              </span>
+                              <strong>{finding.label}</strong>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {isEvidenceReviewed(activeEvidence) && (
+                  <div
+                    className={
+                      isEvidencePerfect(activeEvidence)
+                        ? 'success-banner'
+                        : 'case4-caution-banner'
+                    }
+                  >
+                    {isEvidencePerfect(activeEvidence)
+                      ? activeEvidence.correctFeedback
+                      : activeEvidence.wrongFeedback}
+                  </div>
+                )}
+              </article>
+              <div className="flex flex-col sm:flex-row gap-3">
+                {!isEvidenceReviewed(activeEvidence) && (
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-pink"
+                    onClick={() => submitEvidenceFindings(activeEvidence)}
+                    disabled={!hasEvidenceSelection(activeEvidence)}
+                  >
+                    Submit Findings
+                  </button>
+                )}
+                {isEvidenceReviewed(activeEvidence) && (
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-cyan"
+                    onClick={() => {
+                      const index = CASE5_VETERAN_INVESTIGATION.findIndex(
+                        (item) => item.id === activeTimeline,
+                      )
+                      const next =
+                        CASE5_VETERAN_INVESTIGATION[index + 1] ||
+                        CASE5_VETERAN_INVESTIGATION[0]
+                      setActiveTimeline(next.id)
+                      playSfx('click')
+                    }}
+                  >
+                    Next Timeline Item <IconArrowRight size={16} />
+                  </button>
+                )}
+                {allEvidenceReviewed && (
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-pink"
+                    onClick={() => setPhase('analysis')}
+                  >
+                    Submit Incident Analysis
+                  </button>
+                )}
+              </div>
+            </div>
+          </article>
+        </section>
+      )}
+
+      {phase === 'analysis' && (
+        <section className="case-debrief scene-transition">
+          <div className="success-banner">INCIDENT ANALYSIS REQUIRED</div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                Where should this attack have been stopped?
+              </h2>
+              <p>
+                The video mattered. The email mattered. But the final report has
+                to identify the clearest control failure.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {CASE5_VETERAN_ANALYSIS_OPTIONS.map((option) => {
+                const selected = analysisAnswer === option.value
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`veteran-answer-btn ${
+                      selected ? 'veteran-answer-selected' : ''
+                    }`}
+                    onClick={() => {
+                      setAnalysisAnswer(option.value)
+                      playSfx('click')
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
+            {analysisAnswer && (
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan self-start"
+                onClick={submitAnalysis}
+              >
+                Submit Incident Analysis <IconArrowRight size={16} />
+              </button>
+            )}
+          </div>
+        </section>
+      )}
+
+      {phase === 'teaching' && (
+        <section className="case-debrief scene-transition">
+          <div className={analysisPassed ? 'success-banner' : 'breach-banner'}>
+            {analysisPassed ? 'ANALYSIS LOCKED' : 'ANALYSIS NEEDS REVIEW'}
+          </div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case5-reveal-grid">
+              <article className="case5-reveal-card">
+                <span>THE DEEPFAKE</span>
+                <Case5VeteranVisual type="video" />
+                <strong>Video call stamped: DEEPFAKE CONFIRMED</strong>
+                <p className="case5-reveal-bubble">
+                  Ricky: "The video was fake. But it was not the real weapon."
+                </p>
+              </article>
+              <article className="case5-reveal-card">
+                <span>THE PRESSURE</span>
+                <div className="case5-mini-visual timer">
+                  <strong>EOB DEADLINE</strong>
+                  <em>URGENT PAYMENT</em>
+                </div>
+                <p className="case5-reveal-bubble">
+                  Ricky: "The urgency made stopping feel like failing the CEO."
+                </p>
+              </article>
+              <article className="case5-reveal-card">
+                <span>THE PROCESS</span>
+                <div className="case5-mini-visual policy">
+                  <strong>MISSING AUTHORIZATION</strong>
+                  <em>TRUSTED CHANNEL: NOT COMPLETED</em>
+                </div>
+                <p className="case5-reveal-bubble">
+                  Ricky: "The protocol existed for this exact moment. It was
+                  bypassed."
+                </p>
+              </article>
+            </div>
+            <div className="case2-ricky-panel case5-legacy-ricky-copy">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+              <p>
+                The video was a deepfake, yes. But here’s what I want you to
+                understand: the deepfake wasn’t the weapon. The urgency was the
+                weapon. The deepfake was the delivery mechanism.
+              </p>
+              <p>
+                Helen Smith worked with Marcus Webb for eleven years. Of course
+                she believed his face. The attackers knew she would. So they made
+                sure she never had a reason to stop and follow the process.
+              </p>
+              <p>The process existed exactly for this moment. And it was bypassed.</p>
+            </div>
+            <div className="case5-veteran-second-reveal">
+              <Case5VeteranVisual type="bank" />
+              <div>
+                <span>BANK RISK CARD</span>
+                <p className="case5-reveal-bubble">
+                  Ricky: "The deepfake got Helen on the call. The urgency got
+                  her to skip the protocol. Nobody checked the account."
+                </p>
+                <strong>
+                  Registered 48 hours earlier. No transaction history. Overseas
+                  account. £740,000 first payment.
+                </strong>
+                <p>
+                  The deepfake got Helen on the call. The urgency got her to skip
+                  the protocol. And nobody checked the account. Three failures.
+                  Three. The technology was only one of them.
+                </p>
+                <p>
+                  Meridian Capital lost £740,000 because a video call looked
+                  real for eleven minutes.
+                </p>
+              </div>
+            </div>
+            <div className="case5-consequence-dialogue">
+              <p className="case5-reveal-bubble intern">
+                Intern: "Can the money be recovered?"
+              </p>
+              <p className="case5-reveal-bubble">
+                Ricky: "Sometimes. Not always."
+              </p>
+            </div>
+            <div className="case5-loss-panel">
+              <span>MERIDIAN CAPITAL LOSS</span>
+              <strong>GBP 740,000</strong>
+              <em>Cause: Deepfake + urgency + bypassed process</em>
+            </div>
+            <div className="case5-holo-briefing">
+              <span>WHAT ARE DEEPFAKES & AI MANIPULATION?</span>
+              <p>
+                Deepfakes are AI-generated videos, images, or voices that make
+                it look like someone said or did something they never did.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {CASE5_VETERAN_TEACHING_POINTS.map((point) => (
+                  <article key={point.title} className="red-flag-card">
+                    <IconFlag size={18} />
+                    <div>
+                      <h3>{point.title}</h3>
+                      <p>{point.text}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <blockquote className="zoey-quote">
+                "Seeing isn’t believing anymore. Not in this job."
+              </blockquote>
+            </div>
+            <div className="case5-quick-checks">
+              {CASE5_VETERAN_QUICK_CHECKS.map((check, index) => {
+                const selectedAnswer = quickAnswers[index]
+                const answered = selectedAnswer !== null
+                return (
+                  <article key={check.question} className="veteran-quiz-card">
+                    <h3>{check.question}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      {check.options.map((option, optionIndex) => {
+                        const selected = selectedAnswer === optionIndex
+                        const correct = check.answer === optionIndex
+                        return (
+                          <button
+                            key={option}
+                            type="button"
+                            className={`veteran-answer-btn ${
+                              selected ? 'veteran-answer-selected' : ''
+                            } ${
+                              answered && correct ? 'veteran-answer-correct' : ''
+                            } ${
+                              answered && selected && !correct
+                                ? 'veteran-answer-wrong'
+                                : ''
+                            }`}
+                            onClick={() => answerQuickCheck(index, optionIndex)}
+                            disabled={answered}
+                          >
+                            {option}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {answered && (
+                      <div
+                        className={
+                          selectedAnswer === check.answer
+                            ? 'success-banner'
+                            : 'breach-banner'
+                        }
+                      >
+                        {selectedAnswer === check.answer
+                          ? 'Correct.'
+                          : `Correct answer: ${check.options[check.answer]}`}
+                      </div>
+                    )}
+                  </article>
+                )
+              })}
+            </div>
+            <button
+              type="button"
+              className="ss-btn ss-btn-cyan self-start"
+              onClick={continueFromTeaching}
+              disabled={!quickChecksComplete || resolvingDebrief}
+            >
+              {analysisPassed
+                ? 'Begin Final Certification'
+                : 'Open Failure Debrief'}{' '}
+              <IconArrowRight size={16} />
+            </button>
+          </div>
+        </section>
+      )}
+
+      {phase === 'quiz' && (
+        <section className="case-debrief scene-transition">
+          <div className="success-banner">FINAL FIELD ASSESSMENT</div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <h2 className="font-pixel text-sw-cyan text-sm">
+              AI Manipulation & Deepfake Fraud
+            </h2>
+            <p className="text-sw-text2">
+              Each correct answer is worth 10 coins. Passing requires at least
+              50%, so 5 or more answers completes Case 5 Veteran.
+            </p>
+            {!quizSubmitted ? (
+              <>
+                <div className="veteran-quiz-progress">
+                  Question {currentQuizQuestion + 1} / {CASE5_VETERAN_QUIZ.length}
+                </div>
+                <article
+                  className={`veteran-quiz-card veteran-quiz-focus ${
+                    quizAnswered && !quizSelectedCorrect
+                      ? 'veteran-quiz-shake'
+                      : ''
+                  }`}
+                >
+                  <h3>{activeQuizQuestion.question}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {activeQuizQuestion.options.map((option, optionIndex) => {
+                      const selected = selectedQuizAnswer === optionIndex
+                      const isCorrect = activeQuizQuestion.answer === optionIndex
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          className={`veteran-answer-btn ${
+                            selected ? 'veteran-answer-selected' : ''
+                          } ${
+                            quizAnswered && isCorrect
+                              ? 'veteran-answer-correct'
+                              : ''
+                          } ${
+                            quizAnswered && selected && !isCorrect
+                              ? 'veteran-answer-wrong'
+                              : ''
+                          }`}
+                          onClick={() => answerQuiz(currentQuizQuestion, optionIndex)}
+                          disabled={quizAnswered}
+                        >
+                          {option}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </article>
+                {quizAnswered && (
+                  <div className={quizSelectedCorrect ? 'success-banner' : 'breach-banner'}>
+                    <strong>{quizSelectedCorrect ? 'CORRECT' : 'INCORRECT'}</strong>
+                    {!quizSelectedCorrect && (
+                      <p>
+                        Correct Answer:{' '}
+                        {activeQuizQuestion.options[activeQuizQuestion.answer]}
+                      </p>
+                    )}
+                    <p>{CASE5_VETERAN_QUIZ_FEEDBACK[currentQuizQuestion]}</p>
+                    {quizSelectedCorrect && <p>+10 Quiz Coins Secured</p>}
+                  </div>
+                )}
+                {quizAnswered && (
+                  <button
+                    type="button"
+                    className="ss-btn ss-btn-cyan self-start"
+                    onClick={lastQuizQuestion ? submitQuiz : nextQuizQuestion}
+                  >
+                    {lastQuizQuestion ? 'View results' : 'Next Question'}
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <div className={quizPassed ? 'success-banner' : 'breach-banner'}>
+                  {quizPassed ? 'Certification passed' : 'Certification failed'}
+                </div>
+                <div className="veteran-results-grid">
+                  <div>
+                    <span>Correct</span>
+                    <strong>{quizCorrect} / 10</strong>
+                  </div>
+                  <div>
+                    <span>Quiz coins</span>
+                    <strong>{quizCorrect * 10}</strong>
+                  </div>
+                  <div>
+                    <span>Status</span>
+                    <strong>{quizPassed ? 'Case can close' : 'Replay required'}</strong>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="ss-btn ss-btn-cyan self-start"
+                  onClick={submitQuiz}
+                >
+                  Continue debrief
+                </button>
+              </>
+            )}
+          </div>
+        </section>
+      )}
+
+      {phase === 'debrief' && (
+        <section className="case-debrief scene-transition">
+          <div className={passedVeteran ? 'success-banner' : 'breach-banner'}>
+            {passedVeteran
+              ? 'CASE 05 VETERAN SECURED'
+              : 'TRANSFER INVESTIGATION FAILED'}
+          </div>
+          <div className="ss-card p-5 flex flex-col gap-4">
+            <div className="case2-ricky-panel">
+              <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+              <h2 className="font-pixel text-sw-cyan text-sm">
+                The Transfer Debrief
+              </h2>
+              <p>
+                The deepfake got Helen on the call. The urgency got her to skip
+                protocol. The receiving account should have stopped the payment
+                before funds moved.
+              </p>
+              <p>
+                Can the money be recovered? Sometimes. Not always.
+              </p>
+            </div>
+            <div className="veteran-results-grid">
+              <div>
+                <span>Incident analysis</span>
+                <strong>{analysisPassed ? 'Passed' : 'Failed'}</strong>
+              </div>
+              <div>
+                <span>Quiz</span>
+                <strong>{quizCorrect} / 10</strong>
+              </div>
+              <div>
+                <span>Badge</span>
+                <strong>The Mirage Broken</strong>
+              </div>
+            </div>
+            {route === 'analysisFailed' && (
+              <p className="text-sw-text3 text-sm">
+                Replay required. The final report must identify the receiving
+                account and missing authorization protocol as the clearest catch
+                point.
+              </p>
+            )}
+            {route === 'quizFailed' && (
+              <p className="text-sw-text3 text-sm">
+                The final certification score was below 50%. Replay is required
+                before Case 5 Veteran can close.
+              </p>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                className="ss-btn ss-btn-pink"
+                onClick={
+                  passedVeteran
+                    ? restart
+                    : failureLifeSpent
+                      ? restart
+                      : () => spendFailureLife('replay')
+                }
+                disabled={resolvingDebrief}
+              >
+                Replay Veteran
+              </button>
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan"
+                onClick={
+                  passedVeteran
+                    ? () => finishVeteran('graduation')
+                    : failureLifeSpent
+                      ? () => navigate('/play')
+                      : () => spendFailureLife('continue')
+                }
+                disabled={resolvingDebrief}
+              >
+                {passedVeteran
+                  ? 'Grant Full Clearance'
+                  : 'Continue to Case Files'}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {phase === 'graduation' && (
+        <section className="case5-graduation scene-transition">
+          <div className="case5-confetti" aria-hidden="true">
+            {Array.from({ length: 18 }).map((_, index) => (
+              <span key={index} />
+            ))}
+          </div>
+          <div className="success-banner">CONGRATULATIONS!</div>
+          <div className="ss-card p-6 flex flex-col gap-5">
+            <div className="case5-graduation-grid">
+              <Case5VeteranVisual type="clearance" />
+              <div className="case2-ricky-panel">
+                <span className="font-pixel text-sw-yellow text-xs">AGENT RICKY</span>
+                <h2 className="font-pixel text-sw-cyan text-sm">
+                  You passed your internship at Unit Zero.
+                </h2>
+                <p>Full Agent Clearance granted.</p>
+                <p>Please look forward to starting your new journey soon.</p>
+                <p>
+                  Every case taught you something different. Phishing.
+                  Pile-ons. Social engineering. Rogue networks. Deepfakes.
+                </p>
+                <p>
+                  But every attacker had one thing in common. They never forced
+                  anyone to do anything.
+                </p>
+                <p>They just made the wrong choice feel like the obvious one.</p>
+                <p>
+                  Today, you stopped choosing on instinct. You verified. You
+                  questioned. You followed the process.
+                </p>
+                <blockquote className="zoey-quote">
+                  "Welcome to Unit Zero, Agent."
+                </blockquote>
+              </div>
+            </div>
+            <PixelBadgeCard badge={badge || BADGES.mirageBroken} pointsAwarded={pointsAwarded} />
+            <div className="case5-clearance-stamp">
+              UNIT ZERO - FULL AGENT CLEARANCE
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                className="ss-btn ss-btn-cyan"
+                onClick={() => navigate('/')}
+              >
+                Return to Dashboard
+              </button>
+              <button
+                type="button"
+                className="ss-btn ss-btn-pink"
+                onClick={() => navigate('/play')}
+              >
+                View Case Files
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+    </div>
+  )
+}
+
 function Case4Veteran() {
   const navigate = useNavigate()
   const { user, token, setUser } = useAuth()
@@ -8561,6 +10296,7 @@ export default function Case() {
   if (numericCaseId === 4 && difficulty === 'rookie') return <Case4Rookie />
   if (numericCaseId === 4 && difficulty === 'veteran') return <Case4Veteran />
   if (numericCaseId === 5 && difficulty === 'rookie') return <Case5Rookie />
+  if (numericCaseId === 5 && difficulty === 'veteran') return <Case5Veteran />
   if (numericCaseId === 5) return <FutureCase caseId={numericCaseId} />
   if (numericCaseId !== 1) return <FutureCase caseId={numericCaseId} />
   if (difficulty === 'veteran') return <VeteranCase />

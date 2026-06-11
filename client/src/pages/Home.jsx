@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import FullClearanceCelebration from '../components/FullClearanceCelebration.jsx'
 import { api } from '../lib/api.js'
 import { MAX_LIVES } from '../lib/gameRules.js'
-import { isCaseModeComplete } from '../lib/caseProgress.js'
+import { hasFullAgentClearance, isCaseModeComplete } from '../lib/caseProgress.js'
 import { playSfx, startSfxLoop, stopSfxLoop } from '../lib/sound.js'
 
 const INTRO_LINES = [
@@ -315,6 +316,7 @@ export default function Home() {
 
   const introComplete = Boolean(user?.introCompleted)
   const assignment = useMemo(() => getHomeAssignment(user), [user])
+  const fullAgentClearance = hasFullAgentClearance(user)
   const lives = Math.min(user?.livesRemaining ?? 0, MAX_LIVES)
   const stats = useMemo(
     () => [
@@ -360,7 +362,9 @@ export default function Home() {
         </p>
       </div>
 
-      {introComplete && !introJustCompleted ? (
+      {introComplete && !introJustCompleted && fullAgentClearance ? (
+        <FullClearanceCelebration actions />
+      ) : introComplete && !introJustCompleted ? (
         <AssignmentCard assignment={assignment} />
       ) : (
         <PhoneIntro
